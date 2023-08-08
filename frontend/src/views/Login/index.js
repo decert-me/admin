@@ -1,17 +1,42 @@
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input } from 'antd';
+import { LockOutlined, UserOutlined, SafetyOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Col, Form, Input, Row } from 'antd';
 import { useAuth } from "../../hooks/useAuth";
 import "./index.scss";
+import { useEffect, useState } from 'react';
+import { userCaptcha, userLogin } from '../../request/api/user';
 
 export default function LoginPage(params) {
 
     const { login } = useAuth();
+    const [captcha, setCaptcha] = useState();
 
     const onFinish = (values) => {
-        const { username, password } = values;
-        // TODO: 登录接口
-        login({ username, password }, ["profile", "settings"]);
+        const { username, password, captcha } = values;
+        userLogin({
+            username, password, captcha, CaptchaId: captcha.captchaId
+        })
+        .then(res => {
+            if (res.code === 0) {
+                const { token, user } = res.data;
+                login(token, user);
+            }
+        })
     };
+
+    function getCaptcha() {
+        // TODO: 获取验证码
+        userCaptcha()
+        .then(res => {
+            if (res?.code === 0) {
+                const { picPath, captchaId } = res.data;
+                setCaptcha({picPath, captchaId})
+            }
+        })
+    }
+
+    useEffect(() => {
+        getCaptcha();
+    },[])
 
     return (
         <div className="login">
@@ -24,6 +49,8 @@ export default function LoginPage(params) {
                     }}
                     onFinish={onFinish}
                     >
+
+                    {/* 用户名 */}
                     <Form.Item
                         name="username"
                         rules={[
@@ -33,8 +60,10 @@ export default function LoginPage(params) {
                         },
                         ]}
                     >
-                        <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="Username" />
+                        <Input prefix={<UserOutlined />} placeholder="Username" />
                     </Form.Item>
+
+                    {/* 密码 */}
                     <Form.Item
                         name="password"
                         rules={[
@@ -45,19 +74,39 @@ export default function LoginPage(params) {
                         ]}
                     >
                         <Input
-                        prefix={<LockOutlined className="site-form-item-icon" />}
+                        prefix={<LockOutlined />}
                         type="password"
                         placeholder="Password"
                         />
                     </Form.Item>
-                    <Form.Item>
-                        <Form.Item name="remember" valuePropName="checked" noStyle>
-                        <Checkbox>Remember me</Checkbox>
-                        </Form.Item>
 
-                        <a className="login-form-forgot" href="">
-                        Forgot password
-                        </a>
+                    {/* 验证码 */}
+                    <Form.Item>
+                        <Row gutter={8}>
+                        <Col span={12}>
+                            <Form.Item
+                            name="captcha"
+                            noStyle
+                            rules={[
+                                {
+                                required: true,
+                                message: 'Please input the captcha you got!',
+                                },
+                            ]}
+                            >
+                            <Input 
+                                prefix={<SafetyOutlined />}
+                                placeholder="Captcha"
+                            />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            {
+                                captcha &&
+                                <img src={captcha.picPath} alt="" className="captcha" onClick={() => getCaptcha()} />
+                            }
+                        </Col>
+                        </Row>
                     </Form.Item>
 
                     <Form.Item>

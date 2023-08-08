@@ -28,13 +28,15 @@ export const ProtectedLayout = () => {
 //   自动生成侧边栏
   function menu() {
     const arr = []
-    auth.forEach((element, index) => {
-        arr.push({
-            key: element,
-            icon: "",
-            label: element
-        })
-    });
+    // TODO: menu生成
+    // 鉴权生成
+    // auth.forEach((element, index) => {
+    //     arr.push({
+    //         key: element,
+    //         icon: "",
+    //         label: element
+    //     })
+    // });
     
     return arr
   }

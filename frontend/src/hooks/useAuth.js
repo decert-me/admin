@@ -6,19 +6,22 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useLocalStorage("user", null);
+  const [token, setToken] = useLocalStorage("token", null);
   const [auth, setAuth] = useLocalStorage("auth", null);
 
   const navigate = useNavigate();
 
-  const login = async (data, auth) => {
+  const login = async (token, data, auth) => {
     setUser(data);
-    setAuth(auth)
+    setToken(token);
+    // setAuth(auth)
     navigate("/dashboard/profile", { replace: true });
   };
 
   const logout = () => {
     setUser(null);
-    setAuth(null);
+    setToken(null);
+    // setAuth(null);
     navigate("/", { replace: true });
   };
 
@@ -26,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     () => ({
       user,
       auth,
+      token,
       login,
       logout
     }),

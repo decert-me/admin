@@ -4,7 +4,7 @@ import serverConfig from "./config.js";
 
 // Client-side-only code
 let serviceAxios = axios.create({
-  baseURL: serverConfig?.baseURL + process.env.REACT_APP_BASE_API,
+  baseURL: serverConfig?.baseURL + "/v1",
   timeout: 120000 // 请求超时设置
   //   withCredentials: false, // 跨域请求是否需要携带 cookie
 });
@@ -25,7 +25,7 @@ serviceAxios.interceptors.request.use(
 serviceAxios.interceptors.response.use(
   res => {
     let data = res.data;
-    if (data.status !== 0) {
+    if (data.code !== 0) {
         // reload
     //   if (data.data?.reload) {
     //     store.dispatch(showCustomSigner());
