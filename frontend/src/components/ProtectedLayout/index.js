@@ -1,6 +1,6 @@
 import { Navigate, useLocation, useNavigate, useOutlet } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme } from 'antd';
 import "./index.scss";
+import { menu } from "./menu";
 const { Header, Sider, Content } = Layout;
 
 export const ProtectedLayout = () => {
@@ -17,17 +18,15 @@ export const ProtectedLayout = () => {
   const location = useLocation();
   const navigateTo = useNavigate();
 
+  const { token: { colorBgContainer }, } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken();
 
   if (!user) {
     return <Navigate to="/" />;
   }
 //   自动生成侧边栏
-  function menu() {
-    const arr = []
+  // function menu() {
+    // const arr = []
     // TODO: menu生成
     // 鉴权生成
     // auth.forEach((element, index) => {
@@ -38,9 +37,33 @@ export const ProtectedLayout = () => {
     //     })
     // });
     
-    return arr
-  }
+  //   return arr
+  // }
 
+  function defaultSelectedKeys() {
+    // 获取当前路由 menu
+    const path = location.pathname;
+    let key = "";
+    let open = "";
+    menu.forEach(e => {
+      if (e.children) {
+        const res = e.children.filter(ele => path.includes(ele.key))
+        if (res.length !== 0) {
+          key = res[0].key
+          open = e.key;
+        }
+      }else{
+        if (path.includes(e.key)) {
+          key = e.key
+        }
+      }
+    })
+    return {
+      key,
+      open
+    }
+  }
+  
   return (
     <Layout style={{height: "100vh"}} className="main">
         {/* 侧边栏 */}
@@ -51,11 +74,10 @@ export const ProtectedLayout = () => {
         <Menu
           theme="dark"
           mode="inline"
-        //   初始值
-          defaultSelectedKeys={[location.pathname.split("/").pop()]}
-          items={menu()}
-        //   跳转
-          onClick={(item) => navigateTo(item.key)}
+          defaultSelectedKeys={[defaultSelectedKeys().key]}  //   初始值
+          defaultOpenKeys={[defaultSelectedKeys().open]}  //  默认展开
+          items={menu}
+          onClick={(item) => {navigateTo(item.key)}}  //   跳转
         />
       </Sider>
       {/* 正文 */}

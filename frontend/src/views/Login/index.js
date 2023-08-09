@@ -60,7 +60,7 @@ export default function LoginPage(params) {
                         },
                         ]}
                     >
-                        <Input prefix={<UserOutlined />} placeholder="Username" />
+                        <Input prefix={<UserOutlined />} placeholder="Username: root" />
                     </Form.Item>
 
                     {/* 密码 */}
@@ -76,7 +76,7 @@ export default function LoginPage(params) {
                         <Input
                         prefix={<LockOutlined />}
                         type="password"
-                        placeholder="Password"
+                        placeholder="Password: 123456"
                         />
                     </Form.Item>
 

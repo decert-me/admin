@@ -1,5 +1,2 @@
-
-export default function TutorialsPage(params) {
-    
-    return <h1>Tutorials</h1>
-}
+// index.js
+export { default as TutorialsListPage } from './TutorialsListPage';
