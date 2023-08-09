@@ -9,6 +9,7 @@ import {
 export default function TutorialsListPage(params) {
     
     const { tutorials } = mock();
+    const table = require("./category_tabel.json");
     let [data, setData] = useState([]);
 
     const columns = [
@@ -35,7 +36,7 @@ export default function TutorialsListPage(params) {
           render: (category) => (
             category.map(tag => 
                 <Tag color="geekblue" key={tag}>
-                    {tag}
+                    {table[tag]}
                 </Tag>    
             )
           )
@@ -47,7 +48,7 @@ export default function TutorialsListPage(params) {
           render: (theme) => (
             theme.map(tag => 
                 <Tag color="green" key={tag}>
-                    {tag}
+                    {table[tag]}
                 </Tag>    
             )
           )
