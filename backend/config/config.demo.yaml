@@ -1,0 +1,43 @@
+# system configuration
+system:
+  env: develop
+  addr: 9092
+  use-captcha: true
+
+# pgsql configuration
+pgsql:
+  path: "127.0.0.1"
+  port: "5432"
+  config: ""
+  db-name: "backend"
+  username: "postgres"
+  password: "123456"
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: "info"
+  log-zap: false
+
+# zap configuration
+zap:
+  level: info
+  format: console
+  prefix: '[backend]'
+  director: log
+  show-line: true
+  encode-level: LowercaseColorLevelEncoder
+  stacktrace-key: stacktrace
+  log-in-console: true
+
+# jwt configuration
+jwt:
+  signing-key: "qmPlus"
+  expires-time: 86400
+  issuer: "backend"
+
+# local configuration
+local:
+  path: 'uploads/file'
+
+# casbin configuration
+casbin:
+  model-path: "assets/rbac_model.conf"
