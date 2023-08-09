@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
     setUser(data);
     setToken(token);
     // setAuth(auth)
-    navigate("/dashboard/profile", { replace: true });
+    navigate("/dashboard/tutorials/list", { replace: true });
   };
 
   const logout = () => {
