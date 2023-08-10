@@ -7,10 +7,7 @@ export default function EChartsComponent(props) {
     const chartsRef = useRef();
     const { 
         title, 
-        xAxis, 
-        yAxis, 
-        series, 
-        tooltip,
+        chartsOption,
         width,
         height
     } = props;
@@ -21,10 +18,7 @@ export default function EChartsComponent(props) {
             title: {
                 text: title
             },
-            tooltip,
-            xAxis,
-            yAxis,
-            series
+            ...chartsOption
         })
     }
 
