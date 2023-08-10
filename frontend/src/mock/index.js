@@ -17,7 +17,8 @@ export function mock(params) {
                 "theme": ["defi"],
                 "language": "zh",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "0"
             },
             {
                 id: 2,
@@ -33,7 +34,8 @@ export function mock(params) {
                 "theme": ["btc"],
                 "language": "zh",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "0"
             },
             {
                 id: 3,
@@ -50,7 +52,8 @@ export function mock(params) {
                 "theme": ["web3"],
                 "language": "zh",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "0"
             },
             {
                 id: 4,
@@ -67,7 +70,8 @@ export function mock(params) {
                 "theme": ["blockchain"],
                 "language": "zh",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "0"
             },
             {
                 id: 5,
@@ -81,7 +85,8 @@ export function mock(params) {
                 "theme": ["metaverse"],
                 "language": "zh",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "0"
             },
             {
                 id: 6,
@@ -99,7 +104,8 @@ export function mock(params) {
                 "theme": ["cryptography", "eth", "dao"],
                 "language": "en",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "0"
             },
             {
                 id: 7,
@@ -116,7 +122,8 @@ export function mock(params) {
                 "theme": ["cryptography", "eth", "dao"],
                 "language": "en",
                 "time": 9000000,  //  预估时间
-                "difficulty": 2     //  难度
+                "difficulty": 2,     //  难度
+                status: "1"
             }
         ]
     }

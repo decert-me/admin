@@ -1,4 +1,4 @@
-import { Space, Table, Tag } from "antd";
+import { Space, Switch, Table, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { mock } from "../../mock";
 import { Link } from "react-router-dom";
@@ -75,11 +75,18 @@ export default function TutorialsListPage(params) {
             )
         },
         {
+          title: '上架状态',
+          key: 'status',
+          dataIndex: 'status',
+          render: (status) => (
+              <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked={status == 0 ? true : false} />
+          )
+        },
+        {
           title: 'Action',
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <a>上架</a>
               <Link to={`/dashboard/tutorials/modify/${tutorial.id}`}>修改</Link>
               <a>删除</a>
             </Space>
