@@ -4,7 +4,9 @@ import {
     MinusCircleOutlined
   } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
+import "./index.scss"
 const { TextArea } = Input;
+
 
 
 export default function TutorialsAddPage(params) {
@@ -17,6 +19,7 @@ export default function TutorialsAddPage(params) {
     let [category, setCategory] = useState();     //  类别 选择器option
     let [theme, setTheme] = useState();     //  主题 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
+    let [doctype, setDoctype] = useState();
 
     const onFinish = (values) => {
         console.log('Success:', values);
@@ -84,6 +87,16 @@ export default function TutorialsAddPage(params) {
             autoComplete="off"
             form={form}
         >
+
+            <div className="doctype">
+                <div className={`box ${doctype === "video" ? "active-box" : ""}`} onClick={() => setDoctype("video")}>
+                    视频
+                </div>
+                <div className={`box ${doctype !== "video" ? "active-box" : ""}`} onClick={() => setDoctype("doc")}>
+                    文档
+                </div>
+            </div>
+
             <Form.Item
                 label="标题"
                 name="label"
@@ -135,26 +148,8 @@ export default function TutorialsAddPage(params) {
             >
                 <InputNumber controls={false} />
             </Form.Item>
-
-            <Form.Item
-                label="教程类型"
-                name="docType"
-                rules={[{
-                    required: true,
-                    message: '请选择教程类型!',
-                }]}
-            >
-                <Select
-                    options={[
-                        {label: "docusaurus", value: "docusaurus"},
-                        {label: "gitbook", value: "gitbook"},
-                        {label: "mdBook", value: "mdBook"},
-                        {label: "video", value: "video"}
-                    ]}
-                />
-            </Form.Item>                
             {
-                docType === "video" ?
+                doctype === "video" ?
                 <>
                     <Form.Item
                         label="视频地址"
@@ -253,7 +248,29 @@ export default function TutorialsAddPage(params) {
                             message: '请输入教程地址!',
                         }]}
                     >
-                        <Input />
+                        <Input addonBefore={
+                            <Form.Item
+                                // label="教程类型"
+                                name="docType"
+                                rules={[{
+                                    required: true,
+                                    message: '请选择教程类型!',
+                                }]}
+                                noStyle
+                            >
+                                <Select
+                                    placeholder="教程类型"
+                                    options={[
+                                        {label: "docusaurus", value: "docusaurus"},
+                                        {label: "gitbook", value: "gitbook"},
+                                        {label: "mdBook", value: "mdBook"},
+                                    ]}
+                                    style={{
+                                        width: 120
+                                    }}
+                                />
+                            </Form.Item>                
+                        } />
                     </Form.Item>
                     <Form.Item
                         label="分支"

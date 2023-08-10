@@ -1,0 +1,24 @@
+.doctype{
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    .box{
+        width: 200px;
+        height: 50px;
+        font-size: 18x;
+        font-weight: 500;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 0 2px 1px rgb(207, 207, 207);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .active-box, .box:hover{
+        color: #fff;
+        background-color: #1374f9;
+    }
+}
