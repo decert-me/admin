@@ -118,6 +118,7 @@ export const ProtectedLayout = () => {
             padding: 24,
             minHeight: 280,
             background: colorBgContainer,
+            overflow: "auto"
           }}
           className="content-info"
         >

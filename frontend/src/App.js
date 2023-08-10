@@ -6,7 +6,7 @@ import LoginPage from './views/Login';
 import ProfilePage from './views/Profile';
 import SettingsPage from './views/Settings';
 import AuthGuard from './components/AuthGuard';
-import { TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
+import { TutorialsAuditPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 
 function App() {
   return (
@@ -37,6 +37,10 @@ function App() {
         <Route 
           path="tutorials/modify/:id" 
           element={<TutorialsModifyPage />} 
+        />
+        <Route 
+          path="tutorials/audit" 
+          element={<TutorialsAuditPage />} 
         />
       </Route>
     </Routes>

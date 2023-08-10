@@ -27,7 +27,7 @@ export default function TutorialsListPage(params) {
           dataIndex: 'img',
           key: 'img',
           render: (img) => (
-            <img src={img} alt="" style={{height: "100px"}} />
+            <img src={img} alt="" style={{height: "90px"}} />
           )
         },
         {
