@@ -6,7 +6,7 @@ import LoginPage from './views/Login';
 import ProfilePage from './views/Profile';
 import SettingsPage from './views/Settings';
 import AuthGuard from './components/AuthGuard';
-import { TutorialsAuditPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
+import { TutorialsAddPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 
 function App() {
   return (
@@ -38,6 +38,11 @@ function App() {
           path="tutorials/modify/:id" 
           element={<TutorialsModifyPage />} 
         />
+        <Route 
+          path="tutorials/add" 
+          element={<TutorialsAddPage />} 
+        />
+        
       </Route>
     </Routes>
   );

@@ -18,7 +18,8 @@ export function mock(params) {
                 "language": "zh",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "0"
+                status: "0",
+                key: 1
             },
             {
                 id: 2,
@@ -35,7 +36,8 @@ export function mock(params) {
                 "language": "zh",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "0"
+                status: "0",
+                key: 2,
             },
             {
                 id: 3,
@@ -53,7 +55,8 @@ export function mock(params) {
                 "language": "zh",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "0"
+                status: "0",
+                key: 3,
             },
             {
                 id: 4,
@@ -71,7 +74,8 @@ export function mock(params) {
                 "language": "zh",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "0"
+                status: "0",
+                key: 4,
             },
             {
                 id: 5,
@@ -86,7 +90,8 @@ export function mock(params) {
                 "language": "zh",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "0"
+                status: "0",
+                key: 5,
             },
             {
                 id: 6,
@@ -105,7 +110,8 @@ export function mock(params) {
                 "language": "en",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "0"
+                status: "0",
+                key: 6,
             },
             {
                 id: 7,
@@ -123,7 +129,8 @@ export function mock(params) {
                 "language": "en",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
-                status: "1"
+                status: "1",
+                key: 7,
             }
         ]
     }
