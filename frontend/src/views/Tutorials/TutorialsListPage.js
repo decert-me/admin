@@ -89,9 +89,7 @@ export default function TutorialsListPage(params) {
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              {
-                tutorial.status == "2" ? <a href="">重新打包</a> : <a href="">更新</a>
-              }
+              <a>打包</a>
               <Link to={`/dashboard/tutorials/modify/${tutorial.id}`}>修改</Link>
               <a>删除</a>
             </Space>
