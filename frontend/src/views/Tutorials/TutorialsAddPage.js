@@ -87,16 +87,6 @@ export default function TutorialsAddPage(params) {
             autoComplete="off"
             form={form}
         >
-
-            <div className="doctype">
-                <div className={`box ${doctype === "video" ? "active-box" : ""}`} onClick={() => setDoctype("video")}>
-                    视频
-                </div>
-                <div className={`box ${doctype !== "video" ? "active-box" : ""}`} onClick={() => setDoctype("doc")}>
-                    文档
-                </div>
-            </div>
-
             <Form.Item
                 label="标题"
                 name="label"
@@ -147,6 +137,18 @@ export default function TutorialsAddPage(params) {
                 name="challenge"
             >
                 <InputNumber controls={false} />
+            </Form.Item>
+            <Form.Item
+                label="教程类型"
+            >
+                <div className="doctype">
+                    <div className={`box ${doctype === "video" ? "active-box" : ""}`} onClick={() => setDoctype("video")}>
+                        视频
+                    </div>
+                    <div className={`box ${doctype !== "video" ? "active-box" : ""}`} onClick={() => setDoctype("doc")}>
+                        文档
+                    </div>
+                </div>
             </Form.Item>
             {
                 doctype === "video" ?
