@@ -2,10 +2,16 @@ import {
     MenuOutlined,
     AuditOutlined,
     BookOutlined,
-    FileAddOutlined
+    FileAddOutlined,
+    HomeOutlined
   } from '@ant-design/icons';
 
 export const menu = [
+    {
+        label: "首页",
+        key: "home",
+        icon: <HomeOutlined />,
+    },
     {
         label: "教程管理",
         key: "tutorials",
@@ -22,5 +28,5 @@ export const menu = [
                 icon: <FileAddOutlined />,
             }
         ]
-    }
+    },
 ]

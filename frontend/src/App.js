@@ -6,6 +6,7 @@ import LoginPage from './views/Login';
 import ProfilePage from './views/Profile';
 import SettingsPage from './views/Settings';
 import AuthGuard from './components/AuthGuard';
+import HomePage from './views/Home';
 import { TutorialsAddPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 
 function App() {
@@ -30,6 +31,12 @@ function App() {
           path="settings" 
           element={<SettingsPage />} 
         />
+        <Route 
+          path="home" 
+          element={<HomePage />} 
+        />
+
+        {/* 教程 */}
         <Route 
           path="tutorials/list" 
           element={<TutorialsListPage />} 
