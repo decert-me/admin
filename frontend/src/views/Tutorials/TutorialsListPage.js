@@ -1,6 +1,7 @@
 import { Space, Table, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { mock } from "../../mock";
+import { Link } from "react-router-dom";
 import {
     VideoCameraOutlined,
     ReadOutlined
@@ -36,7 +37,7 @@ export default function TutorialsListPage(params) {
           render: (category) => (
             category.map(tag => 
                 <Tag color="geekblue" key={tag}>
-                    {table[tag]}
+                    {table.category[tag]}
                 </Tag>    
             )
           )
@@ -48,7 +49,7 @@ export default function TutorialsListPage(params) {
           render: (theme) => (
             theme.map(tag => 
                 <Tag color="green" key={tag}>
-                    {table[tag]}
+                    {table.theme[tag]}
                 </Tag>    
             )
           )
@@ -76,10 +77,10 @@ export default function TutorialsListPage(params) {
         {
           title: 'Action',
           key: 'action',
-          render: (_, record) => (
+          render: (_, tutorial) => (
             <Space size="middle">
-              <a>修改 {record.name}</a>
               <a>隐藏</a>
+              <Link to={`/dashboard/tutorials/modify/${tutorial.id}`}>修改</Link>
               <a>删除</a>
             </Space>
           ),
@@ -97,7 +98,6 @@ export default function TutorialsListPage(params) {
     },[])
 
     return (
-        // <h1>TutorialsListPage</h1>
         <div className="tutorials-list">
             <Table columns={columns} dataSource={data} />
         </div>
