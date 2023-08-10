@@ -15,11 +15,11 @@ export const menu = [
                 key: "tutorials/list",
                 icon: <MenuOutlined />,
             },
-            {
-                label: "教程审核",
-                key: "tutorials/audit",
-                icon: <AuditOutlined />,
-            }
+            // {
+            //     label: "教程审核",
+            //     key: "tutorials/audit",
+            //     icon: <AuditOutlined />,
+            // }
         ]
     }
 ]

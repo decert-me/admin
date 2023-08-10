@@ -38,10 +38,6 @@ function App() {
           path="tutorials/modify/:id" 
           element={<TutorialsModifyPage />} 
         />
-        <Route 
-          path="tutorials/audit" 
-          element={<TutorialsAuditPage />} 
-        />
       </Route>
     </Routes>
   );

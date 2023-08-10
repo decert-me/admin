@@ -79,7 +79,7 @@ export default function TutorialsListPage(params) {
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <a>隐藏</a>
+              <a>上架</a>
               <Link to={`/dashboard/tutorials/modify/${tutorial.id}`}>修改</Link>
               <a>删除</a>
             </Space>
