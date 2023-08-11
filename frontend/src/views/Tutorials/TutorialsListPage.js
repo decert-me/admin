@@ -28,7 +28,7 @@ export default function TutorialsListPage(params) {
           dataIndex: 'label',
           key: 'label',
           render: (text) => (
-            <p className="tabel-title newline-omitted">{text}</p>
+            <p className="tabel-item-title newline-omitted">{text}</p>
           )
         },
         {
@@ -107,8 +107,8 @@ export default function TutorialsListPage(params) {
     },[])
 
     return (
-        <div className="tutorials-list">
-          <div className="list-title">
+        <div className="tutorials tutorials-list">
+          <div className="tabel-title">
             <h2>教程列表</h2>
             <Button 
               type="primary"

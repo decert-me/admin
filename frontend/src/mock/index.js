@@ -132,6 +132,32 @@ export function mock(params) {
                 status: "1",
                 key: 7,
             }
+        ],
+        build: [
+            {
+                id: 1,
+                "label": "区块链基础",
+                "img": "https://ipfs.decert.me/images/blockchain-basic.png",
+                status: "0",
+                key: 1
+            },
+            {
+                id: 2,
+                "label": "学习 Solidity",
+                "img": "https://ipfs.decert.me/images/learn-solidity.png",
+                status: "0",
+                key: 2,
+            },
+            {
+                id: 6,
+                "label": "ZKP Encyclopedia",
+                "img": "https://ipfs.learnblockchain.cn/images/helmet4a.png",
+                "branch": "master",
+                "docPath": "/src",
+                "commitHash": "9f27ed7ab0fdd92c446a14e1df59891c17f6e8ed",
+                status: "0",
+                key: 6,
+            },
         ]
     }
 
