@@ -1,7 +1,7 @@
-import { Space, Switch, Table, Tag } from "antd";
+import { Button, Space, Switch, Table, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { mock } from "../../mock";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
     VideoCameraOutlined,
     ReadOutlined
@@ -10,71 +10,26 @@ import {
 export default function TutorialsListPage(params) {
     
     const { tutorials } = mock();
+    const navigateTo = useNavigate();
     const table = require("./category_tabel.json");
     let [data, setData] = useState([]);
 
     const columns = [
         {
-          title: '标题',
-          dataIndex: 'label',
-          key: 'label',
-          render: (text, tutorial) => (
-            <a href={tutorial.repoUrl} target="_blank">{text}</a>
-          )
-        },
-        {
-          title: '图片',
+          title: '封面图',
           dataIndex: 'img',
           key: 'img',
           render: (img) => (
-            <img src={img} alt="" style={{height: "90px"}} />
+            <img src={img} alt="" style={{height: "40px"}} />
           )
         },
         {
-          title: '分类',
-          dataIndex: 'category',
-          key: 'category',
-          render: (category) => (
-            category.map(tag => 
-                <Tag color="geekblue" key={tag}>
-                    {table.category[tag]}
-                </Tag>    
-            )
+          title: '标题',
+          dataIndex: 'label',
+          key: 'label',
+          render: (text) => (
+            <p className="tabel-title newline-omitted">{text}</p>
           )
-        },
-        {
-          title: '主题',
-          key: 'theme',
-          dataIndex: 'theme',
-          render: (theme) => (
-            theme.map(tag => 
-                <Tag color="green" key={tag}>
-                    {table.theme[tag]}
-                </Tag>    
-            )
-          )
-        },
-        {
-            title: '媒体类型',
-            key: 'docType',
-            dataIndex: 'docType',
-            render: (docType) => (
-              <div style={{lineHeight: "20px"}}>
-                <Tag icon={docType === "video" ? <VideoCameraOutlined /> : <ReadOutlined />} color="default">
-                    {docType}
-                </Tag>
-              </div>
-            )
-        },
-        {
-            title: '语言',
-            key: 'language',
-            dataIndex: 'language',
-            render: (language) => (
-                <Tag color={language === "zh" ? "#2db7f5" : "#87d068"}>
-                    {language === "zh" ? "中文" : "英文"}
-                </Tag>    
-            )
         },
         {
           title: '上架状态',
@@ -85,11 +40,55 @@ export default function TutorialsListPage(params) {
           )
         },
         {
+          title: '分类-主题',
+          dataIndex: 'category',
+          key: 'category',
+          render: (category, tutorial) => (
+            <>
+            {
+              category.map(tag => 
+                  <Tag color="geekblue" key={tag}>
+                      {table.category[tag]}
+                  </Tag>    
+              )
+            }
+            {
+              tutorial.theme.map(tag => 
+                  <Tag color="green" key={tag}>
+                      {table.theme[tag]}
+                  </Tag>    
+              )
+            }
+            </>
+          )
+        },
+        {
+          title: '语言',
+          key: 'language',
+          dataIndex: 'language',
+          render: (language) => (
+              <Tag color={language === "zh" ? "#2db7f5" : "#87d068"}>
+                  {language === "zh" ? "中文" : "英文"}
+              </Tag>    
+          )
+        },
+        {
+            title: '媒体类型',
+            key: 'docType',
+            dataIndex: 'docType',
+            render: (docType) => (
+              <div style={{lineHeight: "20px"}}>
+                <Tag icon={docType === "video" ? <VideoCameraOutlined /> : <ReadOutlined />} color="default">
+                    {docType === "video" ? "视频" : "文章"}
+                </Tag>
+              </div>
+            )
+        },
+        {
           title: 'Action',
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <a>打包</a>
               <Link to={`/dashboard/tutorials/modify/${tutorial.id}`}>修改</Link>
               <a>删除</a>
             </Space>
@@ -109,6 +108,13 @@ export default function TutorialsListPage(params) {
 
     return (
         <div className="tutorials-list">
+          <div className="list-title">
+            <h2>教程列表</h2>
+            <Button 
+              type="primary"
+              onClick={() => navigateTo("/dashboard/tutorials/add")}
+            >创建教程</Button>
+          </div>
             <Table columns={columns} dataSource={data} />
         </div>
     )

@@ -106,7 +106,7 @@ export function mock(params) {
                 "docPath": "/src",
                 "commitHash": "9f27ed7ab0fdd92c446a14e1df59891c17f6e8ed",
                 "category": ["others"],
-                "theme": ["cryptography", "eth", "dao"],
+                "theme": ["cryptography", "eth"],
                 "language": "en",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度
@@ -125,7 +125,7 @@ export function mock(params) {
                 "sort": "ordered",
                 "videoCategory": "youtube",
                 "category": ["others"],
-                "theme": ["cryptography", "eth", "dao"],
+                "theme": ["cryptography", "eth"],
                 "language": "en",
                 "time": 9000000,  //  预估时间
                 "difficulty": 2,     //  难度

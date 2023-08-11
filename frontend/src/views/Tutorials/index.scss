@@ -1,3 +1,22 @@
+
+.tutorials-list{
+    .list-title{
+        margin-bottom: 16px;
+        padding-right: 110px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        h2{
+            font-size: 16px;
+            font-weight: 500;
+        }
+    }
+    .tabel-title{
+        width: 165px;
+        -webkit-line-clamp: 1;
+    }
+}
+
 .doctype{
     display: flex;
     gap: 25px;

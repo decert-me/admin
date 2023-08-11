@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+
+.newline-omitted{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
