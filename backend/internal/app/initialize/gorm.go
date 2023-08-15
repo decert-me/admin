@@ -27,6 +27,8 @@ func RegisterTables(db *gorm.DB) {
 		model.AuthorityRelate{},
 		model.AuthoritySource{},
 		model.Tutorial{},
+		model.Label{},
+		model.PackLog{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))
