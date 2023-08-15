@@ -65,6 +65,7 @@ func Routers() *gin.Engine {
 		router.InitUserMgtRouter(v1Group)
 		router.InitTutorialRouter(v1Group)
 		router.InitLabelRouter(v1Group)
+		router.InitIPFSRouter(v1Group)
 	}
 	global.LOG.Info("router register success")
 	return Router
