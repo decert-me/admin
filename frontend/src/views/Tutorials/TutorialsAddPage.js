@@ -5,6 +5,7 @@ import {
   } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 import "./index.scss"
+import { UploadProps } from '../../utils/props';
 const { TextArea } = Input;
 
 
@@ -14,7 +15,6 @@ export default function TutorialsAddPage(params) {
     const table = require("./category_tabel.json");
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
-    const docType = Form.useWatch("docType", form);
 
     let [category, setCategory] = useState();     //  类别 选择器option
     let [theme, setTheme] = useState();     //  主题 选择器option
@@ -33,44 +33,43 @@ export default function TutorialsAddPage(params) {
 
     // 选择器option初始化
     function optionsInit(params) {
-            // 类别初始化
-            let categoryOption = [];
-            for (const key in table.category) {
+        // 类别初始化
+        let categoryOption = [];
+        for (const key in table.category) {
                 if (Object.hasOwnProperty.call(table.category, key)) {
                     categoryOption.push({
-                        key: key,
+                        value: key,
                         label: table.category[key]
                     })
                 }
-            }
-            category = categoryOption;
-            setCategory([...category])
-    
-            // 主题初始化
-            let themeOption = [];
-            for (const key in table.theme) {
+        }
+        category = categoryOption;
+        setCategory([...category])
+        // 主题初始化
+        let themeOption = [];
+        for (const key in table.theme) {
                 if (Object.hasOwnProperty.call(table.theme, key)) {
                     themeOption.push({
-                        key: key,
+                        value: key,
                         label: table.theme[key]
                     })
                 }
-            }
-            theme = themeOption;
-            setTheme([...theme])
+        }
+        theme = themeOption;
+        setTheme([...theme])
     
-            // 语种
-            let langOption = [];
-            for (const key in table.language) {
+        // 语种
+        let langOption = [];
+        for (const key in table.language) {
                 if (Object.hasOwnProperty.call(table.language, key)) {
                     langOption.push({
-                        key: key,
+                        value: key,
                         label: table.language[key]
                     })
                 }
-            }
-            lang = langOption;
-            setLang([...lang])
+        }
+        lang = langOption;
+        setLang([...lang]);
     }
  
     useEffect(() => {
@@ -87,6 +86,7 @@ export default function TutorialsAddPage(params) {
             autoComplete="off"
             form={form}
         >
+
             <Form.Item
                 label="标题"
                 name="label"
@@ -119,9 +119,8 @@ export default function TutorialsAddPage(params) {
                 }]}
             >
                 <Upload 
-                    action="/upload.do" 
                     listType="picture-card"
-                    maxCount={1}
+                    {...UploadProps}
                 >
                     <div>
                     <PlusOutlined />
@@ -138,6 +137,7 @@ export default function TutorialsAddPage(params) {
             >
                 <InputNumber controls={false} />
             </Form.Item>
+
             <Form.Item
                 label="教程类型"
             >
@@ -339,7 +339,7 @@ export default function TutorialsAddPage(params) {
                 name="difficulty"
             >
                 <Select
-                    placeholder="请至少选择一项主题"
+                    placeholder="请选择难度"
                     options={[
                         {label: "困难", value: 2},
                         {label: "一般", value: 1},
