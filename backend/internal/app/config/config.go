@@ -12,4 +12,6 @@ type Server struct {
 	JWT JWT `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 	// OSS
 	Local Local `mapstructure:"local" json:"local" yaml:"local"`
+	// IPFS
+	IPFS []IPFS `mapstructure:"ipfs" json:"ipfs" yaml:"ipfs"`
 }

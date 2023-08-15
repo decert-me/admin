@@ -63,6 +63,9 @@ func Routers() *gin.Engine {
 		router.InitUserRouter(v1Group)      //用户
 		router.InitAuthorityRouter(v1Group) //权限
 		router.InitUserMgtRouter(v1Group)
+		router.InitTutorialRouter(v1Group)
+		router.InitLabelRouter(v1Group)
+		router.InitIPFSRouter(v1Group)
 	}
 	global.LOG.Info("router register success")
 	return Router
