@@ -6,7 +6,7 @@ import {
 import { useEffect, useState } from 'react';
 import "./index.scss"
 import { UploadProps } from '../../utils/props';
-import { createTutorial } from '../../request/api/user';
+import { createTutorial } from '../../request/api/tutorial';
 import { useNavigate } from 'react-router-dom';
 const { TextArea } = Input;
 

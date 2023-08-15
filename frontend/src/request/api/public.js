@@ -19,14 +19,6 @@ export const ipfsImg = (data) => {
     })
 }
 
-    // 上传教程
-export const createTutorial = (data) => {
-    return serviceAxios({
-        url: `/tutorial/createTutorial`,
-        method: "post",
-        data
-    })
-}
 
 // ============================ get ============================
 export const userCaptcha = (data) => {

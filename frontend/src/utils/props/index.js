@@ -1,4 +1,4 @@
-import { ipfsImg } from "../../request/api/user";
+import { ipfsImg } from "../../request/api/public";
 import { message, Upload } from "antd";
 
 export const UploadProps = {
