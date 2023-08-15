@@ -142,7 +142,7 @@ export default function TutorialsListPage(params) {
               onClick={() => navigateTo("/dashboard/tutorials/add")}
             >创建教程</Button>
           </div>
-            <Table columns={columns} dataSource={data} />
+            <Table columns={columns} dataSource={data} pagination={{current: pageConfig.page, total: pageConfig.total, pageSize: pageConfig.pageSize}} />
         </div>
     )
 }
