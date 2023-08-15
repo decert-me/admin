@@ -2,7 +2,8 @@ import {
     MenuOutlined,
     BookOutlined,
     FolderOutlined,
-    HomeOutlined
+    HomeOutlined,
+    TagsOutlined
   } from '@ant-design/icons';
 
 export const menu = [
@@ -26,6 +27,11 @@ export const menu = [
                 key: "tutorials/build",
                 icon: <FolderOutlined />,
             },
+            {
+                label: "标签管理",
+                key: "tutorials/tags",
+                icon: <TagsOutlined />,
+            }
         ]
     },
 ]

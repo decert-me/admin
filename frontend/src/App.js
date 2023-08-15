@@ -7,7 +7,7 @@ import ProfilePage from './views/Profile';
 import SettingsPage from './views/Settings';
 import AuthGuard from './components/AuthGuard';
 import HomePage from './views/Home';
-import { TutorialsAddPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
+import { TutorialsAddPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, TutorialsTagsPage, } from './views/Tutorials';
 
 function App() {
   return (
@@ -52,7 +52,13 @@ function App() {
         <Route 
           path="tutorials/build" 
           element={<TutorialsBuildPage />} 
-        />       
+        />
+        <Route 
+          path="tutorials/tags" 
+          element={<TutorialsTagsPage />} 
+        />     
+
+
       </Route>
     </Routes>
   );
