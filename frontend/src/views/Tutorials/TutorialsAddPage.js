@@ -1,4 +1,4 @@
-import { Button, Form, Input, InputNumber, Select, Upload } from 'antd';
+import { Button, Form, Input, InputNumber, Select, Upload, message } from 'antd';
 import {
     PlusOutlined,
     MinusCircleOutlined
@@ -6,6 +6,8 @@ import {
 import { useEffect, useState } from 'react';
 import "./index.scss"
 import { UploadProps } from '../../utils/props';
+import { createTutorial } from '../../request/api/user';
+import { useNavigate } from 'react-router-dom';
 const { TextArea } = Input;
 
 
@@ -15,17 +17,57 @@ export default function TutorialsAddPage(params) {
     const table = require("./category_tabel.json");
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
+    const navigateTo = useNavigate();
 
     let [category, setCategory] = useState();     //  类别 选择器option
     let [theme, setTheme] = useState();     //  主题 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
-    let [doctype, setDoctype] = useState();
+    let [doctype, setDoctype] = useState("doc");
+    const [loading, setLoading] = useState(false);
 
     const onFinish = (values) => {
-        console.log('Success:', values);
-        console.log();
+        setLoading(true);
+        const {
+            repoUrl, label, catalogueName, docType, desc, 
+            challenge, branch, docPath, commitHash, 
+            category, theme, language, difficulty,
+        } = values;
+        const img = values.img.file.response.data.hash;
 
+        if (doctype === "doc") {
+            const obj = {
+                repoUrl, label, catalogueName, docType, img, desc, 
+                challenge, branch, docPath, commitHash,
+                category, theme, language, difficulty
+            }
+            addArticle(obj)
+        }else{
+            // addVideo(values)
+        }
     };
+
+    function addArticle(obj) {
+        createTutorial(obj)
+        .then(res => {
+            if (res.code === 0) {
+                message.success(res.msg);
+                setTimeout(() => {
+                    navigateTo("/dashboard/tutorials/list");
+                }, 500);
+            }else{
+                setLoading(false);
+                message.success(res.msg);
+            }
+        })
+        .catch(err => {
+            setLoading(false);
+            message.error(err)
+        })
+    }
+
+    function addVideo({}) {
+        
+    }
 
     function init() {
         optionsInit()
@@ -331,7 +373,7 @@ export default function TutorialsAddPage(params) {
                 label="预估时间"
                 name="time"
             >
-                <InputNumber addonAfter="ms" controls={false} />
+                <InputNumber addonAfter="min" controls={false} />
             </Form.Item>
 
             <Form.Item
@@ -349,8 +391,8 @@ export default function TutorialsAddPage(params) {
             </Form.Item>
 
             <Form.Item>
-                <Button type="primary" htmlType="submit">
-                    Submit
+                <Button type="primary" htmlType="submit" loading={loading}>
+                    添加教程
                 </Button>
             </Form.Item>
 
