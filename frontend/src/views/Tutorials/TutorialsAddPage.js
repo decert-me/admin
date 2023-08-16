@@ -1,15 +1,18 @@
-import { Button, Form, Input, InputNumber, Select, Upload, message } from 'antd';
+import "./index.scss"
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Button, Form, Input, InputNumber, Select, Upload, message, Space } from 'antd';
 import {
     PlusOutlined,
     MinusCircleOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    MenuOutlined
   } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import "./index.scss"
 import { UploadProps } from '../../utils/props';
 import { createTutorial } from '../../request/api/tutorial';
 import { Link, useNavigate } from 'react-router-dom';
 import { getLabelList } from '../../request/api/tags';
+import { getYouTubePlayList } from '../../request/api/public';
 const { TextArea } = Input;
 
 
@@ -20,16 +23,49 @@ export default function TutorialsAddPage(params) {
     const videoCategory = Form.useWatch("videoCategory", form);
     const navigateTo = useNavigate();
 
+    const [loading, setLoading] = useState(false);
     let [category, setCategory] = useState();     //  类别 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
-    const [loading, setLoading] = useState(false);
+    let [videoList, updateVideoList] = useState([]);
+
+    function parseVideoList() {
+        const link = form.getFieldValue("url");
+        if (!link) {
+            message.error("请输入正确的视频地址!")
+            return
+        }
+        getYouTubePlayList({link})
+        .then(res => {
+            if (res.code === 0) {
+                message.success(res.msg);
+                videoList = res.data;
+                updateVideoList([...videoList]);
+            }else{
+                setLoading(false)
+            }
+        })
+        .catch(err => {
+            setLoading(false)
+            message.error(err);
+        })
+    }
+
+    function handleOnDragEnd(result) {
+        if (!result.destination) return;
+    
+        const items = Array.from(videoList);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+    
+        updateVideoList(items);
+    }
 
     const onFinish = (values) => {
         setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, 
-            challenge, branch, docPath, commitHash, 
+            challenge, branch, docPath, commitHash, url, videoCategory,
             category, language, difficulty,
         } = values;
         const img = values.img.file.response.data.hash;
@@ -40,13 +76,18 @@ export default function TutorialsAddPage(params) {
                 challenge, branch, docPath, commitHash,
                 category, language, difficulty
             }
-            addArticle(obj)
+            create(obj)
         }else{
-            // addVideo(values)
+            const obj = {
+                url, label, catalogueName, img, desc, 
+                challenge, videoCategory,
+                category, language, difficulty
+            }
+            create({...obj, docType: "video", video: videoList})
         }
     };
 
-    function addArticle(obj) {
+    function create(obj) {
         createTutorial(obj)
         .then(res => {
             if (res.code === 0) {
@@ -56,17 +97,12 @@ export default function TutorialsAddPage(params) {
                 }, 500);
             }else{
                 setLoading(false);
-                message.success(res.msg);
             }
         })
         .catch(err => {
             setLoading(false);
             message.error(err)
         })
-    }
-
-    function addVideo({}) {
-        
     }
 
     function init() {
@@ -136,10 +172,6 @@ export default function TutorialsAddPage(params) {
                 <Form.Item
                     label="描述"
                     name="desc"
-                    rules={[{
-                        required: true,
-                        message: '请输入描述!',
-                    }]}
                 >
                     <TextArea autoSize={{ minRows: 3 }} />
                 </Form.Item>
@@ -196,8 +228,48 @@ export default function TutorialsAddPage(params) {
                                 message: '请输入视频地址!',
                             }]}
                         >
+                            <Space.Compact
+                                style={{
+                                    width: '100%',
+                                }}
+                            >
                             <Input />
+                            {
+                                videoCategory === "youtube" &&
+                                <Button type="primary" onClick={() => parseVideoList()}>解析</Button>
+                            }
+                            </Space.Compact>
                         </Form.Item>
+                        {
+                            videoList.length !== 0 &&
+                            <Form.Item label="视频排序">
+                                <DragDropContext onDragEnd={handleOnDragEnd}>
+                                    <Droppable droppableId="characters">
+                                        {(provided) => (
+                                        <ul className="characters video-list" {...provided.droppableProps} ref={provided.innerRef}>
+                                            {videoList.map(({id, img, label, url}, index) => {
+                                            return (
+                                                <Draggable key={id} draggableId={id} index={index}>
+                                                {(provided) => (
+                                                    <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                    <p className="number">{index + 1}</p>
+                                                    <img src={img} />
+                                                    <div>
+                                                        <p className="newline-omitted">{label}</p>
+                                                        <p className="newline-omitted">{url}</p>
+                                                    </div>
+                                                    </li>
+                                                )}
+                                                </Draggable>
+                                            );
+                                            })}
+                                            {provided.placeholder}
+                                        </ul>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
+                            </Form.Item>
+                        }
                         <Form.Item
                             label="视频类型"
                             name="videoCategory"
@@ -329,6 +401,17 @@ export default function TutorialsAddPage(params) {
                         </Form.Item>
                     </>
                 }
+
+                <Form.Item
+                    label="目录名"
+                    name="catalogueName"
+                    rules={[{
+                        required: true,
+                        message: '请输入目录名!',
+                    }]}
+                >
+                    <Input />
+                </Form.Item>
 
                 <Form.Item
                     label="类别"
