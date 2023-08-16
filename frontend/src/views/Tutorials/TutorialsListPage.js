@@ -1,18 +1,20 @@
-import { Button, Space, Switch, Table, Tag } from "antd";
+import { Button, Popconfirm, Space, Switch, Table, Tag, message } from "antd";
 import { useEffect, useState } from "react";
-import { mock } from "../../mock";
 import { Link, useNavigate } from "react-router-dom";
 import {
     VideoCameraOutlined,
     ReadOutlined
   } from '@ant-design/icons';
+import { deleteTutorial, getTutorialList } from "../../request/api/tutorial";
 
 export default function TutorialsListPage(params) {
     
-    const { tutorials } = mock();
     const navigateTo = useNavigate();
     const table = require("./category_tabel.json");
     let [data, setData] = useState([]);
+    let [pageConfig, setPageConfig] = useState({
+      page: 0, pageSize: 10, total: 0
+    });
 
     const columns = [
         {
@@ -20,7 +22,7 @@ export default function TutorialsListPage(params) {
           dataIndex: 'img',
           key: 'img',
           render: (img) => (
-            <img src={img} alt="" style={{height: "40px"}} />
+            <img src={`https://ipfs.decert.me/${img}`} alt="" style={{height: "40px"}} />
           )
         },
         {
@@ -89,18 +91,43 @@ export default function TutorialsListPage(params) {
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <Link to={`/dashboard/tutorials/modify/${tutorial.id}`}>修改</Link>
-              <a>删除</a>
+              <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>修改</Link>
+              <Popconfirm
+                title="删除教程"
+                description="确定要删除这篇教程吗?"
+                onConfirm={() => deleteTutorial(tutorial.ID)}
+                okText="确定"
+                cancelText="取消"
+              >
+                <a>删除</a>
+              </Popconfirm>
             </Space>
           ),
         },
     ];
 
-    function init() {
-        data = tutorials.list;
-        setData([...data]);
+    async function init() {
+      pageConfig.page += 1;
+      setPageConfig({...pageConfig});
+      getTutorialList(pageConfig)
+      .then(res => {
+        if (res.code === 0) {
+          data = res.data.list;
+          // 添加key
+          data.forEach(ele => {
+            ele.key = ele.ID
+          })
+          setData([...data]);
+          pageConfig.total = res.data.total;
+          setPageConfig({...pageConfig});
+        }else{
+            message.success(res.msg);
+        }
+      })
+      .catch(err => {
+          message.error(err)
+      })
     }
-
 
     useEffect(() => {
         init();
@@ -115,7 +142,7 @@ export default function TutorialsListPage(params) {
               onClick={() => navigateTo("/dashboard/tutorials/add")}
             >创建教程</Button>
           </div>
-            <Table columns={columns} dataSource={data} />
+            <Table columns={columns} dataSource={data} pagination={{current: pageConfig.page, total: pageConfig.total, pageSize: pageConfig.pageSize}} />
         </div>
     )
 }

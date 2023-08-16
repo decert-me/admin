@@ -13,7 +13,7 @@ serviceAxios.interceptors.request.use(
   config => {
     // 如果开启 token 认证
     if (serverConfig.useTokenAuthorization) {
-    //   config.headers["x-token"] = localStorage.getItem(`decert.token`); // 请求头携带 token
+      config.headers["x-token"] = JSON.parse(localStorage.getItem(`token`)); // 请求头携带 token
     }
     return config;
   },
@@ -27,10 +27,13 @@ serviceAxios.interceptors.response.use(
     let data = res.data;
     if (data.code !== 0) {
         // reload
-    //   if (data.data?.reload) {
-    //     store.dispatch(showCustomSigner());
-    //     return
-    //   }
+      if (data.data?.reload) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("auth");
+        window.history.go(0);
+        return
+      }
       message.error(data.message);
       return null
     }

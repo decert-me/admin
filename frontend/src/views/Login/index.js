@@ -3,7 +3,7 @@ import { Button, Checkbox, Col, Form, Input, Row } from 'antd';
 import { useAuth } from "../../hooks/useAuth";
 import "./index.scss";
 import { useEffect, useState } from 'react';
-import { userCaptcha, userLogin } from '../../request/api/user';
+import { userCaptcha, userLogin } from '../../request/api/public';
 
 export default function LoginPage(params) {
 

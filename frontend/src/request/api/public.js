@@ -1,7 +1,7 @@
 import serviceAxios from "../index";
 
 // ============================ post ============================
-// 登录
+    // 登录
 export const userLogin = (data) => {
     return serviceAxios({
         url: `/user/login`,
@@ -9,6 +9,16 @@ export const userLogin = (data) => {
         data
     })
 }
+
+    // 上传图片
+export const ipfsImg = (data) => {
+    return serviceAxios({
+        url: `/ipfs/uploadFile`,
+        method: "post",
+        data
+    })
+}
+
 
 // ============================ get ============================
 export const userCaptcha = (data) => {
