@@ -1,14 +1,34 @@
-import { Button, Form, Input, Select } from "antd";
-import { Link } from "react-router-dom";
+import { Button, Form, Input, Select, message } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import {
     ArrowLeftOutlined,
   } from '@ant-design/icons';
+import { createLabel } from "../../request/api/tags";
+import { useState } from "react";
 
 
 export default function TagsAddPage(params) {
 
+    const navigateTo = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     const onFinish = (values) => {
-        console.log('Success:', values);
+        setLoading(true);
+        createLabel(values)
+        .then(res => {
+            if (res.code === 0) {
+                message.success(res.msg);
+                setTimeout(() => {
+                    navigateTo("/dashboard/tags")
+                }, 500);
+            }else{
+                setLoading(false);
+                message.error(res.msg)
+            }
+        }).catch(err => {
+            setLoading(false);
+            message.error(err)
+        })
     };
     
     return (
@@ -26,7 +46,7 @@ export default function TagsAddPage(params) {
             >
                 <Form.Item
                     label="请选择父级标签"
-                    name="tag"
+                    name="type"
                     rules={[{
                         required: true,
                         message: '请输入标题!',
@@ -45,7 +65,7 @@ export default function TagsAddPage(params) {
 
                 <Form.Item
                     label="中文标题"
-                    name="content_zh"
+                    name="chinese"
                     rules={[{
                         required: true,
                         message: '请输入中文标题!',
@@ -56,7 +76,7 @@ export default function TagsAddPage(params) {
 
                 <Form.Item
                     label="英文标题"
-                    name="content_en"
+                    name="english"
                     rules={[{
                         required: true,
                         message: '请输入英文标题!',
@@ -66,8 +86,8 @@ export default function TagsAddPage(params) {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">
-                        Submit
+                    <Button type="primary" htmlType="submit" loading={loading}>
+                        添加标签
                     </Button>
                 </Form.Item>
 
