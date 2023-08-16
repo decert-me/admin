@@ -23,6 +23,18 @@ func CreateTutorial(c *gin.Context) {
 	}
 }
 
+// UpdateTutorial 更新教程
+func UpdateTutorial(c *gin.Context) {
+	var tutorial model.Tutorial
+	_ = c.ShouldBindJSON(&tutorial)
+	if err := backend.UpdateTutorial(tutorial); err != nil {
+		global.LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败"+err.Error(), c)
+	} else {
+		response.OkWithMessage("更新成功", c)
+	}
+}
+
 // GetTutorialList 获取教程列表
 func GetTutorialList(c *gin.Context) {
 	var pageInfo request.PageInfo

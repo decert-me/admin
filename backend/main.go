@@ -19,6 +19,8 @@ func main() {
 	zap.ReplaceGlobals(global.LOG)
 	// 初始化数据库
 	initialize.InitCommonDB()
+	//// 检查配置
+	//initialize.CheckConfig()
 	// 初始化缓存
 	global.TokenCache = initialize.TokenCache()
 	// 初始化casbin

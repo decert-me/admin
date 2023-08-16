@@ -6,12 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitTutorialRouter(Router *gin.RouterGroup) {
-	routersWithAuth := Router.Group("tutorial").Use(middleware.JWTAuth())
+func InitVideoRouter(Router *gin.RouterGroup) {
+	routersWithAuth := Router.Group("video").Use(middleware.JWTAuth())
 	{
-		routersWithAuth.POST("getTutorialList", api.GetTutorialList) // 获取教程列表
-		routersWithAuth.POST("createTutorial", api.CreateTutorial)   // 创建教程
-		routersWithAuth.POST("getTutorial", api.GetTutorial)         // 获取教程详情
-		routersWithAuth.POST("deleteTutorial", api.DeleteTutorial)   // 删除教程
+		routersWithAuth.POST("getYouTubePlayList", api.GetYouTubePlayList) // 获取YouTube视频列表
 	}
 }
