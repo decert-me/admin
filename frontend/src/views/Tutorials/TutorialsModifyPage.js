@@ -4,11 +4,11 @@ import {
     MinusCircleOutlined
   } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { mock } from '../../mock';
-import { Button, Form, Input, InputNumber, Select, Upload } from 'antd';
-import { getTutorial } from '../../request/api/tutorial';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Button, Form, Input, InputNumber, Select, Upload, message } from 'antd';
+import { getTutorial, updateTutorial } from '../../request/api/tutorial';
 import { getLabelList } from '../../request/api/tags';
+import { UploadProps } from '../../utils/props';
 const { TextArea } = Input;
 
 
@@ -16,28 +16,72 @@ const { TextArea } = Input;
 export default function TutorialsModifyPage(params) {
     
     const { id } = useParams();
-    const { tutorials } = mock();
     const [form] = Form.useForm();
+    const navigateTo = useNavigate();
     const videoCategory = Form.useWatch("videoCategory", form);
     let [fields, setFields] = useState([]);
     let [tutorial, setTutorial] = useState();
     let [category, setCategory] = useState();     //  类别 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
+    let [doctype, setDoctype] = useState("doc");
+    const [loading, setLoading] = useState(false);
     
     const onFinish = (values) => {
-        console.log('Success:', values);
-        console.log();
+        // console.log('Success:', values);
+        // console.log();
+        // updateTutorial(values)
+        setLoading(true);
+        const {
+            repoUrl, label, catalogueName, docType, desc, 
+            challenge, branch, docPath, commitHash, 
+            category, language, difficulty,
+        } = values;
+        const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
+        if (doctype === "doc") {
+            const obj = {
+                repoUrl, label, catalogueName, docType, img, desc, 
+                challenge, branch, docPath, commitHash,
+                category, language, difficulty
+            }
+            addArticle(obj)
+        }else{
+            // addVideo(values)
+        }
 
     };
 
-    function init() {
-        getTutorial({id: Number(id)})
+    function addArticle(obj) {
+        updateTutorial({...obj, id: Number(id)})
         .then(res => {
             if (res.code === 0) {
+                message.success(res.msg);
+                setTimeout(() => {
+                    navigateTo("/dashboard/tutorials/list");
+                }, 500);
+            }else{
+                setLoading(false);
+                message.success(res.msg);
             }
         })
-        tutorial = tutorials.list.filter(e => e.id == id)[0];
-        setTutorial({...tutorial});
+        .catch(err => {
+            setLoading(false);
+            message.error(err)
+        })
+    }
+
+    async function init() {
+        await getTutorial({id: Number(id)})
+        .then(res => {
+            if (res.code === 0) {
+                tutorial = res.data
+                setTutorial({...tutorial});
+            }else{
+                navigateTo(-1);
+            }
+        })
+        .catch(err => {
+            navigateTo(-1);
+        })
         fields = [
             {
                 name: ['label'],
@@ -49,59 +93,58 @@ export default function TutorialsModifyPage(params) {
             },
             {
                 name: ['img'],
-                value: tutorial.img
+                value: "https://ipfs.decert.me/"+tutorial.img
             },
             {
                 name: ['challenge'],
-                value: tutorial.challenge
+                value: tutorial?.challenge
             },
             {
                 name: ['category'],
-                value: tutorial.category
+                value: tutorial?.category
             },
             {
                 name: ['language'],
-                value: tutorial.language
+                value: tutorial?.language
             },
             {
-                name: ['time'],
-                value: tutorial.time
+                name: ['estimateTime'],
+                value: tutorial?.estimateTime
             },
             {
                 name: ['difficulty'],
-                value: tutorial.difficulty
+                value: tutorial?.difficulty
             },
 
             // 文档
             {
                 name: ['repoUrl'],
-                value: tutorial.repoUrl
+                value: tutorial?.repoUrl
             },
             {
                 name: ['branch'],
-                value: tutorial.branch
+                value: tutorial?.branch
             },
             {
                 name: ['docPath'],
-                value: tutorial.docPath
+                value: tutorial?.docPath
             },
             {
                 name: ['commitHash'],
-                value: tutorial.commitHash
+                value: tutorial?.commitHash
             },
 
             // 视频
             {
                 name: ['url'],
-                value: tutorial.url
+                value: tutorial?.url
             },
             {
                 name: ['videoCategory'],
-                value: tutorial.videoCategory
+                value: tutorial?.videoCategory
             },
         ]
         setFields([...fields]);
-
         optionsInit()
     }
 
@@ -188,15 +231,14 @@ export default function TutorialsModifyPage(params) {
                         }]}
                     >
                         <Upload 
-                            action="/upload.do" 
                             listType="picture-card"
+                            {...UploadProps}
                             defaultFileList={[{
                                 uid: '-1',
                                 name: 'image.png',
                                 status: 'done',
-                                url: tutorial.img,
+                                url: "https://ipfs.decert.me/"+tutorial.img,
                             }]}
-                            maxCount={1}
                         >
                             <div>
                             <PlusOutlined />
@@ -214,10 +256,21 @@ export default function TutorialsModifyPage(params) {
                         <InputNumber controls={false} />
                     </Form.Item>
 
-
+                    <Form.Item
+                        label="教程类型"
+                    >
+                        <div className="doctype">
+                            <div className={`box ${doctype === "video" ? "active-box" : ""}`} onClick={() => setDoctype("video")}>
+                                视频
+                            </div>
+                            <div className={`box ${doctype !== "video" ? "active-box" : ""}`} onClick={() => setDoctype("doc")}>
+                                文档
+                            </div>
+                        </div>
+                    </Form.Item>
 
                     {
-                        tutorial.docType === "video" ?
+                        doctype === "video" ?
                         <>
                             <Form.Item
                                 label="视频地址"
@@ -362,7 +415,7 @@ export default function TutorialsModifyPage(params) {
 
                     <Form.Item
                         label="预估时间"
-                        name="time"
+                        name="estimateTime"
                     >
                         <InputNumber addonAfter="min" controls={false} />
                     </Form.Item>
@@ -383,7 +436,7 @@ export default function TutorialsModifyPage(params) {
 
                     <Form.Item>
                         <Button type="primary" htmlType="submit">
-                            Submit
+                            修改教程
                         </Button>
                     </Form.Item>
 

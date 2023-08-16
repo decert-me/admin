@@ -11,6 +11,15 @@ export const createTutorial = (data) => {
     })
 }
 
+// 修改教程
+export const updateTutorial = (data) => {
+    return serviceAxios({
+        url: `/tutorial/updateTutorial`,
+        method: "post",
+        data
+    })
+}
+
 // 删除教程
 export const deleteTutorial = (data) => {
     return serviceAxios({

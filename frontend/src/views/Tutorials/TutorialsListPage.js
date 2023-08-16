@@ -6,10 +6,12 @@ import {
     ReadOutlined
   } from '@ant-design/icons';
 import { deleteTutorial, getTutorialList } from "../../request/api/tutorial";
+import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
+    let [tags, setTags] = useState([]);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
@@ -44,16 +46,15 @@ export default function TutorialsListPage(params) {
           title: '分类',
           dataIndex: 'category',
           key: 'category',
-          render: (category, tutorial) => (
-            <>
-            {
+          render: (category) => (
               category.map(tag => 
                   <Tag color="geekblue" key={tag}>
-                      {tag}
+                    {
+                      tags.filter(e => e.ID === tag).length !== 0 &&
+                        tags.filter(e => e.ID === tag)[0].Chinese
+                    }
                   </Tag>    
               )
-            }
-            </>
           )
         },
         {
@@ -101,6 +102,15 @@ export default function TutorialsListPage(params) {
     async function init() {
       pageConfig.page += 1;
       setPageConfig({...pageConfig});
+      // 获取标签列表
+      getLabelList({type: "category"})
+      .then(res => {
+        if (res.code === 0) {
+          tags = res.data ? res.data : [];
+          setTags([...tags]);
+        }
+      })
+      // 获取教程列表
       getTutorialList(pageConfig)
       .then(res => {
         if (res.code === 0) {
