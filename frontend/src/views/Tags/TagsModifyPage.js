@@ -25,7 +25,6 @@ export default function TagsModifyPage(params) {
                 }, 1000);
             }else{
                 setLoading(false);
-                message.error(res.msg);
             }
         })
         .catch(err => {

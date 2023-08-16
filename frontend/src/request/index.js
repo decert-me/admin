@@ -34,7 +34,7 @@ serviceAxios.interceptors.response.use(
         window.history.go(0);
         return
       }
-      message.error(data.message);
+      message.error(data.msg);
       return null
     }
     // if (data.data.reload) {

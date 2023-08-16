@@ -23,7 +23,6 @@ export default function TagsAddPage(params) {
                 }, 500);
             }else{
                 setLoading(false);
-                message.error(res.msg)
             }
         }).catch(err => {
             setLoading(false);
