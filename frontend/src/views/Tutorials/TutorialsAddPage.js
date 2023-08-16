@@ -26,6 +26,7 @@ export default function TutorialsAddPage(params) {
     const navigateTo = useNavigate();
 
     const [loading, setLoading] = useState(false);
+    const [parseLoading, setParseLoading] = useState(false);
     let [category, setCategory] = useState();     //  类别 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
@@ -37,6 +38,7 @@ export default function TutorialsAddPage(params) {
             message.error("请输入正确的视频地址!")
             return
         }
+        setParseLoading(true);
         getYouTubePlayList({link})
         .then(res => {
             if (res.code === 0) {
@@ -44,11 +46,11 @@ export default function TutorialsAddPage(params) {
                 videoList = res.data;
                 updateVideoList([...videoList]);
             }else{
-                setLoading(false)
+                setParseLoading(false)
             }
         })
         .catch(err => {
-            setLoading(false)
+            setParseLoading(false)
             message.error(err);
         })
     }
@@ -153,7 +155,7 @@ export default function TutorialsAddPage(params) {
     },[videoUrl])
 
     return (
-        <div className="tutorials-add">
+        <div className="tutorials-add tutorials">
             <Link to={`/dashboard/tutorials/list`}>
                 <ArrowLeftOutlined />
             </Link>
@@ -245,7 +247,7 @@ export default function TutorialsAddPage(params) {
                             <Input />
                             {
                                 videoCategory === "youtube" &&
-                                <Button type="primary" onClick={() => parseVideoList()}>解析</Button>
+                                <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading} >解析</Button>
                             }
                             </Space.Compact>
                         </Form.Item>
