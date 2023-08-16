@@ -2210,6 +2210,11 @@
     "expect" "^29.0.0"
     "pretty-format" "^29.0.0"
 
+"@types/js-cookie@^2.x.x":
+  "integrity" "sha512-aLkWa0C0vO5b4Sr798E26QgOkss68Un0bLjs7u9qxzPT5CG+8DuNTffWES58YzJs3hrVAOs1wonycqEBqNJubA=="
+  "resolved" "https://registry.npmmirror.com/@types/js-cookie/-/js-cookie-2.2.7.tgz"
+  "version" "2.2.7"
+
 "@types/json-schema@*", "@types/json-schema@^7.0.4", "@types/json-schema@^7.0.5", "@types/json-schema@^7.0.8", "@types/json-schema@^7.0.9":
   "integrity" "sha512-Hr5Jfhc9eYOQNPYO5WLDq/n4jqijdHNlDXjuAQkkt+mWdQR+XJToOHrsD4cPaMXpn6KO7y2+wM8AZEs8VpBLVA=="
   "resolved" "https://registry.npmmirror.com/@types/json-schema/-/json-schema-7.0.12.tgz"
@@ -2669,6 +2674,27 @@
   "version" "6.0.2"
   dependencies:
     "debug" "4"
+
+"ahooks-v3-count@^1.0.0":
+  "integrity" "sha512-V7uUvAwnimu6eh/PED4mCDjE7tokeZQLKlxg9lCTMPhN+NjsSbtdacByVlR1oluXQzD3MOw55wylDmQo4+S9ZQ=="
+  "resolved" "https://registry.npmmirror.com/ahooks-v3-count/-/ahooks-v3-count-1.0.0.tgz"
+  "version" "1.0.0"
+
+"ahooks@^3.7.8":
+  "integrity" "sha512-e/NMlQWoCjaUtncNFIZk3FG1ImSkV/JhScQSkTqnftakRwdfZWSw6zzoWSG9OMYqPNs2MguDYBUFFC6THelWXA=="
+  "resolved" "https://registry.npmmirror.com/ahooks/-/ahooks-3.7.8.tgz"
+  "version" "3.7.8"
+  dependencies:
+    "@babel/runtime" "^7.21.0"
+    "@types/js-cookie" "^2.x.x"
+    "ahooks-v3-count" "^1.0.0"
+    "dayjs" "^1.9.1"
+    "intersection-observer" "^0.12.0"
+    "js-cookie" "^2.x.x"
+    "lodash" "^4.17.21"
+    "resize-observer-polyfill" "^1.5.1"
+    "screenfull" "^5.0.0"
+    "tslib" "^2.4.1"
 
 "ajv-formats@^2.1.1":
   "integrity" "sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA=="
@@ -3937,7 +3963,7 @@
     "whatwg-mimetype" "^2.3.0"
     "whatwg-url" "^8.0.0"
 
-"dayjs@^1.11.1", "dayjs@>= 1.x":
+"dayjs@^1.11.1", "dayjs@^1.9.1", "dayjs@>= 1.x":
   "integrity" "sha512-QvzAURSbQ0pKdIye2txOzNaHmxtUBXerpY0FJsFXUMKbIZeFm5ht1LS/jFsrncjnmtv8HsG0W2g6c0zUjZWmpA=="
   "resolved" "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.9.tgz"
   "version" "1.11.9"
@@ -5551,6 +5577,11 @@
     "has" "^1.0.3"
     "side-channel" "^1.0.4"
 
+"intersection-observer@^0.12.0":
+  "integrity" "sha512-7m1vEcPCxXYI8HqnL8CKI6siDyD+eIWSwgB3DZA+ZTogxk9I4CDnj4wilt9x/+/QbHI4YG5YZNmC6458/e9Ktg=="
+  "resolved" "https://registry.npmmirror.com/intersection-observer/-/intersection-observer-0.12.2.tgz"
+  "version" "0.12.2"
+
 "ipaddr.js@^2.0.1":
   "integrity" "sha512-LlbxQ7xKzfBusov6UMi4MFpEg0m+mAm9xyNGEduwXMEDuf4WfzB/RZwMVYEd7IKGvh4IUkEXYxtAVu9T3OelJQ=="
   "resolved" "https://registry.npmmirror.com/ipaddr.js/-/ipaddr.js-2.1.0.tgz"
@@ -6391,6 +6422,11 @@
   "integrity" "sha512-oVhqoRDaBXf7sjkll95LHVS6Myyyb1zaunVwk4Z0+WPSW4gjS0pl01zYKHScTuyEhQsFxV5L4DR5r+YqSyqyyg=="
   "resolved" "https://registry.npmmirror.com/jiti/-/jiti-1.19.1.tgz"
   "version" "1.19.1"
+
+"js-cookie@^2.x.x":
+  "integrity" "sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ=="
+  "resolved" "https://registry.npmmirror.com/js-cookie/-/js-cookie-2.2.1.tgz"
+  "version" "2.2.1"
 
 "js-tokens@^3.0.0 || ^4.0.0", "js-tokens@^4.0.0":
   "integrity" "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="
@@ -8904,6 +8940,11 @@
     "ajv" "^6.12.2"
     "ajv-keywords" "^3.4.1"
 
+"screenfull@^5.0.0":
+  "integrity" "sha512-9BakfsO2aUQN2K9Fdbj87RJIEZ82Q9IGim7FqM5OsebfoFC6ZHXgDq/KvniuLTPdeM8wY2o6Dj3WQ7KeQCj3cA=="
+  "resolved" "https://registry.npmmirror.com/screenfull/-/screenfull-5.2.0.tgz"
+  "version" "5.2.0"
+
 "scroll-into-view-if-needed@^3.0.3":
   "integrity" "sha512-t44QCeDKAPf1mtQH3fYpWz8IM/DyvHLjs8wUvvwMYxk5moOqCzrMSxK6HQVD0QVmVjXFavoFIPRVrMuJPKAvtg=="
   "resolved" "https://registry.npmmirror.com/scroll-into-view-if-needed/-/scroll-into-view-if-needed-3.0.10.tgz"
@@ -9657,7 +9698,7 @@
   "resolved" "https://registry.npmmirror.com/tslib/-/tslib-1.14.1.tgz"
   "version" "1.14.1"
 
-"tslib@^2.0.3":
+"tslib@^2.0.3", "tslib@^2.4.1":
   "integrity" "sha512-t0hLfiEKfMUoqhG+U1oid7Pva4bbDPHYfJNiB7BiIjRkj1pyC++4N3huJfqY6aRH6VTB0rvtzQwjM4K6qpfOig=="
   "resolved" "https://registry.npmmirror.com/tslib/-/tslib-2.6.1.tgz"
   "version" "2.6.1"

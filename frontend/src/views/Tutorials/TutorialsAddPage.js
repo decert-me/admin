@@ -13,6 +13,7 @@ import { createTutorial } from '../../request/api/tutorial';
 import { Link, useNavigate } from 'react-router-dom';
 import { getLabelList } from '../../request/api/tags';
 import { getYouTubePlayList } from '../../request/api/public';
+import { useUpdateEffect } from 'ahooks';
 const { TextArea } = Input;
 
 
@@ -21,6 +22,7 @@ export default function TutorialsAddPage(params) {
     
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
+    const videoUrl = Form.useWatch("url", form);
     const navigateTo = useNavigate();
 
     const [loading, setLoading] = useState(false);
@@ -142,6 +144,13 @@ export default function TutorialsAddPage(params) {
     useEffect(() => {
         init()
     },[])
+
+    useUpdateEffect(() => {
+        if (videoList.length !== 0) {
+            videoList = [];
+            updateVideoList([...videoList]);
+        }
+    },[videoUrl])
 
     return (
         <div className="tutorials-add">
