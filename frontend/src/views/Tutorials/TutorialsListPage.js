@@ -112,7 +112,8 @@ export default function TutorialsListPage(params) {
       getTutorialList(pageConfig)
       .then(res => {
         if (res.code === 0) {
-          data = res.data.list;
+          const list = res.data.list;
+          data = list ? list : [];
           // 添加key
           data.forEach(ele => {
             ele.key = ele.ID

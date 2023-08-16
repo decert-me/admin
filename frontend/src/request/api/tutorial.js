@@ -30,3 +30,12 @@ export const getTutorialList = (data) => {
         data
     })
 }
+
+// 获取打包列表
+export const getPackList = (data) => {
+    return serviceAxios({
+        url: `/pack/getPackList`,
+        method: "post",
+        data
+    })
+}
