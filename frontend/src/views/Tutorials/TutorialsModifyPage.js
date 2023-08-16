@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { mock } from '../../mock';
 import { Button, Form, Input, InputNumber, Select, Upload } from 'antd';
+import { getTutorial } from '../../request/api/tutorial';
+import { getLabelList } from '../../request/api/tags';
 const { TextArea } = Input;
 
 
@@ -15,13 +17,11 @@ export default function TutorialsModifyPage(params) {
     
     const { id } = useParams();
     const { tutorials } = mock();
-    const table = require("./category_tabel.json");
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
     let [fields, setFields] = useState([]);
     let [tutorial, setTutorial] = useState();
     let [category, setCategory] = useState();     //  类别 选择器option
-    let [theme, setTheme] = useState();     //  主题 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
     
     const onFinish = (values) => {
@@ -31,6 +31,11 @@ export default function TutorialsModifyPage(params) {
     };
 
     function init() {
+        getTutorial({id: Number(id)})
+        .then(res => {
+            if (res.code === 0) {
+            }
+        })
         tutorial = tutorials.list.filter(e => e.id == id)[0];
         setTutorial({...tutorial});
         fields = [
@@ -53,10 +58,6 @@ export default function TutorialsModifyPage(params) {
             {
                 name: ['category'],
                 value: tutorial.category
-            },
-            {
-                name: ['theme'],
-                value: tutorial.theme
             },
             {
                 name: ['language'],
@@ -104,46 +105,34 @@ export default function TutorialsModifyPage(params) {
         optionsInit()
     }
 
-    // 选择器option初始化
-    function optionsInit(params) {
-        // 类别初始化
-        let categoryOption = [];
-        for (const key in table.category) {
-            if (Object.hasOwnProperty.call(table.category, key)) {
-                categoryOption.push({
-                    key: key,
-                    label: table.category[key]
-                })
+    async function getOption(type) {
+        return await getLabelList(type)
+        .then(res => {
+            if (res.code === 0) {
+                return res.data ? res.data : [];
             }
-        }
+        })
+    }
+
+    // 选择器option初始化
+    async function optionsInit(params) {
+        // 类别初始化
+        let categoryOption = await getOption({type: "category"});
+        categoryOption.forEach(ele => {
+            ele.label = ele.Chinese;
+            ele.value = ele.ID
+        })
         category = categoryOption;
         setCategory([...category])
-
-        // 主题初始化
-        let themeOption = [];
-        for (const key in table.theme) {
-            if (Object.hasOwnProperty.call(table.theme, key)) {
-                themeOption.push({
-                    key: key,
-                    label: table.theme[key]
-                })
-            }
-        }
-        theme = themeOption;
-        setTheme([...theme])
-
+    
         // 语种
-        let langOption = [];
-        for (const key in table.language) {
-            if (Object.hasOwnProperty.call(table.language, key)) {
-                langOption.push({
-                    key: key,
-                    label: table.language[key]
-                })
-            }
-        }
+        let langOption = await getOption({type: "language"});
+        langOption.forEach(ele => {
+            ele.label = ele.Chinese;
+            ele.value = ele.ID
+        })
         lang = langOption;
-        setLang([...lang])
+        setLang([...lang]);
     }
 
     useEffect(() => {
@@ -360,17 +349,6 @@ export default function TutorialsModifyPage(params) {
                             options={category}
                         />
                     </Form.Item>
-                    
-                    <Form.Item
-                        label="主题"
-                        name="theme"
-                    >
-                        <Select
-                            mode="multiple"
-                            placeholder="请至少选择一项主题"
-                            options={theme}
-                        />
-                    </Form.Item>
 
                     <Form.Item
                         label="语种"
@@ -386,7 +364,7 @@ export default function TutorialsModifyPage(params) {
                         label="预估时间"
                         name="time"
                     >
-                        <InputNumber addonAfter="ms" controls={false} />
+                        <InputNumber addonAfter="min" controls={false} />
                     </Form.Item>
 
                     <Form.Item

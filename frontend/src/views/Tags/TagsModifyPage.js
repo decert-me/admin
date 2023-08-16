@@ -15,6 +15,7 @@ export default function TagsModifyPage(params) {
     let [fields, setFields] = useState([]);
     
     const onFinish = (values) => {
+        setLoading(true);
         updateLabel({...values, id: Number(id), weight: Number(values.weight)})
         .then(res => {
             if (res.code === 0) {
@@ -23,10 +24,12 @@ export default function TagsModifyPage(params) {
                     navigateTo(`/dashboard/tags`);
                 }, 1000);
             }else{
+                setLoading(false);
                 message.error(res.msg);
             }
         })
         .catch(err => {
+            setLoading(false);
             message.error(err);
         })
     }
@@ -130,7 +133,7 @@ export default function TagsModifyPage(params) {
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" loading={loading}>
-                        添加标签
+                        修改标签
                     </Button>
                 </Form.Item>
 

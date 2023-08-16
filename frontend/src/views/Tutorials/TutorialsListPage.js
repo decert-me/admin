@@ -10,7 +10,6 @@ import { deleteTutorial, getTutorialList } from "../../request/api/tutorial";
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
-    const table = require("./category_tabel.json");
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
@@ -42,7 +41,7 @@ export default function TutorialsListPage(params) {
           )
         },
         {
-          title: '分类-主题',
+          title: '分类',
           dataIndex: 'category',
           key: 'category',
           render: (category, tutorial) => (
@@ -50,14 +49,7 @@ export default function TutorialsListPage(params) {
             {
               category.map(tag => 
                   <Tag color="geekblue" key={tag}>
-                      {table.category[tag]}
-                  </Tag>    
-              )
-            }
-            {
-              tutorial.theme.map(tag => 
-                  <Tag color="green" key={tag}>
-                      {table.theme[tag]}
+                      {tag}
                   </Tag>    
               )
             }

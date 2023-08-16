@@ -31,6 +31,15 @@ export const getTutorialList = (data) => {
     })
 }
 
+// 获取教程详情
+export const getTutorial = (data) => {
+    return serviceAxios({
+        url: `/tutorial/getTutorial`,
+        method: "post",
+        data
+    })
+}
+
 // 获取打包列表
 export const getPackList = (data) => {
     return serviceAxios({

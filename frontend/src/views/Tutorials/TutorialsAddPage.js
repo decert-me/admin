@@ -9,19 +9,18 @@ import "./index.scss"
 import { UploadProps } from '../../utils/props';
 import { createTutorial } from '../../request/api/tutorial';
 import { Link, useNavigate } from 'react-router-dom';
+import { getLabelList } from '../../request/api/tags';
 const { TextArea } = Input;
 
 
 
 export default function TutorialsAddPage(params) {
     
-    const table = require("./category_tabel.json");
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
     const navigateTo = useNavigate();
 
     let [category, setCategory] = useState();     //  类别 选择器option
-    let [theme, setTheme] = useState();     //  主题 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
     const [loading, setLoading] = useState(false);
@@ -31,7 +30,7 @@ export default function TutorialsAddPage(params) {
         const {
             repoUrl, label, catalogueName, docType, desc, 
             challenge, branch, docPath, commitHash, 
-            category, theme, language, difficulty,
+            category, language, difficulty,
         } = values;
         const img = values.img.file.response.data.hash;
 
@@ -39,7 +38,7 @@ export default function TutorialsAddPage(params) {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, 
                 challenge, branch, docPath, commitHash,
-                category, theme, language, difficulty
+                category, language, difficulty
             }
             addArticle(obj)
         }else{
@@ -74,43 +73,32 @@ export default function TutorialsAddPage(params) {
         optionsInit()
     }
 
+    async function getOption(type) {
+        return await getLabelList(type)
+        .then(res => {
+            if (res.code === 0) {
+                return res.data ? res.data : [];
+            }
+        })
+    }
+
     // 选择器option初始化
-    function optionsInit(params) {
+    async function optionsInit(params) {
         // 类别初始化
-        let categoryOption = [];
-        for (const key in table.category) {
-                if (Object.hasOwnProperty.call(table.category, key)) {
-                    categoryOption.push({
-                        value: key,
-                        label: table.category[key]
-                    })
-                }
-        }
+        let categoryOption = await getOption({type: "category"});
+        categoryOption.forEach(ele => {
+            ele.label = ele.Chinese;
+            ele.value = ele.ID
+        })
         category = categoryOption;
         setCategory([...category])
-        // 主题初始化
-        let themeOption = [];
-        for (const key in table.theme) {
-                if (Object.hasOwnProperty.call(table.theme, key)) {
-                    themeOption.push({
-                        value: key,
-                        label: table.theme[key]
-                    })
-                }
-        }
-        theme = themeOption;
-        setTheme([...theme])
     
         // 语种
-        let langOption = [];
-        for (const key in table.language) {
-                if (Object.hasOwnProperty.call(table.language, key)) {
-                    langOption.push({
-                        value: key,
-                        label: table.language[key]
-                    })
-                }
-        }
+        let langOption = await getOption({type: "language"});
+        langOption.forEach(ele => {
+            ele.label = ele.Chinese;
+            ele.value = ele.ID
+        })
         lang = langOption;
         setLang([...lang]);
     }
@@ -352,24 +340,13 @@ export default function TutorialsAddPage(params) {
                         options={category}
                     />
                 </Form.Item>
-                
-                <Form.Item
-                    label="主题"
-                    name="theme"
-                >
-                    <Select
-                        mode="multiple"
-                        placeholder="请至少选择一项主题"
-                        options={theme}
-                    />
-                </Form.Item>
 
                 <Form.Item
                     label="语种"
                     name="language"
                 >
                     <Select
-                        placeholder="请至少选择一项主题"
+                        placeholder="请至少选择一项语种"
                         options={lang}
                     />
                 </Form.Item>
