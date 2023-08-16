@@ -70,7 +70,7 @@ export default function TutorialsAddPage(params) {
         const {
             repoUrl, label, catalogueName, docType, desc, 
             challenge, branch, docPath, commitHash, url, videoCategory,
-            category, language, difficulty,
+            category, language, difficulty, estimateTime
         } = values;
         const img = values.img.file.response.data.hash;
 
@@ -78,14 +78,14 @@ export default function TutorialsAddPage(params) {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, 
                 challenge, branch, docPath, commitHash,
-                category, language, difficulty
+                category, language, difficulty, estimateTime
             }
             create(obj)
         }else{
             const obj = {
                 url, label, catalogueName, img, desc, 
                 challenge, videoCategory,
-                category, language, difficulty
+                category, language, difficulty, estimateTime
             }
             create({...obj, docType: "video", video: videoList})
         }
@@ -447,7 +447,7 @@ export default function TutorialsAddPage(params) {
 
                 <Form.Item
                     label="预估时间"
-                    name="time"
+                    name="estimateTime"
                 >
                     <InputNumber addonAfter="min" controls={false} />
                 </Form.Item>

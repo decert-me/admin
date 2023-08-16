@@ -69,7 +69,7 @@ export default function TutorialsModifyPage(params) {
         const {
             repoUrl, label, catalogueName, docType, desc, 
             challenge, branch, docPath, commitHash, url, videoCategory,
-            category, language, difficulty,
+            category, language, difficulty, estimateTime
         } = values;
         const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
 
@@ -77,14 +77,14 @@ export default function TutorialsModifyPage(params) {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, 
                 challenge, branch, docPath, commitHash,
-                category, language, difficulty
+                category, language, difficulty, estimateTime
             }
             create(obj)
         }else{
             const obj = {
                 url, label, catalogueName, img, desc, 
                 challenge, videoCategory,
-                category, language, difficulty
+                category, language, difficulty, estimateTime
             }
             create({...obj, docType: "video", video: videoList})
         }
@@ -536,7 +536,7 @@ export default function TutorialsModifyPage(params) {
 
                 <Form.Item
                     label="预估时间"
-                    name="time"
+                    name="estimateTime"
                 >
                     <InputNumber addonAfter="min" controls={false} />
                 </Form.Item>
@@ -556,7 +556,7 @@ export default function TutorialsModifyPage(params) {
                 </Form.Item>
 
                     <Form.Item>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" htmlType="submit" loading={loading}>
                             修改教程
                         </Button>
                     </Form.Item>
