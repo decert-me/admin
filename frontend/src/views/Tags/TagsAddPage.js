@@ -1,4 +1,4 @@
-import { Button, Form, Input, Select, message } from "antd";
+import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import {
     ArrowLeftOutlined,
@@ -43,6 +43,12 @@ export default function TagsAddPage(params) {
                 style={{ maxWidth: 800 }}
                 onFinish={onFinish}
                 autoComplete="off"
+                fields={[
+                    {
+                        name: ['weight'],
+                        value: 0
+                    }
+                ]}
             >
                 <Form.Item
                     label="请选择父级标签"
@@ -61,6 +67,17 @@ export default function TagsAddPage(params) {
                             { value: 'language', label: '语言' }
                         ]}
                     />
+                </Form.Item>
+
+                <Form.Item
+                    label="权重"
+                    name="weight"
+                    rules={[{
+                        required: true,
+                        message: '请输入权重!',
+                    }]}
+                >
+                    <InputNumber controls={false} />
                 </Form.Item>
 
                 <Form.Item
