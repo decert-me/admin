@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -72,4 +74,48 @@ func FileExist(path string) bool {
 		return !fi.IsDir()
 	}
 	return !os.IsNotExist(err)
+}
+
+func CopyContents(sourceDir, destinationDir string) error {
+	// 创建目标目录
+	err := os.MkdirAll(destinationDir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	// 遍历源目录中的文件和子目录
+	return filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 构建目标路径
+		fmt.Println(destinationDir, strings.Replace(path, sourceDir, "", 1))
+		destinationPath := filepath.Join(destinationDir, strings.Replace(path, sourceDir, "", 1))
+
+		// 如果是目录，则在目标目录创建对应子目录
+		if info.IsDir() {
+			return os.MkdirAll(destinationPath, os.ModePerm)
+		}
+		// 如果是文件，则复制文件到目标目录
+		return CopyFile(path, destinationPath)
+	})
+}
+
+func CopyFile(sourcePath, destinationPath string) error {
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destinationFile, err := os.Create(destinationPath)
+	if err != nil {
+		fmt.Println("123")
+		return err
+	}
+	defer destinationFile.Close()
+
+	_, err = io.Copy(destinationFile, sourceFile)
+	return err
 }

@@ -23,10 +23,22 @@ func CreateTutorial(c *gin.Context) {
 	}
 }
 
+// UpdateTutorial 更新教程
+func UpdateTutorial(c *gin.Context) {
+	var tutorial model.Tutorial
+	_ = c.ShouldBindJSON(&tutorial)
+	if err := backend.UpdateTutorial(tutorial); err != nil {
+		global.LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败"+err.Error(), c)
+	} else {
+		response.OkWithMessage("更新成功", c)
+	}
+}
+
 // GetTutorialList 获取教程列表
 func GetTutorialList(c *gin.Context) {
 	var pageInfo request.PageInfo
-	_ = c.ShouldBindQuery(&pageInfo)
+	_ = c.ShouldBindJSON(&pageInfo)
 	if err := utils.Verify(pageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -47,11 +59,23 @@ func GetTutorialList(c *gin.Context) {
 // GetTutorial 获取教程详情
 func GetTutorial(c *gin.Context) {
 	var req request.GetTutorialRequest
-	_ = c.ShouldBindQuery(&req)
+	_ = c.ShouldBindJSON(&req)
 	if data, err := backend.GetTutorial(req.Id); err != nil {
 		global.LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(data, "获取成功", c)
+	}
+}
+
+// DeleteTutorial 删除教程
+func DeleteTutorial(c *gin.Context) {
+	var req request.DelTutorialRequest
+	_ = c.ShouldBindJSON(&req)
+	if err := backend.DeleteTutorial(req); err != nil {
+		global.LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败"+err.Error(), c)
+	} else {
+		response.OkWithMessage("删除成功", c)
 	}
 }
