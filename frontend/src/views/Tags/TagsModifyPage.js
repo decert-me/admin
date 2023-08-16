@@ -41,10 +41,6 @@ export default function TagsModifyPage(params) {
         }
         fields = [
             {
-                name: ['type'],
-                value: type
-            },
-            {
                 name: ['weight'],
                 value: params.weight
             },
@@ -78,24 +74,6 @@ export default function TagsModifyPage(params) {
                 autoComplete="off"
                 fields={fields}
             >
-                <Form.Item
-                    label="请选择父级标签"
-                    name="type"
-                    rules={[{
-                        required: true,
-                        message: '请输入标题!',
-                    }]}
-                >
-                    <Select
-                        style={{
-                            width: 120,
-                        }}
-                        options={[
-                            { value: 'category', label: '分类' },
-                            { value: 'language', label: '语言' }
-                        ]}
-                    />
-                </Form.Item>
 
                 <Form.Item
                     label="权重"
