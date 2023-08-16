@@ -57,7 +57,7 @@ export default function TagsPage(params) {
           key: 'action',
           render: (_, tags) => (
             <Space size="middle">
-                <Link to={`/dashboard/`}>
+                <Link to={`/dashboard/tags/modify/${tags.type}/${tags.ID}?weight=${tags.Weight}&english=${tags.English}&chinese=${tags.Chinese}`}>
                     修改
                 </Link>
                 <Popconfirm

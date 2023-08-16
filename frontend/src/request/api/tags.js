@@ -17,7 +17,14 @@ import serviceAxios from "../index";
             data
         })
     }
-    
+    // 修改标签
+    export const updateLabel = (data) => {
+        return serviceAxios({
+            url: `/label/updateLabel`,
+            method: "post",
+            data
+        })
+    }
     
 // ============================ get ============================
     //     获取标签列表
