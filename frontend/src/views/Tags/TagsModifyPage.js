@@ -1,37 +1,67 @@
-import { Button, Form, Input, InputNumber, Select, message } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import {
     ArrowLeftOutlined,
   } from '@ant-design/icons';
-import { createLabel } from "../../request/api/tags";
-import { useState } from "react";
+import { Button, Form, Input, InputNumber, Select, message } from "antd";
+import { useEffect, useState } from "react";
+import { updateLabel } from "../../request/api/tags";
 
+export default function TagsModifyPage(params) {
 
-export default function TagsAddPage(params) {
-
+    const { type, id } = useParams();
     const navigateTo = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(false);
-
+    let [fields, setFields] = useState([]);
+    
     const onFinish = (values) => {
         setLoading(true);
-        createLabel(values)
+        updateLabel({...values, id: Number(id), weight: Number(values.weight), type: type})
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
                 setTimeout(() => {
-                    navigateTo("/dashboard/tags")
-                }, 500);
+                    navigateTo(`/dashboard/tags`);
+                }, 1000);
             }else{
                 setLoading(false);
             }
-        }).catch(err => {
-            setLoading(false);
-            message.error(err)
         })
-    };
-    
+        .catch(err => {
+            setLoading(false);
+            message.error(err);
+        })
+    }
+
+    function init() {
+        const searchParams = new URLSearchParams(location.search);
+        const params = {};
+        for (const [key, value] of searchParams) {
+            params[key] = value;
+        }
+        fields = [
+            {
+                name: ['weight'],
+                value: params.weight
+            },
+            {
+                name: ['english'],
+                value: params.english
+            },
+            {
+                name: ['chinese'],
+                value: params.chinese
+            }
+        ]
+        setFields([...fields]);
+    }
+
+    useEffect(() => {
+        init();
+    },[])
+
     return (
-        <div className="tags-add">
+        <div className="tags-modify">
             <Link to={`/dashboard/tags`}>
                 <ArrowLeftOutlined />
             </Link>
@@ -42,31 +72,8 @@ export default function TagsAddPage(params) {
                 style={{ maxWidth: 800 }}
                 onFinish={onFinish}
                 autoComplete="off"
-                fields={[
-                    {
-                        name: ['weight'],
-                        value: 0
-                    }
-                ]}
+                fields={fields}
             >
-                <Form.Item
-                    label="请选择父级标签"
-                    name="type"
-                    rules={[{
-                        required: true,
-                        message: '请输入标题!',
-                    }]}
-                >
-                    <Select
-                        style={{
-                            width: 120,
-                        }}
-                        options={[
-                            { value: 'category', label: '分类' },
-                            { value: 'language', label: '语言' }
-                        ]}
-                    />
-                </Form.Item>
 
                 <Form.Item
                     label="权重"
@@ -103,7 +110,7 @@ export default function TagsAddPage(params) {
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" loading={loading}>
-                        添加标签
+                        修改标签
                     </Button>
                 </Form.Item>
 

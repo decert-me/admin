@@ -6,11 +6,12 @@ import {
     ReadOutlined
   } from '@ant-design/icons';
 import { deleteTutorial, getTutorialList } from "../../request/api/tutorial";
+import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
-    const table = require("./category_tabel.json");
+    let [tags, setTags] = useState([]);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
@@ -42,26 +43,18 @@ export default function TutorialsListPage(params) {
           )
         },
         {
-          title: '分类-主题',
+          title: '分类',
           dataIndex: 'category',
           key: 'category',
-          render: (category, tutorial) => (
-            <>
-            {
+          render: (category) => (
               category.map(tag => 
                   <Tag color="geekblue" key={tag}>
-                      {table.category[tag]}
+                    {
+                      tags.filter(e => e.ID === tag).length !== 0 &&
+                        tags.filter(e => e.ID === tag)[0].Chinese
+                    }
                   </Tag>    
               )
-            }
-            {
-              tutorial.theme.map(tag => 
-                  <Tag color="green" key={tag}>
-                      {table.theme[tag]}
-                  </Tag>    
-              )
-            }
-            </>
           )
         },
         {
@@ -95,7 +88,7 @@ export default function TutorialsListPage(params) {
               <Popconfirm
                 title="删除教程"
                 description="确定要删除这篇教程吗?"
-                onConfirm={() => deleteTutorial(tutorial.ID)}
+                onConfirm={() => deleteT(tutorial.ID)}
                 okText="确定"
                 cancelText="取消"
               >
@@ -106,13 +99,26 @@ export default function TutorialsListPage(params) {
         },
     ];
 
-    async function init() {
-      pageConfig.page += 1;
-      setPageConfig({...pageConfig});
+    async function deleteT(id) {
+      await deleteTutorial({id})
+      .then(res => {
+        if (res.code === 0) {
+            message.success(res.msg);
+        }
+      })
+      .catch(err => {
+          message.error(err);
+      })
+      getList()
+    }
+
+    function getList() {
+      // 获取教程列表
       getTutorialList(pageConfig)
       .then(res => {
         if (res.code === 0) {
-          data = res.data.list;
+          const list = res.data.list;
+          data = list ? list : [];
           // 添加key
           data.forEach(ele => {
             ele.key = ele.ID
@@ -127,6 +133,20 @@ export default function TutorialsListPage(params) {
       .catch(err => {
           message.error(err)
       })
+    }
+
+    async function init() {
+      pageConfig.page += 1;
+      setPageConfig({...pageConfig});
+      // 获取标签列表
+      getLabelList({type: "category"})
+      .then(res => {
+        if (res.code === 0) {
+          tags = res.data ? res.data : [];
+          setTags([...tags]);
+        }
+      })
+      getList()
     }
 
     useEffect(() => {

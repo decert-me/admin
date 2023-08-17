@@ -1,6 +1,8 @@
-import { Space, Table } from "antd";
+import { Space, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import { mock } from "../../mock";
+import { getPackList } from "../../request/api/tutorial";
+import { Link } from "react-router-dom";
 
 
 
@@ -8,6 +10,9 @@ export default function TutorialsBuildPage(params) {
     
     const { tutorials } = mock();
     let [data, setData] = useState([]);
+    let [pageConfig, setPageConfig] = useState({
+      page: 0, pageSize: 10, total: 0
+    });
 
     const columns = [
         {
@@ -15,7 +20,7 @@ export default function TutorialsBuildPage(params) {
           dataIndex: 'img',
           key: 'img',
           render: (img) => (
-            <img src={img} alt="" style={{height: "40px"}} />
+            <img src={`https://ipfs.decert.me/${img}`} alt="" style={{height: "40px"}} />
           )
         },
         {
@@ -28,12 +33,12 @@ export default function TutorialsBuildPage(params) {
         },
         {
             title: '状态',
-            dataIndex: 'status',
-            key: 'status',
-            render: (status) => (
+            dataIndex: 'pack_status',
+            key: 'pack_status',
+            render: (pack_status) => (
                 <div className="build-status">
-                    <div className={`point ${status === 0 ? "success" : "error"}`}></div>
-                    <p>{status === 0 ? "打包成功" : "打包失败"}</p>
+                    <div className={`point ${pack_status === 2 ? "success" : "error"}`}></div>
+                    <p>{pack_status === 2 ? "打包成功" : "打包失败"}</p>
                 </div>
             )
         },
@@ -63,35 +68,56 @@ export default function TutorialsBuildPage(params) {
         },
         {
             title: '创建时间',
-            dataIndex: 'createDate',
-            key: 'createDate',
-            render: () => (
-                <p>2023-01-01 11:59:00</p>
+            dataIndex: 'CreatedAt',
+            key: 'CreatedAt',
+            render: (CreatedAt) => (
+                <p>{CreatedAt.replace("T", " ").split(".")[0]}</p>
             )
         },
         {
             title: '最新打包时间',
-            dataIndex: 'updateDate',
-            key: 'updateDate',
-            render: () => (
-                <p>2023-01-01 11:59:00</p>
+            dataIndex: 'UpdatedAt',
+            key: 'UpdatedAt',
+            render: (UpdatedAt) => (
+                <p>{UpdatedAt.replace("T", " ").split(".")[0]}</p>
             )
         },
         {
           title: 'Action',
           key: 'action',
-          render: () => (
+          render: (_, tutorial) => (
             <Space size="middle">
               <a>打包</a>
-              <a>打包记录</a>
+              <Link to={`/dashboard/tutorials/buildlog/${tutorial.ID}`}>
+                打包记录
+              </Link>
             </Space>
           ),
         },
     ];
 
     function init() {
-        data = tutorials.build;
-        setData([...data]);
+      pageConfig.page += 1;
+      setPageConfig({...pageConfig});
+      getPackList(pageConfig)
+      .then(res => {
+        if (res.code === 0) {
+          const list = res.data.list;
+          data = list ? list : [];
+          // 添加key
+          data.forEach((ele, index) => {
+            ele.key = index
+          })
+          setData([...data]);
+          pageConfig.total = res.data.total;
+          setPageConfig({...pageConfig});
+        }else{
+            message.success(res.msg);
+        }
+      })
+      .catch(err => {
+          message.error(err)
+      })
     }
 
     useEffect(() => {

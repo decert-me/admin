@@ -15,6 +15,38 @@
         width: 165px;
         -webkit-line-clamp: 1;
     }
+    .video-list{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        li{
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 10px;
+            position: relative;
+            .number{
+                width: 35px;
+                height: 35px;
+                position: absolute;
+                left: -50px;
+                border-radius: 50%;
+                text-align: center;
+                line-height: 35px;
+            }
+        }
+        img{
+            margin-right: 10px;
+            width: 150px;
+        }
+        p{
+            width: 400px;
+            margin: 0;
+            -webkit-line-clamp: 1;
+        }
+    }
 }
 
 .doctype{

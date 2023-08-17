@@ -25,8 +25,9 @@ serviceAxios.interceptors.request.use(
 serviceAxios.interceptors.response.use(
   res => {
     let data = res.data;
+    // 错误返回
     if (data.code !== 0) {
-        // reload
+      // reload
       if (data.data?.reload) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -34,14 +35,8 @@ serviceAxios.interceptors.response.use(
         window.history.go(0);
         return
       }
-      message.error(data.message);
-      return null
+      message.error(data.msg);
     }
-    // if (data.data.reload) {
-    //   localStorage.clear();
-    // }
-    // 处理自己的业务逻辑，比如判断 token 是否过期等等
-    // 代码块
     return data;
   },
   error => {

@@ -1,42 +1,37 @@
 import serviceAxios from "../index";
 
 // ============================ post ============================
-
-    // 登录
-    export const userLogin = (data) => {
+    // 新建标签
+    export const createLabel = (data) => {
         return serviceAxios({
-            url: `/user/login`,
+            url: `/label/createLabel`,
             method: "post",
             data
         })
     }
-
-    // 上传图片
-    export const ipfsImg = (data) => {
+    // 删除标签
+    export const deleteLabel = (data) => {
         return serviceAxios({
-            url: `/ipfs/uploadFile`,
+            url: `/label/deleteLabel`,
             method: "post",
             data
         })
     }
-
-    // 获取youtube视频解析
-    export const getYouTubePlayList = (data) => {
+    // 修改标签
+    export const updateLabel = (data) => {
         return serviceAxios({
-            url: `/video/getYouTubePlayList`,
+            url: `/label/updateLabel`,
             method: "post",
             data
         })
     }
-
-
+    
 // ============================ get ============================
-
-    // 获取验证码
-    export const userCaptcha = (data) => {
+    //     获取标签列表
+    export const getLabelList = (data) => {
         return serviceAxios({
-            url: `/user/captcha`,
-            method: "get",
+            url: `/label/getLabelList`,
+            method: "post",
             data
         })
     }

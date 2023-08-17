@@ -1,37 +1,76 @@
-import { Button, Form, Input, InputNumber, Select, Upload, message } from 'antd';
+import "./index.scss"
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Button, Form, Input, InputNumber, Select, Upload, message, Space } from 'antd';
 import {
     PlusOutlined,
     MinusCircleOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    MenuOutlined
   } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
-import "./index.scss"
 import { UploadProps } from '../../utils/props';
 import { createTutorial } from '../../request/api/tutorial';
 import { Link, useNavigate } from 'react-router-dom';
+import { getLabelList } from '../../request/api/tags';
+import { getYouTubePlayList } from '../../request/api/public';
+import { useUpdateEffect } from 'ahooks';
 const { TextArea } = Input;
 
 
 
 export default function TutorialsAddPage(params) {
     
-    const table = require("./category_tabel.json");
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
+    const videoUrl = Form.useWatch("url", form);
     const navigateTo = useNavigate();
 
+    const [loading, setLoading] = useState(false);
+    const [parseLoading, setParseLoading] = useState(false);
     let [category, setCategory] = useState();     //  类别 选择器option
-    let [theme, setTheme] = useState();     //  主题 选择器option
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
-    const [loading, setLoading] = useState(false);
+    let [videoList, updateVideoList] = useState([]);
+
+    function parseVideoList() {
+        const link = form.getFieldValue("url");
+        if (!link) {
+            message.error("请输入正确的视频地址!")
+            return
+        }
+        setParseLoading(true);
+        getYouTubePlayList({link})
+        .then(res => {
+            if (res.code === 0) {
+                message.success(res.msg);
+                videoList = res.data;
+                updateVideoList([...videoList]);
+            }else{
+                setParseLoading(false)
+            }
+        })
+        .catch(err => {
+            setParseLoading(false)
+            message.error(err);
+        })
+    }
+
+    function handleOnDragEnd(result) {
+        if (!result.destination) return;
+    
+        const items = Array.from(videoList);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+    
+        updateVideoList(items);
+    }
 
     const onFinish = (values) => {
         setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, 
-            challenge, branch, docPath, commitHash, 
-            category, theme, language, difficulty,
+            challenge, branch, docPath, commitHash, url, videoCategory,
+            category, language, difficulty, estimateTime
         } = values;
         const img = values.img.file.response.data.hash;
 
@@ -39,15 +78,20 @@ export default function TutorialsAddPage(params) {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, 
                 challenge, branch, docPath, commitHash,
-                category, theme, language, difficulty
+                category, language, difficulty, estimateTime
             }
-            addArticle(obj)
+            create(obj)
         }else{
-            // addVideo(values)
+            const obj = {
+                url, label, catalogueName, img, desc, 
+                challenge, videoCategory,
+                category, language, difficulty, estimateTime
+            }
+            create({...obj, docType: "video", video: videoList})
         }
     };
 
-    function addArticle(obj) {
+    function create(obj) {
         createTutorial(obj)
         .then(res => {
             if (res.code === 0) {
@@ -57,7 +101,6 @@ export default function TutorialsAddPage(params) {
                 }, 500);
             }else{
                 setLoading(false);
-                message.success(res.msg);
             }
         })
         .catch(err => {
@@ -66,51 +109,36 @@ export default function TutorialsAddPage(params) {
         })
     }
 
-    function addVideo({}) {
-        
-    }
-
     function init() {
         optionsInit()
     }
 
+    async function getOption(type) {
+        return await getLabelList(type)
+        .then(res => {
+            if (res.code === 0) {
+                return res.data ? res.data : [];
+            }
+        })
+    }
+
     // 选择器option初始化
-    function optionsInit(params) {
+    async function optionsInit(params) {
         // 类别初始化
-        let categoryOption = [];
-        for (const key in table.category) {
-                if (Object.hasOwnProperty.call(table.category, key)) {
-                    categoryOption.push({
-                        value: key,
-                        label: table.category[key]
-                    })
-                }
-        }
+        let categoryOption = await getOption({type: "category"});
+        categoryOption.forEach(ele => {
+            ele.label = ele.Chinese;
+            ele.value = ele.ID
+        })
         category = categoryOption;
         setCategory([...category])
-        // 主题初始化
-        let themeOption = [];
-        for (const key in table.theme) {
-                if (Object.hasOwnProperty.call(table.theme, key)) {
-                    themeOption.push({
-                        value: key,
-                        label: table.theme[key]
-                    })
-                }
-        }
-        theme = themeOption;
-        setTheme([...theme])
     
         // 语种
-        let langOption = [];
-        for (const key in table.language) {
-                if (Object.hasOwnProperty.call(table.language, key)) {
-                    langOption.push({
-                        value: key,
-                        label: table.language[key]
-                    })
-                }
-        }
+        let langOption = await getOption({type: "language"});
+        langOption.forEach(ele => {
+            ele.label = ele.Chinese;
+            ele.value = ele.ID
+        })
         lang = langOption;
         setLang([...lang]);
     }
@@ -119,8 +147,15 @@ export default function TutorialsAddPage(params) {
         init()
     },[])
 
+    useUpdateEffect(() => {
+        if (videoList.length !== 0) {
+            videoList = [];
+            updateVideoList([...videoList]);
+        }
+    },[videoUrl])
+
     return (
-        <div className="tutorials-add">
+        <div className="tutorials-add tutorials">
             <Link to={`/dashboard/tutorials/list`}>
                 <ArrowLeftOutlined />
             </Link>
@@ -148,10 +183,6 @@ export default function TutorialsAddPage(params) {
                 <Form.Item
                     label="描述"
                     name="desc"
-                    rules={[{
-                        required: true,
-                        message: '请输入描述!',
-                    }]}
                 >
                     <TextArea autoSize={{ minRows: 3 }} />
                 </Form.Item>
@@ -208,8 +239,48 @@ export default function TutorialsAddPage(params) {
                                 message: '请输入视频地址!',
                             }]}
                         >
+                            <Space.Compact
+                                style={{
+                                    width: '100%',
+                                }}
+                            >
                             <Input />
+                            {
+                                videoCategory === "youtube" &&
+                                <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading} >解析</Button>
+                            }
+                            </Space.Compact>
                         </Form.Item>
+                        {
+                            videoList.length !== 0 &&
+                            <Form.Item label="视频排序">
+                                <DragDropContext onDragEnd={handleOnDragEnd}>
+                                    <Droppable droppableId="characters">
+                                        {(provided) => (
+                                        <ul className="characters video-list" {...provided.droppableProps} ref={provided.innerRef}>
+                                            {videoList.map(({id, img, label, url}, index) => {
+                                            return (
+                                                <Draggable key={id} draggableId={id} index={index}>
+                                                {(provided) => (
+                                                    <li ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                                                    <p className="number">{index + 1}</p>
+                                                    <img src={img} />
+                                                    <div>
+                                                        <p className="newline-omitted">{label}</p>
+                                                        <p className="newline-omitted">{url}</p>
+                                                    </div>
+                                                    </li>
+                                                )}
+                                                </Draggable>
+                                            );
+                                            })}
+                                            {provided.placeholder}
+                                        </ul>
+                                        )}
+                                    </Droppable>
+                                </DragDropContext>
+                            </Form.Item>
+                        }
                         <Form.Item
                             label="视频类型"
                             name="videoCategory"
@@ -343,6 +414,17 @@ export default function TutorialsAddPage(params) {
                 }
 
                 <Form.Item
+                    label="目录名"
+                    name="catalogueName"
+                    rules={[{
+                        required: true,
+                        message: '请输入目录名!',
+                    }]}
+                >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item
                     label="类别"
                     name="category"
                 >
@@ -352,31 +434,20 @@ export default function TutorialsAddPage(params) {
                         options={category}
                     />
                 </Form.Item>
-                
-                <Form.Item
-                    label="主题"
-                    name="theme"
-                >
-                    <Select
-                        mode="multiple"
-                        placeholder="请至少选择一项主题"
-                        options={theme}
-                    />
-                </Form.Item>
 
                 <Form.Item
                     label="语种"
                     name="language"
                 >
                     <Select
-                        placeholder="请至少选择一项主题"
+                        placeholder="请至少选择一项语种"
                         options={lang}
                     />
                 </Form.Item>
 
                 <Form.Item
                     label="预估时间"
-                    name="time"
+                    name="estimateTime"
                 >
                     <InputNumber addonAfter="min" controls={false} />
                 </Form.Item>

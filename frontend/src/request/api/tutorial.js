@@ -11,6 +11,15 @@ export const createTutorial = (data) => {
     })
 }
 
+// 修改教程
+export const updateTutorial = (data) => {
+    return serviceAxios({
+        url: `/tutorial/updateTutorial`,
+        method: "post",
+        data
+    })
+}
+
 // 删除教程
 export const deleteTutorial = (data) => {
     return serviceAxios({
@@ -26,6 +35,24 @@ export const deleteTutorial = (data) => {
 export const getTutorialList = (data) => {
     return serviceAxios({
         url: `/tutorial/getTutorialList`,
+        method: "post",
+        data
+    })
+}
+
+// 获取教程详情
+export const getTutorial = (data) => {
+    return serviceAxios({
+        url: `/tutorial/getTutorial`,
+        method: "post",
+        data
+    })
+}
+
+// 获取打包列表
+export const getPackList = (data) => {
+    return serviceAxios({
+        url: `/pack/getPackList`,
         method: "post",
         data
     })
