@@ -16,7 +16,7 @@ export default function TagsModifyPage(params) {
     
     const onFinish = (values) => {
         setLoading(true);
-        updateLabel({...values, id: Number(id), weight: Number(values.weight)})
+        updateLabel({...values, id: Number(id), weight: Number(values.weight), type: type})
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
