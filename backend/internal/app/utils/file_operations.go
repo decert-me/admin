@@ -90,7 +90,7 @@ func CopyContents(sourceDir, destinationDir string) error {
 		}
 
 		// 构建目标路径
-		fmt.Println(destinationDir, strings.Replace(path, sourceDir, "", 1))
+		//fmt.Println(destinationDir, strings.Replace(path, sourceDir, "", 1))
 		destinationPath := filepath.Join(destinationDir, strings.Replace(path, sourceDir, "", 1))
 
 		// 如果是目录，则在目标目录创建对应子目录

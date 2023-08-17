@@ -5,6 +5,7 @@ import (
 )
 
 type PackListResponse struct {
+	ID         uint `json:"id"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	Img        string `json:"img,omitempty"`                                             // 教程封面图

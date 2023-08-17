@@ -53,7 +53,7 @@ func UpdateTutorialStatus(c *gin.Context) {
 
 // GetTutorialList 获取教程列表
 func GetTutorialList(c *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo request.GetTutorialListStatusRequest
 	_ = c.ShouldBindJSON(&pageInfo)
 	if err := utils.Verify(pageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)

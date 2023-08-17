@@ -7,9 +7,12 @@ import (
 )
 
 func InitTutorialRouter(Router *gin.RouterGroup) {
+	routers := Router.Group("tutorial")
 	routersWithAuth := Router.Group("tutorial").Use(middleware.JWTAuth())
 	{
-		routersWithAuth.POST("getTutorialList", api.GetTutorialList)           // 获取教程列表
+		routers.POST("getTutorialList", api.GetTutorialList) // 获取教程列表
+	}
+	{
 		routersWithAuth.POST("createTutorial", api.CreateTutorial)             // 创建教程
 		routersWithAuth.POST("getTutorial", api.GetTutorial)                   // 获取教程详情
 		routersWithAuth.POST("deleteTutorial", api.DeleteTutorial)             // 删除教程
