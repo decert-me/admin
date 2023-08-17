@@ -76,3 +76,12 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 获取打包日志
+    export const getPackLog = (data) => {
+        return serviceAxios({
+            url: `/pack/getPackLog`,
+            method: "post",
+            data
+        })
+    }
