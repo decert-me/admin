@@ -12,6 +12,7 @@ export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
     let [tags, setTags] = useState([]);
+    let [lang, setLang] = useState([]);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
@@ -67,8 +68,8 @@ export default function TutorialsListPage(params) {
           key: 'language',
           dataIndex: 'language',
           render: (language) => (
-              <Tag color={language === "zh" ? "#2db7f5" : "#87d068"}>
-                  {language === "zh" ? "中文" : "英文"}
+              <Tag>
+                  {lang.filter(e => e.ID === language)[0].Chinese}
               </Tag>    
           )
         },
@@ -158,6 +159,13 @@ export default function TutorialsListPage(params) {
         if (res.code === 0) {
           tags = res.data ? res.data : [];
           setTags([...tags]);
+        }
+      })
+      getLabelList({type: "language"})
+      .then(res => {
+        if (res.code === 0) {
+          lang = res.data ? res.data : [];
+          setLang([...lang]);
         }
       })
       getList()
