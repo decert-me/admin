@@ -52,7 +52,7 @@ export default function TutorialsListPage(params) {
           dataIndex: 'category',
           key: 'category',
           render: (category) => (
-              category.map(tag => 
+              category && category.map(tag => 
                   <Tag color="geekblue" key={tag}>
                     {
                       tags.filter(e => e.ID === tag).length !== 0 &&
