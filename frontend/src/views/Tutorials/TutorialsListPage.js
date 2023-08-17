@@ -5,7 +5,7 @@ import {
     VideoCameraOutlined,
     ReadOutlined
   } from '@ant-design/icons';
-import { deleteTutorial, getTutorialList } from "../../request/api/tutorial";
+import { deleteTutorial, getTutorialList, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
@@ -38,8 +38,13 @@ export default function TutorialsListPage(params) {
           title: '上架状态',
           key: 'status',
           dataIndex: 'status',
-          render: (status) => (
-              <Switch checkedChildren="已上架" unCheckedChildren="待上架" defaultChecked={status == 0 ? true : false} />
+          render: (status, tutorial) => (
+              <Switch 
+                checkedChildren="已上架" 
+                unCheckedChildren="待上架" 
+                defaultChecked={status == 2 ? true : false} 
+                onChange={(checked) => changeStatus(checked, tutorial.ID)}
+              />
           )
         },
         {
@@ -98,6 +103,15 @@ export default function TutorialsListPage(params) {
           ),
         },
     ];
+
+    function changeStatus(checked, id) {
+      updateTutorialStatus({id, status: checked ? 2 : 1})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+        }
+      })
+    }
 
     async function deleteT(id) {
       await deleteTutorial({id})
