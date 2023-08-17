@@ -88,7 +88,7 @@ export default function TutorialsListPage(params) {
               <Popconfirm
                 title="删除教程"
                 description="确定要删除这篇教程吗?"
-                onConfirm={() => deleteTutorial(tutorial.ID)}
+                onConfirm={() => deleteT(tutorial.ID)}
                 okText="确定"
                 cancelText="取消"
               >
@@ -99,17 +99,20 @@ export default function TutorialsListPage(params) {
         },
     ];
 
-    async function init() {
-      pageConfig.page += 1;
-      setPageConfig({...pageConfig});
-      // 获取标签列表
-      getLabelList({type: "category"})
+    async function deleteT(id) {
+      await deleteTutorial({id})
       .then(res => {
         if (res.code === 0) {
-          tags = res.data ? res.data : [];
-          setTags([...tags]);
+            message.success(res.msg);
         }
       })
+      .catch(err => {
+          message.error(err);
+      })
+      getList()
+    }
+
+    function getList() {
       // 获取教程列表
       getTutorialList(pageConfig)
       .then(res => {
@@ -130,6 +133,20 @@ export default function TutorialsListPage(params) {
       .catch(err => {
           message.error(err)
       })
+    }
+
+    async function init() {
+      pageConfig.page += 1;
+      setPageConfig({...pageConfig});
+      // 获取标签列表
+      getLabelList({type: "category"})
+      .then(res => {
+        if (res.code === 0) {
+          tags = res.data ? res.data : [];
+          setTags([...tags]);
+        }
+      })
+      getList()
     }
 
     useEffect(() => {

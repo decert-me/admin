@@ -79,8 +79,6 @@ export default function TagsPage(params) {
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
-            }else{
-                message.error(res.msg);
             }
         })
         .catch(err => {
