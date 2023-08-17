@@ -41,3 +41,7 @@ local:
 # casbin configuration
 casbin:
   model-path: "assets/rbac_model.conf"
+
+pack:
+  path: "/home/cdeer/code/decert-go/admin/tutorials"
+  publish-path: "/home/cdeer/code/decertme/tutorials/build"

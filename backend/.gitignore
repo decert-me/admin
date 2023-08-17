@@ -20,5 +20,5 @@ uploads/
 config/config.yaml
 config/config.docker.yaml
 
-backend
+./backend
 decert_admin

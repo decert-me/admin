@@ -35,9 +35,25 @@ func UpdateTutorial(c *gin.Context) {
 	}
 }
 
+// UpdateTutorialStatus 更新教程上架状态
+func UpdateTutorialStatus(c *gin.Context) {
+	var req request.UpdateTutorialStatusRequest
+	err := c.ShouldBindJSON(&req)
+	if err != nil || req.Status == 0 {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	if err := backend.UpdateTutorialStatus(req.ID, req.Status); err != nil {
+		global.LOG.Error("更新失败!", zap.Error(err))
+		response.FailWithMessage("更新失败"+err.Error(), c)
+	} else {
+		response.OkWithMessage("更新成功", c)
+	}
+}
+
 // GetTutorialList 获取教程列表
 func GetTutorialList(c *gin.Context) {
-	var pageInfo request.PageInfo
+	var pageInfo request.GetTutorialListStatusRequest
 	_ = c.ShouldBindJSON(&pageInfo)
 	if err := utils.Verify(pageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)

@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/lib/pq"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -21,6 +22,7 @@ type Tutorial struct {
 	StartPage     string         `json:"startPage,omitempty"`
 	CommitHash    string         `json:"commitHash,omitempty"`
 	VideoCategory string         `json:"videoCategory,omitempty"`
+	Video         datatypes.JSON `json:"video,omitempty"`                                            // 视频排序
 	Sort          pq.StringArray `gorm:"column:sort;type:text[];comment:视频排序" json:"sort,omitempty"` // 视频排序
 	Url           string         `json:"url,omitempty"`
 	EstimateTime  uint           `json:"estimateTime,omitempty"`                                    // 预估时间
