@@ -1,6 +1,8 @@
 package response
 
-import "time"
+import (
+	"time"
+)
 
 type PackListResponse struct {
 	CreatedAt  time.Time
