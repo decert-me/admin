@@ -9,7 +9,7 @@ import (
 // LabelLangList 获取语言列表
 func LabelLangList() (language []model.Language, err error) {
 	db := global.DB.Model(&model.Language{})
-	err = db.Find(&language).Error
+	err = db.Order("weight").Find(&language).Error
 	return
 }
 
@@ -21,6 +21,15 @@ func LabelAddLang(data model.Language) error {
 
 // LabelRemoveLang 删除语言
 func LabelRemoveLang(data model.Language) error {
+	// 查询是否在用
+	var count int64
+	err := global.DB.Model(&model.Tutorial{}).Where("language = ?", data.ID).Count(&count).Error
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return errors.New("标签在用，不能删除")
+	}
 	db := global.DB.Model(&model.Language{})
 	raw := db.Where("id = ?", data.ID).Delete(&model.Language{})
 	if raw.RowsAffected == 0 {
@@ -38,7 +47,7 @@ func LabelUpdateLang(data model.Language) error {
 // LabelCategoryList 获取分类标签列表
 func LabelCategoryList() (category []model.Category, err error) {
 	db := global.DB.Model(&model.Category{})
-	err = db.Find(&category).Error
+	err = db.Order("weight").Find(&category).Error
 	return
 }
 
@@ -50,6 +59,15 @@ func LabelAddCategory(data model.Category) error {
 
 // LabelRemoveCategory 删除分类标签
 func LabelRemoveCategory(data model.Category) error {
+	// 查询是否在用
+	var count int64
+	err := global.DB.Model(&model.Tutorial{}).Where("? = ANY(category)", data.ID).Count(&count).Error
+	if err != nil {
+		return err
+	}
+	if count > 0 {
+		return errors.New("标签在用，不能删除")
+	}
 	db := global.DB.Model(&model.Category{})
 	raw := db.Where("id = ?", data.ID).Delete(&model.Category{})
 	if raw.RowsAffected == 0 {
@@ -67,7 +85,7 @@ func LabelUpdateCategory(data model.Category) error {
 // LabelThemeList 获取分类标签列表
 func LabelThemeList() (theme []model.Theme, err error) {
 	db := global.DB.Model(&model.Theme{})
-	err = db.Find(&theme).Error
+	err = db.Order("weight").Find(&theme).Error
 	return
 }
 

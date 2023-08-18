@@ -43,10 +43,18 @@ func GetPackList(info request.PageInfo) (list []response.PackListResponse, total
 }
 
 // GetPackLog 获取打包日志
-func GetPackLog(req request.GetPackLogRequest) (packLog model.PackLog, err error) {
+func GetPackLog(req request.GetPackLogRequest) (packLog []model.PackLog, total int64, err error) {
+	limit := req.PageSize
+	offset := req.PageSize * (req.Page - 1)
 	db := global.DB.Model(&model.PackLog{})
-	err = db.Where("id = ?", req.ID).First(&packLog).Error
-	return packLog, err
+	db.Where("tutorial_id = ?", req.ID)
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&packLog).Error
+	return packLog, total, err
 }
 
 // Pack  打包
@@ -116,7 +124,7 @@ func Pack(req request.PackRequest) error {
 		return err
 	}
 	// 将结果写入数据库
-	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
+	err = global.DB.Model(&model.Tutorial{}).Where("id = ? AND pack_status!=2", req.ID).
 		Updates(&model.Tutorial{StartPage: startPage, PackStatus: status}).Error
 	if err != nil {
 		return err
