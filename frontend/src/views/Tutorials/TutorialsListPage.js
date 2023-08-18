@@ -127,7 +127,11 @@ export default function TutorialsListPage(params) {
       getList()
     }
 
-    function getList() {
+    function getList(page) {
+      if (page) {
+        pageConfig.page = page;
+        setPageConfig({...pageConfig});
+      }
       // 获取教程列表
       getTutorialList(pageConfig)
       .then(res => {
@@ -184,7 +188,16 @@ export default function TutorialsListPage(params) {
               onClick={() => navigateTo("/dashboard/tutorials/add")}
             >创建教程</Button>
           </div>
-            <Table columns={columns} dataSource={data} pagination={{current: pageConfig.page, total: pageConfig.total, pageSize: pageConfig.pageSize}} />
+            <Table 
+              columns={columns} 
+              dataSource={data} 
+              pagination={{
+                current: pageConfig.page, 
+                total: pageConfig.total, 
+                pageSize: pageConfig.pageSize, 
+                onChange: (page) => getList(page)
+              }} 
+            />
         </div>
     )
 }
