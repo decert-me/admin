@@ -60,6 +60,8 @@ func DeleteTutorial(req request.DelTutorialRequest) (err error) {
 }
 
 func UpdateTutorial(tutorial model.Tutorial) (err error) {
+	// 禁止修改 CatalogueName
+	tutorial.CatalogueName = ""
 	raw := global.DB.Where("id = ?", tutorial.ID).Updates(&tutorial)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
