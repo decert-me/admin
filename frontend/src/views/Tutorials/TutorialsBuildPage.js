@@ -1,14 +1,13 @@
-import { Space, Table, message } from "antd";
+import { Button, Space, Table, message } from "antd";
 import { useEffect, useState } from "react";
-import { mock } from "../../mock";
-import { getPackList } from "../../request/api/tutorial";
+import { buildTutorial, getPackList } from "../../request/api/tutorial";
 import { Link } from "react-router-dom";
 
 
 
 export default function TutorialsBuildPage(params) {
     
-    const { tutorials } = mock();
+    let [loading, setLoading] = useState(false);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
@@ -87,14 +86,29 @@ export default function TutorialsBuildPage(params) {
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <a>打包</a>
-              <Link to={`/dashboard/tutorials/buildlog/${tutorial.ID}`}>
-                打包记录
+              <Button type="primary" onClick={() => build(tutorial.id)} loading={loading}>
+                打包
+              </Button>
+              <Link to={`/dashboard/tutorials/buildlog/${tutorial.id}`}>
+                <Button type="primary">
+                  打包记录
+                </Button>
               </Link>
             </Space>
           ),
         },
     ];
+
+    async function build(id) {
+      setLoading(true);
+      await buildTutorial({id})
+      .then(res => {
+        if (res.code === 0) {
+          
+        }
+      })
+      setLoading(false);
+    }
 
     function init() {
       pageConfig.page += 1;

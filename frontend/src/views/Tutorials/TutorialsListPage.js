@@ -5,13 +5,14 @@ import {
     VideoCameraOutlined,
     ReadOutlined
   } from '@ant-design/icons';
-import { deleteTutorial, getTutorialList } from "../../request/api/tutorial";
+import { deleteTutorial, getTutorialList, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
     let [tags, setTags] = useState([]);
+    let [lang, setLang] = useState([]);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
@@ -38,8 +39,13 @@ export default function TutorialsListPage(params) {
           title: '上架状态',
           key: 'status',
           dataIndex: 'status',
-          render: (status) => (
-              <Switch checkedChildren="已上架" unCheckedChildren="待上架" defaultChecked={status == 0 ? true : false} />
+          render: (status, tutorial) => (
+              <Switch 
+                checkedChildren="已上架" 
+                unCheckedChildren="待上架" 
+                defaultChecked={status == 2 ? true : false} 
+                onChange={(checked) => changeStatus(checked, tutorial.ID)}
+              />
           )
         },
         {
@@ -47,7 +53,7 @@ export default function TutorialsListPage(params) {
           dataIndex: 'category',
           key: 'category',
           render: (category) => (
-              category.map(tag => 
+              category && category.map(tag => 
                   <Tag color="geekblue" key={tag}>
                     {
                       tags.filter(e => e.ID === tag).length !== 0 &&
@@ -62,8 +68,8 @@ export default function TutorialsListPage(params) {
           key: 'language',
           dataIndex: 'language',
           render: (language) => (
-              <Tag color={language === "zh" ? "#2db7f5" : "#87d068"}>
-                  {language === "zh" ? "中文" : "英文"}
+              <Tag>
+                  {lang.filter(e => e.ID === language)[0].Chinese}
               </Tag>    
           )
         },
@@ -98,6 +104,15 @@ export default function TutorialsListPage(params) {
           ),
         },
     ];
+
+    function changeStatus(checked, id) {
+      updateTutorialStatus({id, status: checked ? 2 : 1})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+        }
+      })
+    }
 
     async function deleteT(id) {
       await deleteTutorial({id})
@@ -144,6 +159,13 @@ export default function TutorialsListPage(params) {
         if (res.code === 0) {
           tags = res.data ? res.data : [];
           setTags([...tags]);
+        }
+      })
+      getLabelList({type: "language"})
+      .then(res => {
+        if (res.code === 0) {
+          lang = res.data ? res.data : [];
+          setLang([...lang]);
         }
       })
       getList()

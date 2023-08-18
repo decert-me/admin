@@ -11,6 +11,22 @@
             font-weight: 500;
         }
     }
+    .flex{
+        display: flex;
+        align-items: center;
+    }
+    .point{
+        width: 6px;
+        height: 6px;
+        margin-right: 5px;
+        border-radius: 50%;
+    }
+    .point-success{
+        background-color: #52C41A;
+    }
+    .point-error{
+        background-color: #FF4D4F;
+    }
     .tabel-item-title{
         width: 165px;
         -webkit-line-clamp: 1;
