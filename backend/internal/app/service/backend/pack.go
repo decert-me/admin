@@ -20,12 +20,13 @@ func GetPackList(info request.PageInfo) (list []response.PackListResponse, total
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.DB.Model(&model.Tutorial{})
+	db.Where("pack_status != 1")
 	var tutorialList []model.Tutorial
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Where("pack_status != 1").Order("id desc").Find(&tutorialList).Error
+	err = db.Limit(limit).Offset(offset).Order("id desc").Find(&tutorialList).Error
 	for _, v := range tutorialList {
 		list = append(list, response.PackListResponse{
 			ID:         v.ID,
@@ -43,10 +44,18 @@ func GetPackList(info request.PageInfo) (list []response.PackListResponse, total
 }
 
 // GetPackLog 获取打包日志
-func GetPackLog(req request.GetPackLogRequest) (packLog model.PackLog, err error) {
+func GetPackLog(req request.GetPackLogRequest) (packLog []model.PackLog, total int64, err error) {
+	limit := req.PageSize
+	offset := req.PageSize * (req.Page - 1)
 	db := global.DB.Model(&model.PackLog{})
-	err = db.Where("id = ?", req.ID).First(&packLog).Error
-	return packLog, err
+	db.Where("tutorial_id = ?", req.ID)
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	err = db.Limit(limit).Offset(offset).Order("created_at desc").Find(&packLog).Error
+	return packLog, total, err
 }
 
 // Pack  打包
@@ -115,11 +124,13 @@ func Pack(req request.PackRequest) error {
 	if err != nil {
 		return err
 	}
-	// 将结果写入数据库
-	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
-		Updates(&model.Tutorial{StartPage: startPage, PackStatus: status}).Error
-	if err != nil {
-		return err
+	if status == 2 {
+		// 将结果写入数据库
+		err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
+			Updates(&model.Tutorial{StartPage: startPage, PackStatus: status}).Error
+		if err != nil {
+			return err
+		}
 	}
 	if status == 3 {
 		return errors.New("打包失败")

@@ -45,7 +45,7 @@ func UpdateTutorialStatus(c *gin.Context) {
 	}
 	if err := backend.UpdateTutorialStatus(req.ID, req.Status); err != nil {
 		global.LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败"+err.Error(), c)
+		response.FailWithMessage("更新失败："+err.Error(), c)
 	} else {
 		response.OkWithMessage("更新成功", c)
 	}

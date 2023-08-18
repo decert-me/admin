@@ -60,6 +60,8 @@ func DeleteTutorial(req request.DelTutorialRequest) (err error) {
 }
 
 func UpdateTutorial(tutorial model.Tutorial) (err error) {
+	// 禁止修改 CatalogueName
+	tutorial.CatalogueName = ""
 	raw := global.DB.Where("id = ?", tutorial.ID).Updates(&tutorial)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
@@ -69,9 +71,9 @@ func UpdateTutorial(tutorial model.Tutorial) (err error) {
 }
 
 func UpdateTutorialStatus(id uint, status uint8) (err error) {
-	raw := global.DB.Model(&model.Tutorial{}).Where("id = ?", id).Update("status", status)
+	raw := global.DB.Model(&model.Tutorial{}).Where("id = ? AND pack_status=2", id).Update("status", status)
 	if raw.RowsAffected == 0 {
-		return errors.New("修改失败")
+		return errors.New("上架失败，请查看打包状态")
 	}
 	return raw.Error
 }

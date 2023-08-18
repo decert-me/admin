@@ -13,7 +13,7 @@ import (
 // GetPackList 获取打包列表
 func GetPackList(c *gin.Context) {
 	var pageInfo request.PageInfo
-	_ = c.ShouldBindQuery(&pageInfo)
+	_ = c.ShouldBindJSON(&pageInfo)
 	if err := utils.Verify(pageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -34,12 +34,17 @@ func GetPackList(c *gin.Context) {
 // GetPackLog 获取打包日志
 func GetPackLog(c *gin.Context) {
 	var req request.GetPackLogRequest
-	_ = c.ShouldBindQuery(&req)
-	if data, err := backend.GetPackLog(req); err != nil {
+	_ = c.ShouldBindJSON(&req)
+	if data, total, err := backend.GetPackLog(req); err != nil {
 		global.LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
-		response.OkWithDetailed(data, "获取成功", c)
+		response.OkWithDetailed(response.PageResult{
+			List:     data,
+			Total:    total,
+			Page:     req.Page,
+			PageSize: req.PageSize,
+		}, "获取成功", c)
 	}
 }
 
