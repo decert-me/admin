@@ -20,12 +20,13 @@ func GetPackList(info request.PageInfo) (list []response.PackListResponse, total
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.DB.Model(&model.Tutorial{})
+	db.Where("pack_status != 1")
 	var tutorialList []model.Tutorial
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Where("pack_status != 1").Order("id desc").Find(&tutorialList).Error
+	err = db.Limit(limit).Offset(offset).Order("id desc").Find(&tutorialList).Error
 	for _, v := range tutorialList {
 		list = append(list, response.PackListResponse{
 			ID:         v.ID,
