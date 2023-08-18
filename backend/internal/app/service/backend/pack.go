@@ -123,11 +123,13 @@ func Pack(req request.PackRequest) error {
 	if err != nil {
 		return err
 	}
-	// 将结果写入数据库
-	err = global.DB.Model(&model.Tutorial{}).Where("id = ? AND pack_status!=2", req.ID).
-		Updates(&model.Tutorial{StartPage: startPage, PackStatus: status}).Error
-	if err != nil {
-		return err
+	if status == 2 {
+		// 将结果写入数据库
+		err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
+			Updates(&model.Tutorial{StartPage: startPage, PackStatus: status}).Error
+		if err != nil {
+			return err
+		}
 	}
 	if status == 3 {
 		return errors.New("打包失败")
