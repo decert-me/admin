@@ -68,7 +68,7 @@ export default function TutorialsModifyPage(params) {
     const onFinish = async(values) => {
         // setLoading(true);
         const {
-            repoUrl, label, catalogueName, docType, desc, 
+            repoUrl, label, docType, desc, 
             challenge, branch, docPath, commitHash, url, videoCategory,
             category, language, difficulty, estimateTime
         } = values;
@@ -92,14 +92,14 @@ export default function TutorialsModifyPage(params) {
         }
         if (doctype === "doc") {
             const obj = {
-                repoUrl, label, catalogueName, docType, img, desc, 
+                repoUrl, label, docType, img, desc, 
                 challenge, branch, docPath, commitHash,
                 category, language, difficulty, estimateTime
             }
             create(obj)
         }else{
             const obj = {
-                url, label, catalogueName, img, desc, 
+                url, label, img, desc, 
                 challenge, videoCategory,
                 category, language, difficulty, estimateTime
             }
@@ -154,10 +154,6 @@ export default function TutorialsModifyPage(params) {
             {
                 name: ['challenge'],
                 value: tutorial?.challenge
-            },
-            {
-                name: ["catalogueName"],
-                value: tutorial.catalogueName
             },
             {
                 name: ['category'],
@@ -518,17 +514,6 @@ export default function TutorialsModifyPage(params) {
                         </Form.Item>
                     </>
                 }
-
-                <Form.Item
-                    label="目录名"
-                    name="catalogueName"
-                    rules={[{
-                        required: true,
-                        message: '请输入目录名!',
-                    }]}
-                >
-                    <Input />
-                </Form.Item>
 
                 <Form.Item
                     label="分类"
