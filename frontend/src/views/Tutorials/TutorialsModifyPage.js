@@ -11,6 +11,7 @@ import { getTutorial, updateTutorial } from '../../request/api/tutorial';
 import { getLabelList } from '../../request/api/tags';
 import { UploadProps } from '../../utils/props';
 import { getYouTubePlayList } from '../../request/api/public';
+import { getQuest } from '../../request/api/quest';
 const { TextArea } = Input;
 
 
@@ -64,8 +65,8 @@ export default function TutorialsModifyPage(params) {
         updateVideoList(items);
     }
     
-    const onFinish = (values) => {
-        setLoading(true);
+    const onFinish = async(values) => {
+        // setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, 
             challenge, branch, docPath, commitHash, url, videoCategory,
@@ -73,6 +74,22 @@ export default function TutorialsModifyPage(params) {
         } = values;
         const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
 
+        // 判断challenge是否存在
+        let flag = true;
+        if (challenge) {
+            await getQuest({id: Number(challenge)})
+            .then(res => {
+                if (res.status !== 0) {
+                    flag = false;
+                    return;
+                }
+            })
+        }
+        if (!flag) {
+            // 终止
+            message.error("请输入正确的挑战编号!")
+            return
+        }
         if (doctype === "doc") {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, 
@@ -381,8 +398,8 @@ export default function TutorialsModifyPage(params) {
                             <Select
                                 placeholder="请选择视频类型!"
                                 options={[
-                                    {label: "youtube", value: "youtube"},
-                                    {label: "bilibili", value: "bilibili"}
+                                    {label: "YouTube", value: "youtube"},
+                                    {label: "Bilibili", value: "bilibili"}
                                 ]}
                             />
                         </Form.Item>
@@ -470,8 +487,8 @@ export default function TutorialsModifyPage(params) {
                                     <Select
                                         placeholder="教程类型"
                                         options={[
-                                            {label: "docusaurus", value: "docusaurus"},
-                                            {label: "gitbook", value: "gitbook"},
+                                            {label: "Docusaurus", value: "docusaurus"},
+                                            {label: "GitBook", value: "gitbook"},
                                             {label: "mdBook", value: "mdBook"},
                                         ]}
                                         style={{
@@ -514,7 +531,7 @@ export default function TutorialsModifyPage(params) {
                 </Form.Item>
 
                 <Form.Item
-                    label="类别"
+                    label="分类"
                     name="category"
                 >
                     <Select
@@ -527,6 +544,10 @@ export default function TutorialsModifyPage(params) {
                 <Form.Item
                     label="语种"
                     name="language"
+                    rules={[{
+                        required: true,
+                        message: '请输入语种!',
+                    }]}
                 >
                     <Select
                         placeholder="请至少选择一项语种"
@@ -549,7 +570,7 @@ export default function TutorialsModifyPage(params) {
                         placeholder="请选择难度"
                         options={[
                             {label: "困难", value: 2},
-                            {label: "一般", value: 1},
+                            {label: "中等", value: 1},
                             {label: "简单", value: 0}
                         ]}
                     />
