@@ -12,6 +12,7 @@ import { getLabelList } from '../../request/api/tags';
 import { UploadProps } from '../../utils/props';
 import { getYouTubePlayList } from '../../request/api/public';
 import { getQuest } from '../../request/api/quest';
+import { useUpdateEffect } from 'ahooks';
 const { TextArea } = Input;
 
 
@@ -66,10 +67,10 @@ export default function TutorialsModifyPage(params) {
     }
     
     const onFinish = async(values) => {
-        // setLoading(true);
+        setLoading(true);
         const {
             repoUrl, label, docType, desc, 
-            challenge, branch, docPath, commitHash, url, videoCategory,
+            challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime
         } = values;
         const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
@@ -88,6 +89,7 @@ export default function TutorialsModifyPage(params) {
         if (!flag) {
             // 终止
             message.error("请输入正确的挑战编号!")
+            setLoading(false);
             return
         }
         if (doctype === "doc") {
@@ -101,9 +103,13 @@ export default function TutorialsModifyPage(params) {
             const obj = {
                 url, label, img, desc, 
                 challenge, videoCategory,
-                category, language, difficulty, estimateTime
+                category, language, difficulty, estimateTime, docType: "video"
             }
-            create({...obj, docType: "video", video: videoList})
+            if (videoCategory === "bilibili") {
+                create({...obj, video: videoItems})
+            }else{
+                create({...obj, video: videoList})
+            }
         }
     };
 
@@ -203,6 +209,10 @@ export default function TutorialsModifyPage(params) {
                 name: ['videoCategory'],
                 value: tutorial?.videoCategory
             },
+            {
+                name: ['videoItems'],
+                value: tutorial.video
+            }
         ]
         setFields([...fields]);
         doctype = tutorial.docType === "video" ? "video" : "doc";
@@ -247,6 +257,13 @@ export default function TutorialsModifyPage(params) {
     useEffect(() => {
         init()
     },[])
+
+    useUpdateEffect(() => {
+        if (videoCategory === "bilibili") {
+            videoList = [];
+            updateVideoList([...videoList]);
+        }
+    },[videoCategory])
 
     return (
         <div className="tutorials-modify tutorials">
@@ -402,20 +419,36 @@ export default function TutorialsModifyPage(params) {
                         {
                             videoCategory === "bilibili" &&
                             <Form.Item
-                                label="视频列表"
-                            >
-                                <Form.List
-                                    name="videoItems"
-                                >
-                                    {(fields, { add, remove }, { errors }) => (
-                                    <>
-                                        {fields.map((field, index) => (
+                            label="视频列表"
+                        >
+                            <Form.List name="videoItems" >
+                                {(fields, { add, remove }, { errors }) => (
+                                <>
+                                    {fields.map((field, index) => (
+                                    <Space
+                                        key={index}
+                                        align="baseline"
+                                        className="bte"
+                                    >
+                                        
                                         <Form.Item
-                                            required={false}
-                                            key={field.key}
-                                        >
-                                            <Form.Item
                                             {...field}
+                                            validateTrigger={['onChange', 'onBlur']}
+                                            name={[field.name, 'label']}
+                                            rules={[
+                                                {
+                                                required: true,
+                                                whitespace: true,
+                                                message: "请输入视频标题！",
+                                                },
+                                            ]}
+                                            noStyle
+                                        >
+                                            <Input placeholder="视频标题"/>
+                                        </Form.Item>
+                                        <Form.Item
+                                            {...field}
+                                            name={[field.name, 'code']}
                                             validateTrigger={['onChange', 'onBlur']}
                                             rules={[
                                                 {
@@ -425,39 +458,33 @@ export default function TutorialsModifyPage(params) {
                                                 },
                                             ]}
                                             noStyle
-                                            >
-                                            <Input
-                                                placeholder="bilibili的嵌入代码"
-                                                style={{
-                                                width: '90%',
-                                                }}
-                                            />
-                                            </Form.Item>
-                                            {fields.length > 1 ? (
-                                            <MinusCircleOutlined
-                                                className="dynamic-delete-button"
-                                                onClick={() => remove(field.name)}
-                                            />
-                                            ) : null}
-                                        </Form.Item>
-                                        ))}
-                                        <Form.Item>
-                                        <Button
-                                            type="dashed"
-                                            onClick={() => add()}
-                                            style={{
-                                            width: '60%',
-                                            }}
-                                            icon={<PlusOutlined />}
                                         >
-                                            Add field
-                                        </Button>
-                                        <Form.ErrorList errors={errors} />
+                                            <Input placeholder="bilibili的嵌入代码" />
                                         </Form.Item>
-                                    </>
-                                    )}
-                                </Form.List>
-                            </Form.Item>
+                                        <MinusCircleOutlined
+                                            className="dynamic-delete-button"
+                                            onClick={() => remove(field.name)}
+                                        />
+                                    </Space>
+
+                                    ))}
+                                    <Form.Item>
+                                    <Button
+                                        type="dashed"
+                                        onClick={() => add()}
+                                        style={{
+                                        width: '60%',
+                                        }}
+                                        icon={<PlusOutlined />}
+                                    >
+                                        Add field
+                                    </Button>
+                                    <Form.ErrorList errors={errors} />
+                                    </Form.Item>
+                                </>
+                                )}
+                            </Form.List>
+                        </Form.Item>
                         }
                     </>
                     :

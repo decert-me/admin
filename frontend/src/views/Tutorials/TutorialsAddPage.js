@@ -70,7 +70,7 @@ export default function TutorialsAddPage(params) {
         setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, 
-            challenge, branch, docPath, commitHash, url, videoCategory,
+            challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime
         } = values;
         const img = values.img.file.response.data.hash;
@@ -88,6 +88,7 @@ export default function TutorialsAddPage(params) {
         if (!flag) {
             // 终止
             message.error("请输入正确的挑战编号!")
+            setLoading(false);
             return
         }
 
@@ -102,9 +103,13 @@ export default function TutorialsAddPage(params) {
             const obj = {
                 url, label, catalogueName, img, desc, 
                 challenge, videoCategory,
-                category, language, difficulty, estimateTime
+                category, language, difficulty, estimateTime, docType: "video"
             }
-            create({...obj, docType: "video", video: videoList})
+            if (videoCategory === "bilibili") {
+                create({...obj, video: videoItems})
+            }else{
+                create({...obj, video: videoList})
+            }
         }
     };
 
@@ -170,6 +175,13 @@ export default function TutorialsAddPage(params) {
             updateVideoList([...videoList]);
         }
     },[videoUrl])
+
+    useUpdateEffect(() => {
+        if (videoCategory === "bilibili") {
+            videoList = [];
+            updateVideoList([...videoList]);
+        }
+    },[videoCategory])
 
     return (
         <div className="tutorials-add tutorials">
@@ -319,42 +331,52 @@ export default function TutorialsAddPage(params) {
                             <Form.Item
                                 label="视频列表"
                             >
-                                <Form.List
-                                    name="videoItems"
-                                >
+                                <Form.List name="videoItems" >
                                     {(fields, { add, remove }, { errors }) => (
                                     <>
                                         {fields.map((field, index) => (
-                                        <Form.Item
-                                            required={false}
-                                            key={field.key}
+                                        <Space
+                                            key={index}
+                                            align="baseline"
+                                            className="bte"
                                         >
+                                            
                                             <Form.Item
-                                            {...field}
-                                            validateTrigger={['onChange', 'onBlur']}
-                                            rules={[
-                                                {
-                                                required: true,
-                                                whitespace: true,
-                                                message: "请输入视频链接或删除该输入框！",
-                                                },
-                                            ]}
-                                            noStyle
+                                                {...field}
+                                                validateTrigger={['onChange', 'onBlur']}
+                                                name={[field.name, 'label']}
+                                                rules={[
+                                                    {
+                                                    required: true,
+                                                    whitespace: true,
+                                                    message: "请输入视频标题！",
+                                                    },
+                                                ]}
+                                                noStyle
                                             >
-                                            <Input
-                                                placeholder="bilibili的嵌入代码"
-                                                style={{
-                                                width: '90%',
-                                                }}
-                                            />
+                                                <Input placeholder="视频标题"/>
                                             </Form.Item>
-                                            {fields.length > 1 ? (
+                                            <Form.Item
+                                                {...field}
+                                                name={[field.name, 'code']}
+                                                validateTrigger={['onChange', 'onBlur']}
+                                                rules={[
+                                                    {
+                                                    required: true,
+                                                    whitespace: true,
+                                                    message: "请输入视频链接或删除该输入框！",
+                                                    },
+                                                ]}
+                                                noStyle
+                                            >
+                                                <Input placeholder="bilibili的嵌入代码" />
+                                            </Form.Item>
                                             <MinusCircleOutlined
                                                 className="dynamic-delete-button"
                                                 onClick={() => remove(field.name)}
                                             />
-                                            ) : null}
-                                        </Form.Item>
+                                        </Space>
+
                                         ))}
                                         <Form.Item>
                                         <Button

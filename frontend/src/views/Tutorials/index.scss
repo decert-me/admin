@@ -11,6 +11,18 @@
             font-weight: 500;
         }
     }
+    .bte{
+        width: 100%;
+        margin-bottom: 10px;
+        .ant-space-item{
+            &:nth-child(1){
+                width: 30%;
+            }
+            &:nth-child(2){
+                width: 70%;
+            }
+        }
+    }
     .flex{
         display: flex;
         align-items: center;
