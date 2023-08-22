@@ -18,6 +18,18 @@ export default function TutorialsListPage(params) {
       page: 0, pageSize: 10, total: 0
     });
 
+    const handleChangeStatus = ({id, checked}, key) => {
+      const index = data.findIndex((item) => item.key === key);
+      updateTutorialStatus({id, status: checked ? 2 : 1})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+          data[index].status = checked ? 2 : 1;
+          setData([...data]);
+        }
+      })
+    };
+
     const columns = [
         {
           title: '封面图',
@@ -43,8 +55,8 @@ export default function TutorialsListPage(params) {
               <Switch 
                 checkedChildren="已上架" 
                 unCheckedChildren="待上架" 
-                defaultChecked={status == 2 ? true : false} 
-                onChange={(checked) => changeStatus(checked, tutorial.ID)}
+                checked={status == 2 ? true : false}
+                onChange={(checked) => handleChangeStatus({checked: checked, id: tutorial.ID}, tutorial.key)}
               />
           )
         },
@@ -104,15 +116,6 @@ export default function TutorialsListPage(params) {
           ),
         },
     ];
-
-    function changeStatus(checked, id) {
-      updateTutorialStatus({id, status: checked ? 2 : 1})
-      .then(res => {
-        if (res.code === 0) {
-          message.success(res.msg);
-        }
-      })
-    }
 
     async function deleteT(id) {
       await deleteTutorial({id})
