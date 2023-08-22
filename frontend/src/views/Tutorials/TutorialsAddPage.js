@@ -42,12 +42,11 @@ export default function TutorialsAddPage(params) {
         setParseLoading(true);
         getYouTubePlayList({link})
         .then(res => {
+            setParseLoading(false)
             if (res.code === 0) {
                 message.success(res.msg);
                 videoList = res.data;
                 updateVideoList([...videoList]);
-            }else{
-                setParseLoading(false)
             }
         })
         .catch(err => {
