@@ -95,3 +95,15 @@ func DeleteTutorial(c *gin.Context) {
 		response.OkWithMessage("删除成功", c)
 	}
 }
+
+// TopTutorial 置顶教程
+func TopTutorial(c *gin.Context) {
+	var req request.TopTutorialRequest
+	_ = c.ShouldBindJSON(&req)
+	if err := backend.TopTutorial(req); err != nil {
+		global.LOG.Error("删除失败!", zap.Error(err))
+		response.FailWithMessage("删除失败"+err.Error(), c)
+	} else {
+		response.OkWithMessage("删除成功", c)
+	}
+}

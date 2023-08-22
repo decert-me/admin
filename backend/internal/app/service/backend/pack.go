@@ -13,7 +13,10 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 )
+
+var l sync.Mutex
 
 // GetPackList 获取打包列表
 func GetPackList(info request.PageInfo) (list []response.PackListResponse, total int64, err error) {
@@ -60,6 +63,8 @@ func GetPackLog(req request.GetPackLogRequest) (packLog []model.PackLog, total i
 
 // Pack  打包
 func Pack(req request.PackRequest) error {
+	l.Lock()
+	defer l.Unlock()
 	// 查询数据库
 	var tutorial model.Tutorial
 	err := global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).First(&tutorial).Error
@@ -96,6 +101,10 @@ func Pack(req request.PackRequest) error {
 		fmt.Println(err)
 		return err
 	}
+	var packLog strings.Builder
+	for _, v := range stdoutErr {
+		packLog.WriteString(v + "\n")
+	}
 	fmt.Println(stdoutRes)
 	fmt.Println(stdoutErr)
 	var success bool
@@ -125,15 +134,23 @@ func Pack(req request.PackRequest) error {
 		return err
 	}
 	if status == 2 {
-		// 将结果写入数据库
+		packLog.Reset()
+		packLog.WriteString(" ")
+	}
+	if tutorial.PackStatus == 2 && status == 3 {
+		// 写入日志
 		err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
-			Updates(&model.Tutorial{StartPage: startPage, PackStatus: status}).Error
+			Updates(&model.Tutorial{PackLog: packLog.String()}).Error
 		if err != nil {
 			return err
 		}
-	}
-	if status == 3 {
 		return errors.New("打包失败")
+	}
+	// 将结果写入数据库
+	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
+		Updates(&model.Tutorial{StartPage: startPage, PackStatus: status, PackLog: packLog.String()}).Error
+	if err != nil {
+		return err
 	}
 	// 删除多余文件
 	//PackDelExcessFile(dir + "/build")

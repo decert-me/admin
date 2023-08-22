@@ -12,8 +12,8 @@ import (
 
 func initServer(address string, router *gin.Engine) server {
 	s := endless.NewServer(address, router)
-	s.ReadHeaderTimeout = 30 * time.Second
-	s.WriteTimeout = 30 * time.Second
+	s.ReadHeaderTimeout = 300 * time.Second
+	s.WriteTimeout = 300 * time.Second
 	s.MaxHeaderBytes = 1 << 20
 	return s
 }

@@ -37,7 +37,7 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Order("id desc").Find(&tutorialList).Error
+	err = db.Limit(limit).Offset(offset).Order("top,id desc").Find(&tutorialList).Error
 	return tutorialList, total, err
 }
 
@@ -60,13 +60,11 @@ func DeleteTutorial(req request.DelTutorialRequest) (err error) {
 }
 
 func UpdateTutorial(tutorial model.Tutorial) (err error) {
-	// 禁止修改 CatalogueName
-	tutorial.CatalogueName = ""
 	raw := global.DB.Where("id = ?", tutorial.ID).Updates(&tutorial)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
 	}
-	go Pack(request.PackRequest{ID: tutorial.ID})
+	Pack(request.PackRequest{ID: tutorial.ID})
 	return raw.Error
 }
 
@@ -76,4 +74,15 @@ func UpdateTutorialStatus(id uint, status uint8) (err error) {
 		return errors.New("上架失败，请查看打包状态")
 	}
 	return raw.Error
+}
+
+func TopTutorial(req request.TopTutorialRequest) (err error) {
+	for i := 0; i < len(req.ID); i++ {
+		err = global.DB.Begin().Model(&model.Tutorial{}).Where("id = ?", req.ID[i]).Update("top", req.Top[i]).Error
+		if err != nil {
+			return
+		}
+	}
+
+	return nil
 }
