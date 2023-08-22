@@ -74,7 +74,7 @@ export default function TutorialsListPage(params) {
           key: 'label',
           render: (text, tutorial) => (
             tutorial.status == 2 ?
-            <a href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
+            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
             :
             <p className="tabel-item-title newline-omitted">{tutorial.top ? "【置顶】" : ""}{text}</p>
           )
@@ -130,11 +130,21 @@ export default function TutorialsListPage(params) {
             )
         },
         {
+            title: '创建时间',
+            key: 'CreatedAt',
+            dataIndex: 'CreatedAt',
+            render: (CreatedAt) => (
+              <p>{CreatedAt.replace("T", " ").split(".")[0]}</p>
+            )
+        },
+        {
           title: 'Action',
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>修改</Link>
+              <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>编辑</Link>
+              <Button type="link" className="p0">打包</Button>
+              <Button type="link" className="p0">日志</Button>
               <Popconfirm
                 title="删除教程"
                 description="确定要删除这篇教程吗?"

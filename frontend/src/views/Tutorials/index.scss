@@ -1,6 +1,9 @@
 
 .tutorials{
-    a{
+    .p0{
+        padding: 0;
+    }
+    .underline{
         text-decoration: underline;
         color: #000;
         &:hover{
