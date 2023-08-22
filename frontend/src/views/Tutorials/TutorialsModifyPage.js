@@ -338,11 +338,8 @@ export default function TutorialsModifyPage(params) {
                     label="教程类型"
                 >
                     <div className="doctype">
-                        <div className={`box ${doctype === "video" ? "active-box" : ""}`} onClick={() => setDoctype("video")}>
-                            视频
-                        </div>
-                        <div className={`box ${doctype !== "video" ? "active-box" : ""}`} onClick={() => setDoctype("doc")}>
-                            文档
+                        <div className={`box box-disabled active-box`}>
+                            {doctype === "video" ? "视频" : "文档"}
                         </div>
                     </div>
                 </Form.Item>
@@ -362,7 +359,7 @@ export default function TutorialsModifyPage(params) {
                                     width: '100%',
                                 }}
                             >
-                            <Input defaultValue={tutorial?.url} />
+                            <Input defaultValue={tutorial?.url} disabled />
                             {
                                 videoCategory === "youtube" &&
                                 <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading}>解析</Button>
@@ -413,6 +410,7 @@ export default function TutorialsModifyPage(params) {
                                     {label: "YouTube", value: "youtube"},
                                     {label: "Bilibili", value: "bilibili"}
                                 ]}
+                                disabled
                             />
                         </Form.Item>
                         {

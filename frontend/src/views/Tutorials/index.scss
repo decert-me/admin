@@ -94,6 +94,9 @@
         cursor: pointer;
         transition: background-color 0.2s;
     }
+    .box-disabled{
+        pointer-events: none;
+    }
     .active-box, .box:hover{
         color: #fff;
         background-color: #1374f9;
