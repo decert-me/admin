@@ -62,7 +62,7 @@ export default function TutorialsBuildPage(params) {
             dataIndex: 'commitHash',
             key: 'commitHash',
             render: (commitHash) => (
-                <p>{commitHash}</p>
+                <p>{commitHash ? commitHash.substring(0,7) : ""}</p>
             )
         },
         {

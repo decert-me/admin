@@ -181,7 +181,7 @@ export default function TutorialsModifyPage(params) {
             // 文档
             {
                 name: ["docType"],
-                value: tutorial?.docType
+                value: tutorial.docType === "video" ? null : tutorial.docType
             },
             {
                 name: ['repoUrl'],
