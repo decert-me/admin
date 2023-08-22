@@ -1,8 +1,15 @@
 
 .tutorials{
+    a{
+        text-decoration: underline;
+        color: #000;
+        &:hover{
+            color: #1677ff;
+        }
+    }
     .tabel-title{
         margin-bottom: 16px;
-        padding-right: 110px;
+        padding-right: 50px;
         display: flex;
         justify-content: space-between;
         align-items: center;

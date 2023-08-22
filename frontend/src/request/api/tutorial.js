@@ -47,6 +47,15 @@ import serviceAxios from "../index";
         })
     }
 
+    // 修改置顶状态
+    export const topTutorial = (data) => {
+        return serviceAxios({
+            url: `/tutorial/topTutorial`,
+            method: "post",
+            data
+        })
+    }
+
 
 // 获取 ==================>
 

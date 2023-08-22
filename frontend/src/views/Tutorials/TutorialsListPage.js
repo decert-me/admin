@@ -5,12 +5,14 @@ import {
     VideoCameraOutlined,
     ReadOutlined
   } from '@ant-design/icons';
-import { deleteTutorial, getTutorialList, updateTutorialStatus } from "../../request/api/tutorial";
+import { deleteTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);   //  列表所选item
+    const [topLoad, setTopLoad] = useState(false);    //  置顶等待
     let [tags, setTags] = useState([]);
     let [lang, setLang] = useState([]);
     let [data, setData] = useState([]);
@@ -18,6 +20,7 @@ export default function TutorialsListPage(params) {
       page: 0, pageSize: 10, total: 0
     });
 
+    // 教程上下架
     const handleChangeStatus = ({id, checked}, key) => {
       const index = data.findIndex((item) => item.key === key);
       updateTutorialStatus({id, status: checked ? 2 : 1})
@@ -28,6 +31,32 @@ export default function TutorialsListPage(params) {
           setData([...data]);
         }
       })
+    };
+
+    // 教程置顶
+    function toTop(status) {
+      setTopLoad(true);
+      const statusArr = Array(selectedRowKeys.length).fill(status);
+      topTutorial({id: selectedRowKeys, top: statusArr})
+      .then(res => {
+        setTopLoad(false);
+        if (res.code === 0) {
+          message.success(res.msg);
+          setSelectedRowKeys([...[]]);
+          getList()
+        }
+      })
+    }
+
+    const hasSelected = selectedRowKeys.length > 0;
+
+    const onSelectChange = (newSelectedRowKeys) => {
+      setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection = {
+      selectedRowKeys,
+      onChange: onSelectChange,
     };
 
     const columns = [
@@ -43,8 +72,11 @@ export default function TutorialsListPage(params) {
           title: '标题',
           dataIndex: 'label',
           key: 'label',
-          render: (text) => (
-            <p className="tabel-item-title newline-omitted">{text}</p>
+          render: (text, tutorial) => (
+            tutorial.status == 2 ?
+            <a href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
+            :
+            <p className="tabel-item-title newline-omitted">{tutorial.top ? "【置顶】" : ""}{text}</p>
           )
         },
         {
@@ -186,12 +218,30 @@ export default function TutorialsListPage(params) {
         <div className="tutorials tutorials-list">
           <div className="tabel-title">
             <h2>教程列表</h2>
-            <Button 
-              type="primary"
-              onClick={() => navigateTo("/dashboard/tutorials/add")}
-            >创建教程</Button>
+            <Space size="large">
+              <Button 
+                onClick={() => toTop(true)}
+                disabled={!hasSelected} 
+                loading={topLoad}
+              >
+                置顶
+              </Button>
+              <Button 
+                onClick={() => toTop(false)}
+                disabled={!hasSelected} 
+                loading={topLoad}
+              >
+                取消置顶
+              </Button>
+              <Button 
+                type="primary"
+                onClick={() => navigateTo("/dashboard/tutorials/add")}
+              >创建教程</Button>
+            </Space>
           </div>
+
             <Table 
+              rowSelection={rowSelection}
               columns={columns} 
               dataSource={data} 
               pagination={{
