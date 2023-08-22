@@ -256,29 +256,30 @@ export default function TutorialsAddPage(params) {
                         </div>
                     </div>
                 </Form.Item>
+                <Form.Item
+                    label="视频地址"
+                    name="url"
+                    rules={[{
+                        required: true,
+                        message: '请输入视频地址!',
+                    }]}
+                    hidden={doctype !== "video"}
+                >
+                    <Space.Compact
+                        style={{
+                            width: '100%',
+                        }}
+                    >
+                    <Input />
+                    {
+                        videoCategory === "youtube" &&
+                        <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading} >解析</Button>
+                    }
+                    </Space.Compact>
+                </Form.Item>
                 {
                     doctype === "video" ?
                     <>
-                        <Form.Item
-                            label="视频地址"
-                            name="url"
-                            rules={[{
-                                required: true,
-                                message: '请输入视频地址!',
-                            }]}
-                        >
-                            <Space.Compact
-                                style={{
-                                    width: '100%',
-                                }}
-                            >
-                            <Input />
-                            {
-                                videoCategory === "youtube" &&
-                                <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading} >解析</Button>
-                            }
-                            </Space.Compact>
-                        </Form.Item>
                         {
                             videoList.length !== 0 &&
                             <Form.Item label="视频排序">
