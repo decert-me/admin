@@ -3,7 +3,8 @@ import {
     BookOutlined,
     FolderOutlined,
     HomeOutlined,
-    TagsOutlined
+    TagsOutlined,
+    ProfileOutlined
   } from '@ant-design/icons';
 
 export const menu = [
@@ -14,25 +15,17 @@ export const menu = [
     },
     {
         label: "教程管理",
-        // key: "tutorials",
         key: "tutorials/list",
         icon: <BookOutlined />,
-        // children: [
-            // {
-            //     label: "教程管理",
-            //     key: "tutorials/list",
-            //     icon: <MenuOutlined />,
-            // },
-            // {
-            //     label: "打包管理",
-            //     key: "tutorials/build",
-            //     icon: <FolderOutlined />,
-            // }
-        // ]
     },
     {
         label: "标签管理",
         key: "tags",
         icon: <TagsOutlined />,
+    },
+    {
+        label: "挑战管理",
+        key: "challenge",
+        icon: <ProfileOutlined />
     }
 ]

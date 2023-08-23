@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import './styles/App.css';
+import './styles/index.scss';
 import { Redirect } from './components/Redirect';
 import { ProtectedLayout } from './components/ProtectedLayout';
 import LoginPage from './views/Login';
@@ -9,6 +10,7 @@ import AuthGuard from './components/AuthGuard';
 import HomePage from './views/Home';
 import { TutorialsAddPage, TutorialsBuildLogPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 import { TagsAddPage, TagsModifyPage, TagsPage } from './views/Tags';
+import { ChallengeListPage } from './views/Challenge';
 
 function App() {
   return (
@@ -74,6 +76,12 @@ function App() {
           element={<TagsModifyPage />} 
         />
 
+
+        {/* 挑战 */}
+        <Route 
+          path="challenge" 
+          element={<ChallengeListPage />} 
+        />
 
       </Route>
     </Routes>
