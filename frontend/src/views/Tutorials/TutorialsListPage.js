@@ -120,7 +120,7 @@ export default function TutorialsListPage(params) {
           key: 'label',
           render: (text, tutorial) => (
             tutorial.status == 2 ?
-            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
+            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
             :
             <p className="tabel-item-title newline-omitted">{tutorial.top ? "【置顶】" : ""}{text}</p>
           )
