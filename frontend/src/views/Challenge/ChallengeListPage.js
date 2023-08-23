@@ -1,7 +1,7 @@
 import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import "./index.scss";
-import { getQuestList } from "../../request/api/quest";
+import { getQuestList, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
@@ -22,7 +22,7 @@ export default function ChallengeListPage(params) {
           title: '挑战编号',
           dataIndex: 'tokenId',
           render: (tokenId) => (
-            <a href={`${isTest ? "https://decert.me" : "http://192.168.1.10:8087"}/challenge/${tokenId}`} target="_blank">{tokenId}</a>
+            <a className="underline" href={`${isTest ? "https://decert.me" : "http://192.168.1.10:8087"}/challenge/${tokenId}`} target="_blank">{tokenId}</a>
           )
         },
         {
@@ -129,8 +129,16 @@ export default function ChallengeListPage(params) {
     ];
 
     // 上下架
-    function handleChangeStatus({status, id}) {
-        
+    function handleChangeStatus({status, id}, key) {
+      const index = data.findIndex((item) => item.key === key);
+      updateQuestStatus({id, status})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+          data[index].status = status;
+          setData([...data]);
+        }
+      })
     } 
     
     const onSelectChange = (newSelectedRowKeys) => {

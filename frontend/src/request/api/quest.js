@@ -20,3 +20,14 @@ import serviceAxios from "../index";
             data
         })
     }
+
+// ============================ post ============================
+
+    // 更改挑战上架状态
+    export const updateQuestStatus = (data) => {
+        return serviceAxios({
+            url: `/quest/updateQuestStatus`,
+            method: "post",
+            data
+        })
+    }
