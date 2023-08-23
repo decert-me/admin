@@ -1,7 +1,7 @@
 import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import "./index.scss";
-import { getQuestList, updateQuestStatus } from "../../request/api/quest";
+import { getQuestList, topQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
@@ -155,15 +155,15 @@ export default function ChallengeListPage(params) {
     function toTop(status) {
         setTopLoad(true);
         const statusArr = Array(selectedRowKeys.length).fill(status);
-        // topTutorial({id: selectedRowKeys, top: statusArr})
-        // .then(res => {
+        topQuest({id: selectedRowKeys, top: statusArr})
+        .then(res => {
           setTopLoad(false);
-        //   if (res.code === 0) {
-        //     message.success(res.msg);
-        //     setSelectedRowKeys([...[]]);
-        //     getList()
-        //   }
-        // })
+          if (res.code === 0) {
+            message.success(res.msg);
+            setSelectedRowKeys([...[]]);
+            getList()
+          }
+        })
     }
 
     function getList(page) {
@@ -171,7 +171,6 @@ export default function ChallengeListPage(params) {
           pageConfig.page = page;
           setPageConfig({...pageConfig});
         }
-        console.log(pageConfig);
         // 获取教程列表
         getQuestList(pageConfig)
         .then(res => {
@@ -180,7 +179,7 @@ export default function ChallengeListPage(params) {
             data = list ? list : [];
             // 添加key
             data.forEach(ele => {
-              ele.key = ele.ID
+              ele.key = ele.id
             })
             setData([...data]);
             pageConfig.total = res.data.total;

@@ -31,3 +31,12 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 置顶、取消置顶挑战
+    export const topQuest = (data) => {
+        return serviceAxios({
+            url: `/quest/topQuest`,
+            method: "post",
+            data
+        })
+    }
