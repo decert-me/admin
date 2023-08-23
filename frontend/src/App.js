@@ -50,14 +50,14 @@ function App() {
           path="tutorials/add" 
           element={<TutorialsAddPage />} 
         />
-        <Route 
+        {/* <Route 
           path="tutorials/build" 
           element={<TutorialsBuildPage />} 
         />
         <Route 
           path="tutorials/buildlog/:id" 
           element={<TutorialsBuildLogPage />} 
-        />
+        /> */}
         
 
         {/* 标签 */}

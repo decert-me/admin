@@ -14,20 +14,21 @@ export const menu = [
     },
     {
         label: "教程管理",
-        key: "tutorials",
+        // key: "tutorials",
+        key: "tutorials/list",
         icon: <BookOutlined />,
-        children: [
-            {
-                label: "教程管理",
-                key: "tutorials/list",
-                icon: <MenuOutlined />,
-            },
-            {
-                label: "打包管理",
-                key: "tutorials/build",
-                icon: <FolderOutlined />,
-            }
-        ]
+        // children: [
+            // {
+            //     label: "教程管理",
+            //     key: "tutorials/list",
+            //     icon: <MenuOutlined />,
+            // },
+            // {
+            //     label: "打包管理",
+            //     key: "tutorials/build",
+            //     icon: <FolderOutlined />,
+            // }
+        // ]
     },
     {
         label: "标签管理",
