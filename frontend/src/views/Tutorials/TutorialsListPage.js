@@ -1,4 +1,4 @@
-import { Button, Popconfirm, Space, Switch, Table, Tag, message } from "antd";
+import { Button, Modal, Popconfirm, Space, Switch, Table, Tag, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -20,8 +20,11 @@ export default function TutorialsListPage(params) {
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
     });
+    let [log, setLog] = useState();
     const [selectKey, setSelectKey] = useState('');
     const isSelect = (record) => record.key === selectKey;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     // 教程上下架
     const handleChangeStatus = ({id, checked}, key) => {
@@ -64,6 +67,17 @@ export default function TutorialsListPage(params) {
         </Button>
       )
     }
+
+    // 日志
+    const showModal = (logs) => {
+      log = logs;
+      setLog(log);
+      setIsModalOpen(true);
+    };
+
+    const handleCancel = () => {
+      setIsModalOpen(false);
+    };
 
     // 教程置顶
     function toTop(status) {
@@ -176,7 +190,11 @@ export default function TutorialsListPage(params) {
             <Space size="middle">
               <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>编辑</Link>
               {goBuild(tutorial)}
-              <Button type="link" className="p0">日志</Button>
+              <Button 
+                type="link" 
+                className="p0"
+                onClick={() => showModal(tutorial.pack_log)}
+              >日志</Button>
               <Popconfirm
                 title="删除教程"
                 description="确定要删除这篇教程吗?"
@@ -293,6 +311,9 @@ export default function TutorialsListPage(params) {
                 onChange: (page) => getList(page)
               }} 
             />
+            <Modal width={800} open={isModalOpen} onCancel={handleCancel} footer={null}>
+              <p dangerouslySetInnerHTML={{__html: log}}></p>
+            </Modal>
         </div>
     )
 }
