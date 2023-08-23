@@ -13,7 +13,7 @@ import { createTutorial } from '../../request/api/tutorial';
 import { Link, useNavigate } from 'react-router-dom';
 import { getLabelList } from '../../request/api/tags';
 import { getYouTubePlayList } from '../../request/api/public';
-import { useUpdateEffect } from 'ahooks';
+import { useRequest, useUpdateEffect } from 'ahooks';
 import { getQuest } from "../../request/api/quest";
 const { TextArea } = Input;
 
@@ -32,6 +32,14 @@ export default function TutorialsAddPage(params) {
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
     let [videoList, updateVideoList] = useState([]);
+    const { run } = useRequest(parseUrl, {
+        debounceWait: 500,
+        manual: true,
+    });
+
+    function parseUrl(params) {
+        form.setFieldValue("videoCategory", videoUrl.indexOf("www.youtube.com") !== -1 ? "youtube" : "bilibili")
+    }
 
     function parseVideoList() {
         const link = form.getFieldValue("url");
@@ -173,6 +181,7 @@ export default function TutorialsAddPage(params) {
             videoList = [];
             updateVideoList([...videoList]);
         }
+        run();
     },[videoUrl])
 
     useUpdateEffect(() => {
@@ -195,12 +204,6 @@ export default function TutorialsAddPage(params) {
                 onFinish={onFinish}
                 autoComplete="off"
                 form={form}
-                fields={[
-                    {
-                        name: ["url"],
-                        value: " "
-                    }
-                ]}
             >
 
                 <Form.Item
@@ -266,7 +269,7 @@ export default function TutorialsAddPage(params) {
                     label="视频地址"
                     name="url"
                     rules={[{
-                        required: true,
+                        required: doctype === "video",
                         message: '请输入视频地址!',
                     }]}
                     hidden={doctype !== "video"}
@@ -325,7 +328,7 @@ export default function TutorialsAddPage(params) {
                             }]}
                         >
                             <Select
-                                placeholder="请选择视频类型!"
+                                disabled
                                 options={[
                                     {label: "YouTube", value: "youtube"},
                                     {label: "Bilibili", value: "bilibili"}

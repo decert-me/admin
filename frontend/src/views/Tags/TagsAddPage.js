@@ -46,6 +46,10 @@ export default function TagsAddPage(params) {
                     {
                         name: ['weight'],
                         value: 0
+                    },
+                    {
+                        name: ['type'],
+                        value: "category"
                     }
                 ]}
             >
