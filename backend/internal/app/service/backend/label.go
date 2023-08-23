@@ -9,7 +9,7 @@ import (
 // LabelLangList 获取语言列表
 func LabelLangList() (language []model.Language, err error) {
 	db := global.DB.Model(&model.Language{})
-	err = db.Order("weight").Find(&language).Error
+	err = db.Order("weight desc,created_at desc").Find(&language).Error
 	return
 }
 
@@ -47,7 +47,7 @@ func LabelUpdateLang(data model.Language) error {
 // LabelCategoryList 获取分类标签列表
 func LabelCategoryList() (category []model.Category, err error) {
 	db := global.DB.Model(&model.Category{})
-	err = db.Order("weight").Find(&category).Error
+	err = db.Order("weight desc,created_at desc").Find(&category).Error
 	return
 }
 
@@ -85,7 +85,7 @@ func LabelUpdateCategory(data model.Category) error {
 // LabelThemeList 获取分类标签列表
 func LabelThemeList() (theme []model.Theme, err error) {
 	db := global.DB.Model(&model.Theme{})
-	err = db.Order("weight").Find(&theme).Error
+	err = db.Order("weight desc,created_at desc").Find(&theme).Error
 	return
 }
 

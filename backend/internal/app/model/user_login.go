@@ -16,7 +16,3 @@ type UserLogin struct {
 	Agent         string `json:"agent" form:"agent" gorm:"column:agent;comment:代理"`                            // 代理
 	ErrorMessage  string `json:"error_message" form:"error_message" gorm:"column:error_message;comment:错误信息"`  // 错误信息
 }
-
-func (UserLogin) TableName() string {
-	return "admin_user_login"
-}

@@ -11,7 +11,7 @@ import (
 
 // InitCommonDB 通用数据库
 func InitCommonDB() {
-	db := GormPgSql("")
+	db := GormPgSql("admin")
 	if db != nil {
 		global.DB = db
 		RegisterTables(db) // 初始化表
@@ -32,6 +32,7 @@ func RegisterTables(db *gorm.DB) {
 		model.DocType{},
 		model.Language{},
 		model.Theme{},
+		model.Quest{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))

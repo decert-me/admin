@@ -19,7 +19,3 @@ type User struct {
 	AuthoritySourceIds []uint    `json:"authoritySourceIds" gorm:"-"`               // 用户资源ID
 	Authority          Authority `json:"authority" gorm:"foreignKey:AuthorityId;references:AuthorityId;comment:用户角色"`
 }
-
-func (User) TableName() string {
-	return "admin_user"
-}
