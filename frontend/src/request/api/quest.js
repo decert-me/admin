@@ -49,4 +49,13 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 更新挑战
+    export const updateQuest = (data) => {
+        return serviceAxios({
+            url: `/quest/update`,
+            method: "post",
+            data
+        })
+    }
     

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "./index.scss";
 import { deleteQuest, getQuestList, topQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
+import { useNavigate } from "react-router-dom";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
 const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
@@ -11,6 +12,7 @@ const opensea = isTest ? "https://opensea.io/assets/matic/0xc8E9cd4921E54c416387
 export default function ChallengeListPage(params) {
 
     const { formatTimestamp } = format();
+    const navigateTo = useNavigate();
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);     //  多选框: 选中的挑战
     const [topLoad, setTopLoad] = useState(false);    //  置顶等待
@@ -108,7 +110,7 @@ export default function ChallengeListPage(params) {
                 <Button 
                   type="link" 
                   className="p0"
-                //   onClick={() => navigateTo(`/dashboard/tutorials/modify/${tutorial.ID}`)}
+                  onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
                 >编辑</Button>
                 <Popconfirm
                   title="移除挑战"

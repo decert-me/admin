@@ -10,7 +10,7 @@ import AuthGuard from './components/AuthGuard';
 import HomePage from './views/Home';
 import { TutorialsAddPage, TutorialsBuildLogPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 import { TagsAddPage, TagsModifyPage, TagsPage } from './views/Tags';
-import { ChallengeListPage } from './views/Challenge';
+import { ChallengeListPage, ChallengeModifyPage } from './views/Challenge';
 
 function App() {
   return (
@@ -81,6 +81,10 @@ function App() {
         <Route 
           path="challenge" 
           element={<ChallengeListPage />} 
+        />
+        <Route 
+          path="challenge/modify/:id/:tokenId" 
+          element={<ChallengeModifyPage />} 
         />
 
       </Route>
