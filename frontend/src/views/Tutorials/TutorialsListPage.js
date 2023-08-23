@@ -5,7 +5,7 @@ import {
     VideoCameraOutlined,
     ReadOutlined
   } from '@ant-design/icons';
-import { deleteTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
+import { buildTutorial, deleteTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
@@ -13,12 +13,15 @@ export default function TutorialsListPage(params) {
     const navigateTo = useNavigate();
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);   //  列表所选item
     const [topLoad, setTopLoad] = useState(false);    //  置顶等待
+    let [loading, setLoading] = useState(false);    //  打包loading
     let [tags, setTags] = useState([]);
     let [lang, setLang] = useState([]);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
     });
+    const [selectKey, setSelectKey] = useState('');
+    const isSelect = (record) => record.key === selectKey;
 
     // 教程上下架
     const handleChangeStatus = ({id, checked}, key) => {
@@ -32,6 +35,35 @@ export default function TutorialsListPage(params) {
         }
       })
     };
+
+    // 打包
+    async function build(id, key) {
+      setSelectKey(key);
+      setLoading(true);
+      await buildTutorial({id})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+        }
+      })
+      setLoading(false);
+      getList()
+    }
+
+    function goBuild(tutorial) {
+      const selet = isSelect(tutorial);
+      return (
+        <Button 
+          type="link" 
+          className="p0" 
+          loading={selet && loading} 
+          disabled={selectKey !== tutorial.key && loading}
+          onClick={() => build(tutorial.ID, tutorial.key)}
+        >
+          打包
+        </Button>
+      )
+    }
 
     // 教程置顶
     function toTop(status) {
@@ -143,7 +175,7 @@ export default function TutorialsListPage(params) {
           render: (_, tutorial) => (
             <Space size="middle">
               <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>编辑</Link>
-              <Button type="link" className="p0">打包</Button>
+              {goBuild(tutorial)}
               <Button type="link" className="p0">日志</Button>
               <Popconfirm
                 title="删除教程"
