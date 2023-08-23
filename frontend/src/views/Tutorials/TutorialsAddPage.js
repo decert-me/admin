@@ -195,6 +195,12 @@ export default function TutorialsAddPage(params) {
                 onFinish={onFinish}
                 autoComplete="off"
                 form={form}
+                fields={[
+                    {
+                        name: ["url"],
+                        value: " "
+                    }
+                ]}
             >
 
                 <Form.Item
