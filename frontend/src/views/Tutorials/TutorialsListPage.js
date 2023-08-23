@@ -1,12 +1,14 @@
-import { Button, Modal, Popconfirm, Space, Switch, Table, Tag, message } from "antd";
+import { Button, Modal, Popconfirm, Space, Spin, Switch, Table, Tag, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
     VideoCameraOutlined,
-    ReadOutlined
+    ReadOutlined,
+    LoadingOutlined
   } from '@ant-design/icons';
-import { buildTutorial, deleteTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
+import { buildTutorial, deleteTutorial, getTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
+import Polling from "../../components/Polling";
 
 export default function TutorialsListPage(params) {
     
@@ -60,7 +62,7 @@ export default function TutorialsListPage(params) {
           type="link" 
           className="p0" 
           loading={selet && loading} 
-          disabled={selectKey !== tutorial.key && loading}
+          disabled={(selectKey !== tutorial.key && loading) || tutorial.pack_status == 1}
           onClick={() => build(tutorial.ID, tutorial.key)}
         >
           打包
@@ -78,6 +80,17 @@ export default function TutorialsListPage(params) {
     const handleCancel = () => {
       setIsModalOpen(false);
     };
+
+    // 轮询获取
+    function pollingFunc(id) {
+        getTutorial({id})
+        .then(res => {
+          if (res.code === 0 && res.data.pack_status !== 1) {
+            // 更新当前页
+            getList()
+          }
+        })
+    }
 
     // 教程置顶
     function toTop(status) {
@@ -130,6 +143,13 @@ export default function TutorialsListPage(params) {
           key: 'status',
           dataIndex: 'status',
           render: (status, tutorial) => (
+            tutorial.pack_status == 1 ? 
+            <Polling 
+              pollingFunc={
+                () => pollingFunc(Number(tutorial.ID))
+              }
+            />
+            :
               <Switch 
                 checkedChildren="已上架" 
                 unCheckedChildren="待上架" 
@@ -188,12 +208,18 @@ export default function TutorialsListPage(params) {
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>编辑</Link>
+              <Button 
+                type="link" 
+                className="p0"
+                onClick={() => navigateTo(`/dashboard/tutorials/modify/${tutorial.ID}`)}
+                disabled={tutorial.pack_status == 1}
+              >编辑</Button>
               {goBuild(tutorial)}
               <Button 
                 type="link" 
                 className="p0"
                 onClick={() => showModal(tutorial.pack_log)}
+                disabled={tutorial.pack_status == 1}
               >日志</Button>
               <Popconfirm
                 title="删除教程"
@@ -201,8 +227,13 @@ export default function TutorialsListPage(params) {
                 onConfirm={() => deleteT(tutorial.ID)}
                 okText="确定"
                 cancelText="取消"
+                disabled={tutorial.pack_status == 1}
               >
-                <a>删除</a>
+                <Button 
+                type="link" 
+                className="p0"
+                disabled={tutorial.pack_status == 1}
+              >删除</Button>
               </Popconfirm>
             </Space>
           ),
