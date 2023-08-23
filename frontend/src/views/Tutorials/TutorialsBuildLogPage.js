@@ -14,7 +14,7 @@ export default function TutorialsBuildLogPage(params) {
     let [tutorial, setTutorial] = useState();
     let [log, setLog] = useState();
     let [pageConfig, setPageConfig] = useState({
-        page: 0, total: 0, pageSize: 10
+        page: 1, total: 0, pageSize: 10
     });
 
     const columns = [
@@ -71,9 +71,11 @@ export default function TutorialsBuildLogPage(params) {
         }
     ];
 
-    function getLog() {
-        pageConfig.page += 1;
-        setPageConfig({...pageConfig});
+    function getLog(num) {
+        if (num) {                
+            pageConfig.page = num;
+            setPageConfig({...pageConfig});
+        }
         const { page, pageSize } = pageConfig;
         //  获取日志
         getPackLog({id: Number(id), page, pageSize})
@@ -119,7 +121,12 @@ export default function TutorialsBuildLogPage(params) {
             <Table 
                 columns={columns} 
                 dataSource={log}
-                pagination={{current: pageConfig.page, total: pageConfig.total, pageSize: pageConfig.pageSize}} 
+                pagination={{
+                    current: pageConfig.page, 
+                    total: pageConfig.total, 
+                    pageSize: pageConfig.pageSize, 
+                    onChange: (page) => getLog(page)
+                }} 
             />
         </div>
     )

@@ -1,22 +1,109 @@
-import { Button, Popconfirm, Space, Switch, Table, Tag, message } from "antd";
+import { Button, Modal, Popconfirm, Space, Switch, Table, Tag, message } from "antd";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
     VideoCameraOutlined,
     ReadOutlined
   } from '@ant-design/icons';
-import { deleteTutorial, getTutorialList, updateTutorialStatus } from "../../request/api/tutorial";
+import { buildTutorial, deleteTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
 
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);   //  列表所选item
+    const [topLoad, setTopLoad] = useState(false);    //  置顶等待
+    let [loading, setLoading] = useState(false);    //  打包loading
     let [tags, setTags] = useState([]);
     let [lang, setLang] = useState([]);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
       page: 0, pageSize: 10, total: 0
     });
+    let [log, setLog] = useState();
+    const [selectKey, setSelectKey] = useState('');
+    const isSelect = (record) => record.key === selectKey;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+    // 教程上下架
+    const handleChangeStatus = ({id, checked}, key) => {
+      const index = data.findIndex((item) => item.key === key);
+      updateTutorialStatus({id, status: checked ? 2 : 1})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+          data[index].status = checked ? 2 : 1;
+          setData([...data]);
+        }
+      })
+    };
+
+    // 打包
+    async function build(id, key) {
+      setSelectKey(key);
+      setLoading(true);
+      await buildTutorial({id})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+        }
+      })
+      setLoading(false);
+      getList()
+    }
+
+    function goBuild(tutorial) {
+      const selet = isSelect(tutorial);
+      return (
+        <Button 
+          type="link" 
+          className="p0" 
+          loading={selet && loading} 
+          disabled={selectKey !== tutorial.key && loading}
+          onClick={() => build(tutorial.ID, tutorial.key)}
+        >
+          打包
+        </Button>
+      )
+    }
+
+    // 日志
+    const showModal = (logs) => {
+      log = logs;
+      setLog(log);
+      setIsModalOpen(true);
+    };
+
+    const handleCancel = () => {
+      setIsModalOpen(false);
+    };
+
+    // 教程置顶
+    function toTop(status) {
+      setTopLoad(true);
+      const statusArr = Array(selectedRowKeys.length).fill(status);
+      topTutorial({id: selectedRowKeys, top: statusArr})
+      .then(res => {
+        setTopLoad(false);
+        if (res.code === 0) {
+          message.success(res.msg);
+          setSelectedRowKeys([...[]]);
+          getList()
+        }
+      })
+    }
+
+    const hasSelected = selectedRowKeys.length > 0;
+
+    const onSelectChange = (newSelectedRowKeys) => {
+      setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection = {
+      selectedRowKeys,
+      onChange: onSelectChange,
+    };
 
     const columns = [
         {
@@ -31,8 +118,11 @@ export default function TutorialsListPage(params) {
           title: '标题',
           dataIndex: 'label',
           key: 'label',
-          render: (text) => (
-            <p className="tabel-item-title newline-omitted">{text}</p>
+          render: (text, tutorial) => (
+            tutorial.status == 2 ?
+            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
+            :
+            <p className="tabel-item-title newline-omitted">{tutorial.top ? "【置顶】" : ""}{text}</p>
           )
         },
         {
@@ -43,8 +133,8 @@ export default function TutorialsListPage(params) {
               <Switch 
                 checkedChildren="已上架" 
                 unCheckedChildren="待上架" 
-                defaultChecked={status == 2 ? true : false} 
-                onChange={(checked) => changeStatus(checked, tutorial.ID)}
+                checked={status == 2 ? true : false}
+                onChange={(checked) => handleChangeStatus({checked: checked, id: tutorial.ID}, tutorial.key)}
               />
           )
         },
@@ -86,11 +176,25 @@ export default function TutorialsListPage(params) {
             )
         },
         {
+            title: '创建时间',
+            key: 'CreatedAt',
+            dataIndex: 'CreatedAt',
+            render: (CreatedAt) => (
+              <p>{CreatedAt.replace("T", " ").split(".")[0]}</p>
+            )
+        },
+        {
           title: 'Action',
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
-              <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>修改</Link>
+              <Link to={`/dashboard/tutorials/modify/${tutorial.ID}`}>编辑</Link>
+              {goBuild(tutorial)}
+              <Button 
+                type="link" 
+                className="p0"
+                onClick={() => showModal(tutorial.pack_log)}
+              >日志</Button>
               <Popconfirm
                 title="删除教程"
                 description="确定要删除这篇教程吗?"
@@ -105,15 +209,6 @@ export default function TutorialsListPage(params) {
         },
     ];
 
-    function changeStatus(checked, id) {
-      updateTutorialStatus({id, status: checked ? 2 : 1})
-      .then(res => {
-        if (res.code === 0) {
-          message.success(res.msg);
-        }
-      })
-    }
-
     async function deleteT(id) {
       await deleteTutorial({id})
       .then(res => {
@@ -127,7 +222,11 @@ export default function TutorialsListPage(params) {
       getList()
     }
 
-    function getList() {
+    function getList(page) {
+      if (page) {
+        pageConfig.page = page;
+        setPageConfig({...pageConfig});
+      }
       // 获取教程列表
       getTutorialList(pageConfig)
       .then(res => {
@@ -179,12 +278,42 @@ export default function TutorialsListPage(params) {
         <div className="tutorials tutorials-list">
           <div className="tabel-title">
             <h2>教程列表</h2>
-            <Button 
-              type="primary"
-              onClick={() => navigateTo("/dashboard/tutorials/add")}
-            >创建教程</Button>
+            <Space size="large">
+              <Button 
+                onClick={() => toTop(true)}
+                disabled={!hasSelected} 
+                loading={topLoad}
+              >
+                置顶
+              </Button>
+              <Button 
+                onClick={() => toTop(false)}
+                disabled={!hasSelected} 
+                loading={topLoad}
+              >
+                取消置顶
+              </Button>
+              <Button 
+                type="primary"
+                onClick={() => navigateTo("/dashboard/tutorials/add")}
+              >创建教程</Button>
+            </Space>
           </div>
-            <Table columns={columns} dataSource={data} pagination={{current: pageConfig.page, total: pageConfig.total, pageSize: pageConfig.pageSize}} />
+
+            <Table 
+              rowSelection={rowSelection}
+              columns={columns} 
+              dataSource={data} 
+              pagination={{
+                current: pageConfig.page, 
+                total: pageConfig.total, 
+                pageSize: pageConfig.pageSize, 
+                onChange: (page) => getList(page)
+              }} 
+            />
+            <Modal width={800} open={isModalOpen} onCancel={handleCancel} footer={null}>
+              <p dangerouslySetInnerHTML={{__html: log}}></p>
+            </Modal>
         </div>
     )
 }

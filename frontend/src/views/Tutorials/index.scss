@@ -1,14 +1,36 @@
 
 .tutorials{
+    .p0{
+        padding: 0;
+    }
+    .underline{
+        text-decoration: underline;
+        color: #000;
+        &:hover{
+            color: #1677ff;
+        }
+    }
     .tabel-title{
         margin-bottom: 16px;
-        padding-right: 110px;
+        padding-right: 50px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         h2{
             font-size: 16px;
             font-weight: 500;
+        }
+    }
+    .bte{
+        width: 100%;
+        margin-bottom: 10px;
+        .ant-space-item{
+            &:nth-child(1){
+                width: 30%;
+            }
+            &:nth-child(2){
+                width: 70%;
+            }
         }
     }
     .flex{
@@ -81,6 +103,9 @@
         justify-content: center;
         cursor: pointer;
         transition: background-color 0.2s;
+    }
+    .box-disabled{
+        pointer-events: none;
     }
     .active-box, .box:hover{
         color: #fff;

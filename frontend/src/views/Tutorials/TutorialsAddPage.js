@@ -14,6 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getLabelList } from '../../request/api/tags';
 import { getYouTubePlayList } from '../../request/api/public';
 import { useUpdateEffect } from 'ahooks';
+import { getQuest } from "../../request/api/quest";
 const { TextArea } = Input;
 
 
@@ -41,12 +42,11 @@ export default function TutorialsAddPage(params) {
         setParseLoading(true);
         getYouTubePlayList({link})
         .then(res => {
+            setParseLoading(false)
             if (res.code === 0) {
                 message.success(res.msg);
                 videoList = res.data;
                 updateVideoList([...videoList]);
-            }else{
-                setParseLoading(false)
             }
         })
         .catch(err => {
@@ -65,14 +65,31 @@ export default function TutorialsAddPage(params) {
         updateVideoList(items);
     }
 
-    const onFinish = (values) => {
+    const onFinish = async(values) => {
         setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, 
-            challenge, branch, docPath, commitHash, url, videoCategory,
+            challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime
         } = values;
         const img = values.img.file.response.data.hash;
+
+        let flag = true;
+        if (challenge) {
+            await getQuest({id: Number(challenge)})
+            .then(res => {
+                if (res.status !== 0) {
+                    flag = false;
+                    return;
+                }
+            })
+        }
+        if (!flag) {
+            // 终止
+            message.error("请输入正确的挑战编号!")
+            setLoading(false);
+            return
+        }
 
         if (doctype === "doc") {
             const obj = {
@@ -85,9 +102,13 @@ export default function TutorialsAddPage(params) {
             const obj = {
                 url, label, catalogueName, img, desc, 
                 challenge, videoCategory,
-                category, language, difficulty, estimateTime
+                category, language, difficulty, estimateTime, docType: "video"
             }
-            create({...obj, docType: "video", video: videoList})
+            if (videoCategory === "bilibili") {
+                create({...obj, video: videoItems})
+            }else{
+                create({...obj, video: videoList})
+            }
         }
     };
 
@@ -154,6 +175,13 @@ export default function TutorialsAddPage(params) {
         }
     },[videoUrl])
 
+    useUpdateEffect(() => {
+        if (videoCategory === "bilibili") {
+            videoList = [];
+            updateVideoList([...videoList]);
+        }
+    },[videoCategory])
+
     return (
         <div className="tutorials-add tutorials">
             <Link to={`/dashboard/tutorials/list`}>
@@ -167,6 +195,12 @@ export default function TutorialsAddPage(params) {
                 onFinish={onFinish}
                 autoComplete="off"
                 form={form}
+                fields={[
+                    {
+                        name: ["url"],
+                        value: " "
+                    }
+                ]}
             >
 
                 <Form.Item
@@ -228,29 +262,30 @@ export default function TutorialsAddPage(params) {
                         </div>
                     </div>
                 </Form.Item>
+                <Form.Item
+                    label="视频地址"
+                    name="url"
+                    rules={[{
+                        required: true,
+                        message: '请输入视频地址!',
+                    }]}
+                    hidden={doctype !== "video"}
+                >
+                    <Space.Compact
+                        style={{
+                            width: '100%',
+                        }}
+                    >
+                    <Input />
+                    {
+                        videoCategory === "youtube" &&
+                        <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading} >解析</Button>
+                    }
+                    </Space.Compact>
+                </Form.Item>
                 {
                     doctype === "video" ?
                     <>
-                        <Form.Item
-                            label="视频地址"
-                            name="url"
-                            rules={[{
-                                required: true,
-                                message: '请输入视频地址!',
-                            }]}
-                        >
-                            <Space.Compact
-                                style={{
-                                    width: '100%',
-                                }}
-                            >
-                            <Input />
-                            {
-                                videoCategory === "youtube" &&
-                                <Button type="primary" onClick={() => parseVideoList()} loading={parseLoading} >解析</Button>
-                            }
-                            </Space.Compact>
-                        </Form.Item>
                         {
                             videoList.length !== 0 &&
                             <Form.Item label="视频排序">
@@ -292,8 +327,8 @@ export default function TutorialsAddPage(params) {
                             <Select
                                 placeholder="请选择视频类型!"
                                 options={[
-                                    {label: "youtube", value: "youtube"},
-                                    {label: "bilibili", value: "bilibili"}
+                                    {label: "YouTube", value: "youtube"},
+                                    {label: "Bilibili", value: "bilibili"}
                                 ]}
                             />
                         </Form.Item>
@@ -302,42 +337,52 @@ export default function TutorialsAddPage(params) {
                             <Form.Item
                                 label="视频列表"
                             >
-                                <Form.List
-                                    name="videoItems"
-                                >
+                                <Form.List name="videoItems" >
                                     {(fields, { add, remove }, { errors }) => (
                                     <>
                                         {fields.map((field, index) => (
-                                        <Form.Item
-                                            required={false}
-                                            key={field.key}
+                                        <Space
+                                            key={index}
+                                            align="baseline"
+                                            className="bte"
                                         >
+                                            
                                             <Form.Item
-                                            {...field}
-                                            validateTrigger={['onChange', 'onBlur']}
-                                            rules={[
-                                                {
-                                                required: true,
-                                                whitespace: true,
-                                                message: "请输入视频链接或删除该输入框！",
-                                                },
-                                            ]}
-                                            noStyle
+                                                {...field}
+                                                validateTrigger={['onChange', 'onBlur']}
+                                                name={[field.name, 'label']}
+                                                rules={[
+                                                    {
+                                                    required: true,
+                                                    whitespace: true,
+                                                    message: "请输入视频标题！",
+                                                    },
+                                                ]}
+                                                noStyle
                                             >
-                                            <Input
-                                                placeholder="bilibili的嵌入代码"
-                                                style={{
-                                                width: '90%',
-                                                }}
-                                            />
+                                                <Input placeholder="视频标题"/>
                                             </Form.Item>
-                                            {fields.length > 1 ? (
+                                            <Form.Item
+                                                {...field}
+                                                name={[field.name, 'code']}
+                                                validateTrigger={['onChange', 'onBlur']}
+                                                rules={[
+                                                    {
+                                                    required: true,
+                                                    whitespace: true,
+                                                    message: "请输入视频链接或删除该输入框！",
+                                                    },
+                                                ]}
+                                                noStyle
+                                            >
+                                                <Input placeholder="bilibili的嵌入代码" />
+                                            </Form.Item>
                                             <MinusCircleOutlined
                                                 className="dynamic-delete-button"
                                                 onClick={() => remove(field.name)}
                                             />
-                                            ) : null}
-                                        </Form.Item>
+                                        </Space>
+
                                         ))}
                                         <Form.Item>
                                         <Button
@@ -381,8 +426,8 @@ export default function TutorialsAddPage(params) {
                                     <Select
                                         placeholder="教程类型"
                                         options={[
-                                            {label: "docusaurus", value: "docusaurus"},
-                                            {label: "gitbook", value: "gitbook"},
+                                            {label: "Docusaurus", value: "docusaurus"},
+                                            {label: "GitBook", value: "gitbook"},
                                             {label: "mdBook", value: "mdBook"},
                                         ]}
                                         style={{
@@ -425,7 +470,7 @@ export default function TutorialsAddPage(params) {
                 </Form.Item>
 
                 <Form.Item
-                    label="类别"
+                    label="分类"
                     name="category"
                 >
                     <Select
@@ -438,6 +483,10 @@ export default function TutorialsAddPage(params) {
                 <Form.Item
                     label="语种"
                     name="language"
+                    rules={[{
+                        required: true,
+                        message: '请输入语种!',
+                    }]}
                 >
                     <Select
                         placeholder="请至少选择一项语种"
@@ -460,7 +509,7 @@ export default function TutorialsAddPage(params) {
                         placeholder="请选择难度"
                         options={[
                             {label: "困难", value: 2},
-                            {label: "一般", value: 1},
+                            {label: "中等", value: 1},
                             {label: "简单", value: 0}
                         ]}
                     />

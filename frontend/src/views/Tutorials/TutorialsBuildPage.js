@@ -10,7 +10,7 @@ export default function TutorialsBuildPage(params) {
     let [loading, setLoading] = useState(false);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
-      page: 0, pageSize: 10, total: 0
+      page: 1, total: 0, pageSize: 10
     });
 
     const columns = [
@@ -62,7 +62,7 @@ export default function TutorialsBuildPage(params) {
             dataIndex: 'commitHash',
             key: 'commitHash',
             render: (commitHash) => (
-                <p>{commitHash}</p>
+                <p style={{textAlign: "center"}}>{commitHash ? commitHash.substring(0,7) : ""}</p>
             )
         },
         {
@@ -110,9 +110,11 @@ export default function TutorialsBuildPage(params) {
       setLoading(false);
     }
 
-    function init() {
-      pageConfig.page += 1;
-      setPageConfig({...pageConfig});
+    function init(page) {
+      if (page) {        
+        pageConfig.page = page;
+        setPageConfig({...pageConfig});
+      }
       getPackList(pageConfig)
       .then(res => {
         if (res.code === 0) {
@@ -143,7 +145,16 @@ export default function TutorialsBuildPage(params) {
             <div className="tabel-title">
                 <h2>打包管理</h2>
             </div>
-            <Table columns={columns} dataSource={data} />
+            <Table 
+              columns={columns}
+              dataSource={data} 
+              pagination={{
+                current: pageConfig.page, 
+                total: pageConfig.total, 
+                pageSize: pageConfig.pageSize, 
+                onChange: (page) => init(page)
+              }} 
+            />
         </div>
     )
 }
