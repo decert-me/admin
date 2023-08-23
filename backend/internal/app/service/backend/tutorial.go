@@ -5,6 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"errors"
+	"gorm.io/gorm"
 )
 
 func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{}, total int64, err error) {
@@ -43,6 +44,12 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 
 func CreateTutorial(tutorial model.Tutorial) (res model.Tutorial, err error) {
 	err = global.DB.Create(&tutorial).Error
+	if err != nil {
+		if err == gorm.ErrDuplicatedKey {
+			return res, errors.New("目录名重复")
+		}
+		return res, err
+	}
 	// 打包
 	go Pack(request.PackRequest{ID: tutorial.ID})
 	return tutorial, err
@@ -72,6 +79,12 @@ func UpdateTutorialStatus(id uint, status uint8) (err error) {
 	raw := global.DB.Model(&model.Tutorial{}).Where("id = ? AND pack_status=2", id).Update("status", status)
 	if raw.RowsAffected == 0 {
 		return errors.New("上架失败，请查看打包状态")
+	}
+	if raw.Error != nil {
+		if raw.Error == gorm.ErrDuplicatedKey {
+			return errors.New("目录名重复")
+		}
+		return raw.Error
 	}
 	return raw.Error
 }
