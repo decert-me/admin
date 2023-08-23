@@ -5,6 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"errors"
+	"gorm.io/gorm"
 )
 
 func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{}, total int64, err error) {
@@ -37,12 +38,18 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Order("id desc").Find(&tutorialList).Error
+	err = db.Limit(limit).Offset(offset).Order("top desc,id desc").Find(&tutorialList).Error
 	return tutorialList, total, err
 }
 
 func CreateTutorial(tutorial model.Tutorial) (res model.Tutorial, err error) {
 	err = global.DB.Create(&tutorial).Error
+	if err != nil {
+		if err == gorm.ErrDuplicatedKey {
+			return res, errors.New("目录名重复")
+		}
+		return res, err
+	}
 	// 打包
 	go Pack(request.PackRequest{ID: tutorial.ID})
 	return tutorial, err
@@ -60,13 +67,11 @@ func DeleteTutorial(req request.DelTutorialRequest) (err error) {
 }
 
 func UpdateTutorial(tutorial model.Tutorial) (err error) {
-	// 禁止修改 CatalogueName
-	tutorial.CatalogueName = ""
 	raw := global.DB.Where("id = ?", tutorial.ID).Updates(&tutorial)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
 	}
-	go Pack(request.PackRequest{ID: tutorial.ID})
+	Pack(request.PackRequest{ID: tutorial.ID})
 	return raw.Error
 }
 
@@ -75,5 +80,22 @@ func UpdateTutorialStatus(id uint, status uint8) (err error) {
 	if raw.RowsAffected == 0 {
 		return errors.New("上架失败，请查看打包状态")
 	}
+	if raw.Error != nil {
+		if raw.Error == gorm.ErrDuplicatedKey {
+			return errors.New("目录名重复")
+		}
+		return raw.Error
+	}
 	return raw.Error
+}
+
+func TopTutorial(req request.TopTutorialRequest) (err error) {
+	for i := 0; i < len(req.ID); i++ {
+		err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID[i]).Update("top", req.Top[i]).Error
+		if err != nil {
+			return
+		}
+	}
+
+	return nil
 }

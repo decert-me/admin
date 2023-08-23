@@ -18,3 +18,8 @@ type GetTutorialListStatusRequest struct {
 	PageInfo
 	model.Tutorial
 }
+
+type TopTutorialRequest struct {
+	ID  []uint  `json:"id"`
+	Top []*bool `json:"top"`
+}

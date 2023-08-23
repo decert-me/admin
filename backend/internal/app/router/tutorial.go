@@ -18,6 +18,6 @@ func InitTutorialRouter(Router *gin.RouterGroup) {
 		routersWithAuth.POST("deleteTutorial", api.DeleteTutorial)             // 删除教程
 		routersWithAuth.POST("updateTutorial", api.UpdateTutorial)             // 更新教程
 		routersWithAuth.POST("updateTutorialStatus", api.UpdateTutorialStatus) // 更新教程上架状态
-
+		routersWithAuth.POST("topTutorial", api.TopTutorial)                   // 置顶教程
 	}
 }

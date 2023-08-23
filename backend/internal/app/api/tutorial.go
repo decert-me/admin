@@ -17,7 +17,7 @@ func CreateTutorial(c *gin.Context) {
 	_ = c.ShouldBindJSON(&tutorial)
 	if tutorialBack, err := backend.CreateTutorial(tutorial); err != nil {
 		global.LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败"+err.Error(), c)
+		response.FailWithMessage("创建失败："+err.Error(), c)
 	} else {
 		response.OkWithDetailed(tutorialBack, "创建成功", c)
 	}
@@ -29,7 +29,7 @@ func UpdateTutorial(c *gin.Context) {
 	_ = c.ShouldBindJSON(&tutorial)
 	if err := backend.UpdateTutorial(tutorial); err != nil {
 		global.LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败"+err.Error(), c)
+		response.FailWithMessage("更新失败："+err.Error(), c)
 	} else {
 		response.OkWithMessage("更新成功", c)
 	}
@@ -90,8 +90,20 @@ func DeleteTutorial(c *gin.Context) {
 	_ = c.ShouldBindJSON(&req)
 	if err := backend.DeleteTutorial(req); err != nil {
 		global.LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败"+err.Error(), c)
+		response.FailWithMessage("删除失败："+err.Error(), c)
 	} else {
 		response.OkWithMessage("删除成功", c)
+	}
+}
+
+// TopTutorial 置顶教程
+func TopTutorial(c *gin.Context) {
+	var req request.TopTutorialRequest
+	_ = c.ShouldBindJSON(&req)
+	if err := backend.TopTutorial(req); err != nil {
+		global.LOG.Error("操作失败!", zap.Error(err))
+		response.FailWithMessage("操作失败："+err.Error(), c)
+	} else {
+		response.OkWithMessage("操作成功", c)
 	}
 }
