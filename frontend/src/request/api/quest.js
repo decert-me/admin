@@ -40,3 +40,13 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 删除挑战
+    export const deleteQuest = (data) => {
+        return serviceAxios({
+            url: `/quest/delete`,
+            method: "post",
+            data
+        })
+    }
+    

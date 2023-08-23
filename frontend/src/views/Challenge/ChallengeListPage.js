@@ -1,7 +1,7 @@
 import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import "./index.scss";
-import { getQuestList, topQuest, updateQuestStatus } from "../../request/api/quest";
+import { deleteQuest, getQuestList, topQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
@@ -33,10 +33,10 @@ export default function ChallengeListPage(params) {
           render: ({image}, quest) => (
             quest.claim_num !== 0 ?
             <a href={`${opensea}/${quest.tokenId}`} target="_blank">
-                <img src={image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "50px"}} />
+                <img src={image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "53px"}} />
             </a>
             :
-            <img src={image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "50px"}} />
+            <img src={image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "53px"}} />
           )
         },
         {
@@ -109,20 +109,17 @@ export default function ChallengeListPage(params) {
                   type="link" 
                   className="p0"
                 //   onClick={() => navigateTo(`/dashboard/tutorials/modify/${tutorial.ID}`)}
-                //   disabled={tutorial.pack_status == 1}
                 >编辑</Button>
                 <Popconfirm
                   title="移除挑战"
                   description="确定要移除该挑战吗?"
-                //   onConfirm={() => deleteT(tutorial.ID)}
+                  onConfirm={() => deleteT(Number(quest.id))}
                   okText="确定"
                   cancelText="取消"
-                //   disabled={tutorial.pack_status == 1}
                 >
                   <Button 
                   type="link" 
                   className="p0"
-                //   disabled={tutorial.pack_status == 1}
                 >删除</Button>
                 </Popconfirm>
               </Space>
@@ -141,7 +138,21 @@ export default function ChallengeListPage(params) {
           setData([...data]);
         }
       })
-    } 
+    }
+
+    // 删除教程
+    async function deleteT(id) {
+        await deleteQuest({id})
+        .then(res => {
+          if (res.code === 0) {
+              message.success(res.msg);
+          }
+        })
+        .catch(err => {
+            message.error(err);
+        })
+        getList()
+    }
     
     const onSelectChange = (newSelectedRowKeys) => {
         setSelectedRowKeys(newSelectedRowKeys);
