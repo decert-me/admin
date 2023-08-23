@@ -5,6 +5,8 @@ import { getQuestList, topQuest, updateQuestStatus } from "../../request/api/que
 import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
+const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
+const opensea = isTest ? "https://opensea.io/assets/matic/0xc8E9cd4921E54c4163870092Ca8d9660e967B53d" : "https://testnets.opensea.io/assets/mumbai/0x66C54CB10Ef3d038aaBA2Ac06d2c25B326be8142"
 
 export default function ChallengeListPage(params) {
 
@@ -22,7 +24,7 @@ export default function ChallengeListPage(params) {
           title: '挑战编号',
           dataIndex: 'tokenId',
           render: (tokenId) => (
-            <a className="underline" href={`${isTest ? "https://decert.me" : "http://192.168.1.10:8087"}/challenge/${tokenId}`} target="_blank">{tokenId}</a>
+            <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
           )
         },
         {
@@ -30,7 +32,7 @@ export default function ChallengeListPage(params) {
           dataIndex: 'metadata',
           render: ({image}, quest) => (
             quest.claim_num !== 0 ?
-            <a href={`${isTest ? "https://opensea.io/assets/matic/0xc8E9cd4921E54c4163870092Ca8d9660e967B53d" : "https://testnets.opensea.io/assets/mumbai/0x66C54CB10Ef3d038aaBA2Ac06d2c25B326be8142"}/${quest.tokenId}`} target="_blank">
+            <a href={`${opensea}/${quest.tokenId}`} target="_blank">
                 <img src={image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "50px"}} />
             </a>
             :
@@ -40,15 +42,15 @@ export default function ChallengeListPage(params) {
         {
           title: '标题',
           dataIndex: 'title',
-          render: (title) => (
-            <p>{title}</p>
+          render: (title, quest) => (
+            <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
           )
         },
         {
             title: '发布者',
             dataIndex: 'creator',
             render: (creator) => (
-              <p>{creator.substring(0,5) + "..." + creator.substring(38,42)}</p>
+                <a className="underline" href={`${host}/user/${creator}`} target="_blank">{creator.substring(0,5) + "..." + creator.substring(38,42)}</a>
             )
         },
         {
