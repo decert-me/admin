@@ -33,6 +33,6 @@ type Tutorial struct {
 	Difficulty    uint8          `json:"difficulty"`                                                // 难度
 	Status        uint8          `gorm:"column:status;default:1" json:"status,omitempty"`           // 状态 1 未上架 2 已上架
 	PackStatus    uint8          `gorm:"column:pack_status;default:1" json:"pack_status,omitempty"` // 状态 1 未打包 2 打包成功 3 打包失败
-	PackLog       string         `gorm:"column:pack_log;type:text" json:"pack_log,omitempty"`       // 打包日志
-	Top           *bool          `json:"top,omitempty"`                                             // 是否置顶
+	PackLog       string         `gorm:"column:pack_log;type:text" json:"pack_log"`                 // 打包日志
+	Top           *bool          `gorm:"column:top;default:false" json:"top"`                       // 是否置顶
 }

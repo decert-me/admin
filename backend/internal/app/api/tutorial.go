@@ -101,9 +101,9 @@ func TopTutorial(c *gin.Context) {
 	var req request.TopTutorialRequest
 	_ = c.ShouldBindJSON(&req)
 	if err := backend.TopTutorial(req); err != nil {
-		global.LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败"+err.Error(), c)
+		global.LOG.Error("操作失败!", zap.Error(err))
+		response.FailWithMessage("操作失败"+err.Error(), c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("操作成功", c)
 	}
 }

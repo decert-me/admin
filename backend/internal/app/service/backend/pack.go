@@ -14,6 +14,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"time"
 )
 
 var l sync.Mutex
@@ -103,7 +104,7 @@ func Pack(req request.PackRequest) error {
 	}
 	var packLog strings.Builder
 	for _, v := range stdoutErr {
-		packLog.WriteString(v + "\n")
+		packLog.WriteString(v + "<br />")
 	}
 	fmt.Println(stdoutRes)
 	fmt.Println(stdoutErr)
@@ -135,7 +136,11 @@ func Pack(req request.PackRequest) error {
 	}
 	if status == 2 {
 		packLog.Reset()
-		packLog.WriteString(" ")
+		packLog.WriteString("打包成功  <br />")
+		packLog.WriteString(fmt.Sprintf("打包时间：%s <br />", time.Now().Format("2006-01-02 15:04:05")))
+		if tutorial.CommitHash != nil && *tutorial.CommitHash != "" {
+			packLog.WriteString(fmt.Sprintf("版本：%s <br />", *tutorial.CommitHash))
+		}
 	}
 	if tutorial.PackStatus == 2 && status == 3 {
 		// 写入日志

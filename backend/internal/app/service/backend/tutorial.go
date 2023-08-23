@@ -37,7 +37,7 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Order("top,id desc").Find(&tutorialList).Error
+	err = db.Limit(limit).Offset(offset).Order("top desc,id desc").Find(&tutorialList).Error
 	return tutorialList, total, err
 }
 
@@ -78,7 +78,7 @@ func UpdateTutorialStatus(id uint, status uint8) (err error) {
 
 func TopTutorial(req request.TopTutorialRequest) (err error) {
 	for i := 0; i < len(req.ID); i++ {
-		err = global.DB.Begin().Model(&model.Tutorial{}).Where("id = ?", req.ID[i]).Update("top", req.Top[i]).Error
+		err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID[i]).Update("top", req.Top[i]).Error
 		if err != nil {
 			return
 		}
