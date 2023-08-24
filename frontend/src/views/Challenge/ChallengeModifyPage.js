@@ -41,7 +41,7 @@ export default function ChallengeModifyPage(params) {
                 setData({...data});
                 fields = [
                     {name: ["difficulty"], value: data.metadata.attributes.difficulty},
-                    {name: ["estimateTime"], value: data.quest_data.estimateTime}
+                    {name: ["estimateTime"], value: data.quest_data.estimateTime / 60}
                 ];
                 setFields([...fields]);
             }
