@@ -1,0 +1,29 @@
+.tabel-title{
+    margin-bottom: 16px;
+    padding-right: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h2{
+        font-size: 16px;
+        font-weight: 500;
+    }
+}
+.p0{
+    padding: 0;
+    button{
+        padding: 0;
+    }
+}
+.underline{
+    text-decoration: underline;
+    color: #000;
+    &:hover{
+        color: #1677ff;
+    }
+}
+
+// 置顶
+.toTop{
+    background-color: #FAFAFA;
+}
