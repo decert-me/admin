@@ -133,9 +133,9 @@ export default function TutorialsListPage(params) {
           key: 'label',
           render: (text, tutorial) => (
             tutorial.status == 2 ?
-            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{tutorial.top ? "【置顶】" : ""}{text}</a>
+            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("localhost") === -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{text}</a>
             :
-            <p className="tabel-item-title newline-omitted">{tutorial.top ? "【置顶】" : ""}{text}</p>
+            <p className="tabel-item-title newline-omitted">{text}</p>
           )
         },
         {
@@ -284,14 +284,14 @@ export default function TutorialsListPage(params) {
       pageConfig.page += 1;
       setPageConfig({...pageConfig});
       // 获取标签列表
-      getLabelList({type: "category"})
+      await getLabelList({type: "category"})
       .then(res => {
         if (res.code === 0) {
           tags = res.data ? res.data : [];
           setTags([...tags]);
         }
       })
-      getLabelList({type: "language"})
+      await getLabelList({type: "language"})
       .then(res => {
         if (res.code === 0) {
           lang = res.data ? res.data : [];
@@ -335,6 +335,7 @@ export default function TutorialsListPage(params) {
               rowSelection={rowSelection}
               columns={columns} 
               dataSource={data} 
+              rowClassName={(record) => record.top && "toTop"}
               pagination={{
                 current: pageConfig.page, 
                 total: pageConfig.total, 

@@ -243,6 +243,7 @@ export default function ChallengeListPage(params) {
                 rowSelection={rowSelection} 
                 columns={columns} 
                 dataSource={data} 
+                rowClassName={(record) => record.top && "toTop"}
                 pagination={{
                     current: pageConfig.page, 
                     total: pageConfig.total, 
