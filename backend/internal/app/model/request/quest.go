@@ -37,6 +37,10 @@ type TopQuestRequest struct {
 }
 
 type UpdateQuestStatusRequest struct {
-	ID     []uint `json:"id"`
-	Status uint8  `json:"status" binding:"required"`
+	ID     uint  `json:"id"`
+	Status uint8 `json:"status" binding:"required"`
+}
+
+type DeleteQuestRequest struct {
+	ID uint `json:"id"`
 }

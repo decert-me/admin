@@ -56,3 +56,14 @@ func UpdateQuest(c *gin.Context) {
 		response.OkWithMessage("更新成功", c)
 	}
 }
+
+// DeleteQuest 删除挑战
+func DeleteQuest(c *gin.Context) {
+	var r request.DeleteQuestRequest
+	_ = c.ShouldBindJSON(&r)
+	if err := backend.DeleteQuest(r); err != nil {
+		response.FailWithMessage("删除失败："+err.Error(), c)
+	} else {
+		response.OkWithMessage("删除成功", c)
+	}
+}

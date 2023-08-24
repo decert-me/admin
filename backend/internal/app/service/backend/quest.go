@@ -16,12 +16,13 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	offset := req.PageSize * (req.Page - 1)
 
 	db := global.DB.Model(&model.Quest{})
-
+	db.Where("disabled = false")
 	db.Where(&req.Quest)
 	err = db.Count(&total).Error
 	if err != nil {
 		return res, total, err
 	}
+	db.Order("top desc,token_id desc")
 	if req.OrderKey == "token_id" {
 		fmt.Println(req.OrderKey)
 		fmt.Println(req.Desc)
@@ -56,7 +57,7 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 // TopQuest 置顶挑战
 func TopQuest(req request.TopQuestRequest) error {
 	for i, id := range req.ID {
-		err := global.DB.Model(&model.Quest{}).Where("token_id = ?", id).Update("top", req.Top[i]).Error
+		err := global.DB.Model(&model.Quest{}).Where("id = ?", id).Update("top", req.Top[i]).Error
 		if err != nil {
 			return err
 		}
@@ -75,18 +76,12 @@ func UpdateQuestStatus(req request.UpdateQuestStatusRequest) error {
 
 // UpdateQuest 修改挑战
 func UpdateQuest(req request.UpdateQuestRequest) error {
-	// 若此挑战已经有人挑战过，不可编辑
-	var count int64
-	err := global.DB.Model(&model.UserChallenges{}).Where("token_id = ?", req.ID).Count(&count).Error
-	if err != nil {
-		return err
-	}
-	if count > 0 {
-		return errors.New("此挑战已经有人挑战过，不可编辑")
+	if req.Difficulty == nil && req.EstimateTime == nil {
+		return errors.New("参数错误")
 	}
 	data := map[string]interface{}{
-		"meta_data":  gorm.Expr(fmt.Sprintf("jsonb_set(data, '{attributes,difficulty}', '%d')", req.Difficulty)),
-		"quest_data": gorm.Expr(fmt.Sprintf("jsonb_set(data, '{estimateTime}', '%d')", req.EstimateTime)),
+		"meta_data":  gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', '%d')", *req.Difficulty)),
+		"quest_data": gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', '%d')", *req.EstimateTime)),
 	}
 	raw := global.DB.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
 	if raw.RowsAffected == 0 {
@@ -96,4 +91,13 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		return raw.Error
 	}
 	return nil
+}
+
+// DeleteQuest 删除挑战
+func DeleteQuest(req request.DeleteQuestRequest) error {
+	raw := global.DB.Model(&model.Quest{}).Where("id = ?", req.ID).Update("disabled", true)
+	if raw.RowsAffected == 0 {
+		return errors.New("删除失败")
+	}
+	return raw.Error
 }

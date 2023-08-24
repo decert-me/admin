@@ -13,5 +13,6 @@ func InitQuestRouter(Router *gin.RouterGroup) {
 		routersWithAuth.POST("topQuest", api.TopQuest)                   //  置顶教程
 		routersWithAuth.POST("updateQuestStatus", api.UpdateQuestStatus) // 更新教程上架状态
 		routersWithAuth.POST("update", api.UpdateQuest)                  // 更新教程
+		routersWithAuth.POST("delete", api.DeleteQuest)                  // 删除教程
 	}
 }
