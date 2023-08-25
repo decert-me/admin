@@ -21,7 +21,7 @@ export default function ChallengeModifyPage(params) {
             if (res.code === 0) {
                 message.success(res.msg);
                 setTimeout(() => {
-                    navigateTo("/dashboard/challenge");
+                    navigateTo("/dashboard/challenge/list");
                 }, 500);
             }else{
                 setLoading(false);
@@ -54,7 +54,7 @@ export default function ChallengeModifyPage(params) {
 
     return (
         <div className="challenge">
-            <Link to={`/dashboard/challenge`}>
+            <Link to={`/dashboard/challenge/list`}>
                 <ArrowLeftOutlined />
             </Link>
             <h2>编辑</h2>
