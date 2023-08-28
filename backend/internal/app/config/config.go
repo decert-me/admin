@@ -8,7 +8,6 @@ type Server struct {
 	Captcha Captcha `mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 	Pgsql   Pgsql   `mapstructure:"pgsql" json:"pgsql" yaml:"pgsql"`
 	JWT     JWT     `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
-	Local   Local   `mapstructure:"local" json:"local" yaml:"local"`
 	IPFS    []IPFS  `mapstructure:"ipfs" json:"ipfs" yaml:"ipfs"`
 	Pack    Pack    `mapstructure:"pack" json:"pack" yaml:"pack"`
 }

@@ -34,14 +34,10 @@ jwt:
   expires-time: 86400
   issuer: "backend"
 
-# local configuration
-local:
-  path: 'uploads/file'
-
 # casbin configuration
 casbin:
   model-path: "assets/rbac_model.conf"
 
 pack:
-  path: "/home/cdeer/code/decert-go/admin/tutorials"
-  publish-path: "/home/cdeer/code/decertme/tutorials/build"
+  path: "/home/cdeer/code/decert-go/admin/tutorials"         # tutorials 项目路径
+  publish-path: "/home/cdeer/code/decertme/tutorials/build"  # 打包后的路径
