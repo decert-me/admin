@@ -3,12 +3,14 @@ import { useNavigate } from "react-router-dom";
 import "./index.scss";
 import { useEffect, useState } from "react";
 import { getCollectionList } from "../../request/api/quest";
+import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
 const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
 
 export default function ChallengeCompilationPage(params) {
     
+    const { formatTimestamp } = format();
     const navigateTo = useNavigate();
     let [data, setData] = useState();
     let [pageConfig, setPageConfig] = useState({
@@ -85,12 +87,12 @@ export default function ChallengeCompilationPage(params) {
             )
         },
         {
-            title: '创建时间',
-            dataIndex: 'CreatedAt',
-            render: (CreatedAt) => (
-              <p>{CreatedAt.replace("T", " ").split(".")[0]}</p>
-            )
-        },
+          title: '创建时间',
+          dataIndex: 'addTs',
+          render: (addTs) => (
+            <p>{formatTimestamp(addTs * 1000)}</p>
+          )
+      },
         {
             title: '操作',
             key: 'action',
@@ -99,12 +101,12 @@ export default function ChallengeCompilationPage(params) {
                 <Button 
                   type="link" 
                   className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
+                  onClick={() => navigateTo(`/dashboard/challenge/compilation/modify/${quest.id}`)}
                 >编辑</Button>
                 <Button 
                   type="link" 
                   className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
+                  onClick={() => navigateTo(`/dashboard/challenge/compilation/sort/${quest.ID}`)}
                 >排序</Button>
                 <Popconfirm
                   title="移除合辑"
@@ -136,7 +138,7 @@ export default function ChallengeCompilationPage(params) {
           data = list ? list : [];
           // 添加key
           data.forEach(ele => {
-            ele.key = ele.ID
+            ele.key = ele.id
           })
           setData([...data]);
           pageConfig.total = res.data.total;
