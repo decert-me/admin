@@ -84,6 +84,10 @@ function App() {
           element={<ChallengeListPage />} 
         />
         <Route 
+          path="challenge/list/:id" 
+          element={<ChallengeListPage />} 
+        />
+        <Route 
           path="challenge/modify/:id/:tokenId" 
           element={<ChallengeModifyPage />} 
         />

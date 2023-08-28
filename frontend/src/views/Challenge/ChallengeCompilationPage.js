@@ -106,7 +106,7 @@ export default function ChallengeCompilationPage(params) {
                 <Button 
                   type="link" 
                   className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/compilation/sort/${quest.ID}`)}
+                  onClick={() => navigateTo(`/dashboard/challenge/list/${quest.id}`)}
                 >排序</Button>
                 <Popconfirm
                   title="移除合辑"

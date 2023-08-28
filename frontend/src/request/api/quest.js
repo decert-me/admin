@@ -38,6 +38,15 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 获取合辑内的挑战列表
+    export const getCollectionQuestList = (data) => {
+        return serviceAxios({
+            url: `/collection/collectionQuest`,
+            method: "post",
+            data
+        })
+    }
     
 // ============================ post ============================
 
@@ -95,10 +104,19 @@ import serviceAxios from "../index";
         })
     }
 
-    // 更新合辑
+    // 删除合辑
     export const deleteCollection = (data) => {
         return serviceAxios({
             url: `/collection/delete`,
+            method: "post",
+            data
+        })
+    }
+
+    // 修改挑战合辑内的排序
+    export const updateCollectionQuestSort = (data) => {
+        return serviceAxios({
+            url: `/collection/updateCollectionQuestSort`,
             method: "post",
             data
         })

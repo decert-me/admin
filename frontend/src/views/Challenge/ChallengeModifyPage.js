@@ -51,7 +51,7 @@ export default function ChallengeModifyPage(params) {
                 const arr = list ? list : [];
                 collection = [];
                 arr.forEach(e => {
-                    collection.push({ label: e.title, value: e.ID })
+                    collection.push({ label: e.title, value: e.id })
                 })
                 setCollection([...collection]);
             }
