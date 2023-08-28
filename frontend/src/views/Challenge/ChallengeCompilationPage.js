@@ -1,6 +1,8 @@
-import { Button, Popconfirm, Space, Switch, Table } from "antd";
+import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import "./index.scss";
+import { useEffect, useState } from "react";
+import { getCollectionList } from "../../request/api/quest";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
 const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
@@ -8,20 +10,24 @@ const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
 export default function ChallengeCompilationPage(params) {
     
     const navigateTo = useNavigate();
+    let [data, setData] = useState();
+    let [pageConfig, setPageConfig] = useState({
+      page: 0, pageSize: 10, total: 0
+    });
 
     const columns = [
         {
           title: 'ID',
-          dataIndex: 'id',
+          dataIndex: 'ID',
           render: (tokenId) => (
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
           )
         },
         {
           title: '合辑图片',
-          dataIndex: 'img',
-          render: ({image}) => (
-            <img src={image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "53px"}} />
+          dataIndex: 'cover',
+          render: (image) => (
+            <img src={"https://ipfs.decert.me/"+image} alt="" style={{height: "53px"}} />
           )
         },
         {
@@ -33,9 +39,9 @@ export default function ChallengeCompilationPage(params) {
         },
         {
             title: '作者',
-            dataIndex: 'creator',
-            render: (creator) => (
-                <a className="underline" href={`${host}/user/${creator}`} target="_blank">{creator.substring(0,5) + "..." + creator.substring(38,42)}</a>
+            dataIndex: 'author',
+            render: (author) => (
+              <p>{author}</p>
             )
         },
         {
@@ -51,6 +57,27 @@ export default function ChallengeCompilationPage(params) {
             )
         },
         {
+          title: '难度',
+          dataIndex: 'difficulty',
+          render: (difficulty) => (
+            <p>{difficulty === 0 ? "简单" : difficulty === 1 ? "一般" : difficulty === 2 ? "困难" : "/"}</p>
+          )
+        },
+        {
+          title: '时长',
+          dataIndex: 'time',
+          render: (time) => (
+            <p>{time}</p>
+          )
+        },
+        {
+          title: '挑战数量',
+          dataIndex: 'time',
+          render: (time) => (
+            <p>{time}</p>
+          )
+        },
+        {
             title: '挑战人次',
             dataIndex: 'challenge_num',
             render: (challenge_num) => (
@@ -59,14 +86,13 @@ export default function ChallengeCompilationPage(params) {
         },
         {
             title: '创建时间',
-            dataIndex: 'addTs',
-            render: (addTs) => (
-            //   <p>{formatTimestamp(addTs * 1000)}</p>
-                {addTs}
+            dataIndex: 'CreatedAt',
+            render: (CreatedAt) => (
+              <p>{CreatedAt.replace("T", " ").split(".")[0]}</p>
             )
         },
         {
-            title: 'Action',
+            title: '操作',
             key: 'action',
             render: (_, quest) => (
               <Space size="middle">
@@ -97,6 +123,40 @@ export default function ChallengeCompilationPage(params) {
         }
     ];
 
+    function getList(page) {
+      if (page) {
+        pageConfig.page = page;
+        setPageConfig({...pageConfig});
+      }
+      // 获取挑战合辑列表
+      getCollectionList(pageConfig)
+      .then(res => {
+        if (res.code === 0) {
+          const list = res.data.list;
+          data = list ? list : [];
+          // 添加key
+          data.forEach(ele => {
+            ele.key = ele.ID
+          })
+          setData([...data]);
+          pageConfig.total = res.data.total;
+          setPageConfig({...pageConfig});
+        }else{
+          message.success(res.msg);
+        }
+      })
+    }
+
+    function init(params) {
+      pageConfig.page += 1;
+      setPageConfig({...pageConfig});
+      getList()
+    }
+
+    useEffect(() => {
+      init();
+    },[])
+
     return (
         <div className="challenge">
             <div className="tabel-title">
@@ -110,7 +170,7 @@ export default function ChallengeCompilationPage(params) {
             </div>
             <Table
                 columns={columns} 
-                // dataSource={data} 
+                dataSource={data} 
                 // rowClassName={(record) => record.top && "toTop"}
                 // pagination={{
                 //     current: pageConfig.page, 

@@ -24,7 +24,7 @@ export default function ChallengeAddPage(params) {
                 if (res.code === 0) {
                     message.success(res.msg);
                     setTimeout(() => {
-                        navigateTo("/dashboard/challenge/list");
+                        navigateTo("/dashboard/challenge/compilation");
                     }, 500);
                 }else{
                     setLoading(false);

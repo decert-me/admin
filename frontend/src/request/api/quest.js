@@ -21,6 +21,14 @@ import serviceAxios from "../index";
         })
     }
 
+    // 获取合辑地址
+    export const getCollectionList = (data) => {
+        return serviceAxios({
+            url: `/collection/list`,
+            method: "post",
+            data
+        })
+    }
 // ============================ post ============================
 
     // 更改挑战上架状态
