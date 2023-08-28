@@ -1,24 +1,27 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
     ArrowLeftOutlined,
     PlusOutlined
   } from '@ant-design/icons';
 import { Button, Form, Input, Select, Upload, message } from "antd";
 import { UploadProps } from "../../utils/props";
-import { useState } from "react";
-import { createCollection } from "../../request/api/quest";
+import { useEffect, useState } from "react";
+import { getCollectionDetail, updateCollection } from "../../request/api/quest";
 const { TextArea } = Input;
 
 
-export default function ChallengeAddPage(params) {
-
+export default function ChallengeCompilationModifyPage(params) {
+    
     const navigateTo = useNavigate();
+    const {id} = useParams();
     const [loading, setLoading] = useState(false);
+    let [fields, setFields] = useState([]);
+    let [data, setData] = useState();
 
     function onFinish(values) {
         try {
-            const cover = values.cover.file.response.data.hash;
-            createCollection({...values, cover})
+            const cover = values.cover?.file?.response?.data?.hash || data.cover;
+            updateCollection({...values, cover, id: Number(id)})
             .then(res => {
                 if (res.code === 0) {
                     message.success(res.msg);
@@ -35,11 +38,35 @@ export default function ChallengeAddPage(params) {
         }
     }
 
+    function init(params) {
+        getCollectionDetail({id: Number(id)})
+        .then(res => {
+            if (res.code === 0) {
+                data = res.data;
+                setData({...data});
+                fields = [
+                    {name: ["title"], value: res.data.title},
+                    {name: ["description"], value: res.data.description},
+                    {name: ["author"], value: res.data.author},
+                    {name: ["cover"], value: "https://ipfs.decert.me/"+res.data.cover},
+                    {name: ["difficulty"], value: res.data.difficulty},
+                ]
+                setFields([...fields]);
+            }
+        })
+    }
+
+    useEffect(() => {
+        init();
+    },[])
+
     return (
-        <div className="challenge-add challenge">
+        data &&
+        <div className="challenge">
             <Link to={`/dashboard/challenge/compilation`}>
                 <ArrowLeftOutlined />
             </Link>
+            
             <Form
                 name="basic"
                 labelCol={{ span: 6 }}
@@ -47,6 +74,7 @@ export default function ChallengeAddPage(params) {
                 style={{ maxWidth: 800 }}
                 onFinish={onFinish}
                 autoComplete="off"
+                fields={fields}
             >
                 <Form.Item
                     label="合辑标题"
@@ -62,6 +90,10 @@ export default function ChallengeAddPage(params) {
                 <Form.Item
                     label="合辑简介"
                     name="description"
+                    rules={[{
+                        required: true,
+                        message: '请输入简介!',
+                    }]}
                 >
                     <TextArea autoSize={{ minRows: 5 }} />
                 </Form.Item>
@@ -78,6 +110,12 @@ export default function ChallengeAddPage(params) {
                     <Upload
                         listType="picture-card"
                         {...UploadProps}
+                        defaultFileList={[{
+                            uid: '-1',
+                            name: 'image.png',
+                            status: 'done',
+                            url: "https://ipfs.decert.me/"+data.cover,
+                        }]}
                     >
                         <div>
                         <PlusOutlined />
@@ -115,7 +153,7 @@ export default function ChallengeAddPage(params) {
 
                 <Form.Item>
                     <Button type="primary" htmlType="submit" loading={loading}>
-                        添加挑战合辑
+                        保存
                     </Button>
                 </Form.Item>
             </Form>

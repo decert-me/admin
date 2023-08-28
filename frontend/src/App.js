@@ -11,6 +11,7 @@ import HomePage from './views/Home';
 import { TutorialsAddPage, TutorialsBuildLogPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 import { TagsAddPage, TagsModifyPage, TagsPage } from './views/Tags';
 import { ChallengeAddPage, ChallengeCompilationPage, ChallengeListPage, ChallengeModifyPage } from './views/Challenge';
+import ChallengeCompilationModifyPage from './views/Challenge/ChallengeCompilationModifyPage';
 
 function App() {
   return (
@@ -87,8 +88,12 @@ function App() {
           element={<ChallengeModifyPage />} 
         />
         <Route 
-          path="challenge/compilation" 
+          path="challenge/compilation"
           element={<ChallengeCompilationPage />} 
+        />
+        <Route 
+          path="challenge/compilation/modify/:id"
+          element={<ChallengeCompilationModifyPage />}
         />
         <Route 
           path="challenge/add" 

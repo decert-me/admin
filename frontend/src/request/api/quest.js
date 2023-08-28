@@ -29,6 +29,16 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 获取合辑详情
+    export const getCollectionDetail = (data) => {
+        return serviceAxios({
+            url: `/collection/detail`,
+            method: "post",
+            data
+        })
+    }
+    
 // ============================ post ============================
 
     // 更改挑战上架状态
@@ -71,6 +81,15 @@ import serviceAxios from "../index";
     export const createCollection = (data) => {
         return serviceAxios({
             url: `/collection/create`,
+            method: "post",
+            data
+        })
+    }
+
+    // 创建合辑
+    export const updateCollection = (data) => {
+        return serviceAxios({
+            url: `/collection/update`,
             method: "post",
             data
         })
