@@ -24,6 +24,7 @@ type UpdateQuestRequest struct {
 	ID           uint  `json:"id"`
 	Difficulty   *uint `json:"difficulty"`    // 0:easy;1:moderate;2:difficult
 	EstimateTime *uint `json:"estimate_time"` // 预估时间/min
+	CollectionID *uint `json:"collection_id"`
 }
 
 type UpdateRecommendRequest struct {

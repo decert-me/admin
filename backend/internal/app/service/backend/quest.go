@@ -76,12 +76,15 @@ func UpdateQuestStatus(req request.UpdateQuestStatusRequest) error {
 
 // UpdateQuest 修改挑战
 func UpdateQuest(req request.UpdateQuestRequest) error {
-	if req.Difficulty == nil && req.EstimateTime == nil {
+	if req.EstimateTime == nil || req.CollectionID == nil {
 		return errors.New("参数错误")
 	}
 	data := map[string]interface{}{
-		"meta_data":  gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', '%d')", *req.Difficulty)),
-		"quest_data": gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', '%d')", *req.EstimateTime)),
+		"quest_data":    gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', '%d')", *req.EstimateTime)),
+		"collection_id": *req.CollectionID,
+	}
+	if req.Difficulty != nil {
+		data["meta_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', '%d')", *req.Difficulty))
 	}
 	raw := global.DB.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
 	if raw.RowsAffected == 0 {
