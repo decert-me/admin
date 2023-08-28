@@ -53,8 +53,8 @@ export default function ChallengeCompilationPage(params) {
                 <Switch
                     checkedChildren="已上架" 
                     unCheckedChildren="待上架" 
-                    checked={status == 2 ? true : false}
-                    onChange={(checked) => handleChangeStatus({status: checked ? 2 : 1, id: quest.id}, quest.key)}
+                    checked={status == 1 ? true : false}
+                    onChange={(checked) => handleChangeStatus({status: checked ? 1 : 2, id: quest.id}, quest.key)}
                 />
             )
         },
