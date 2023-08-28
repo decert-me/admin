@@ -2,7 +2,7 @@ import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import "./index.scss";
 import { useEffect, useState } from "react";
-import { deleteCollection, getCollectionList } from "../../request/api/quest";
+import { deleteCollection, getCollectionList, updateStatusCollection } from "../../request/api/quest";
 import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
@@ -53,8 +53,8 @@ export default function ChallengeCompilationPage(params) {
                 <Switch
                     checkedChildren="已上架" 
                     unCheckedChildren="待上架" 
-                    checked={status == 1 ? true : false}
-                    // onChange={(checked) => handleChangeStatus({status: checked ? 1 : 2, id: quest.id}, quest.key)}
+                    checked={status == 2 ? true : false}
+                    onChange={(checked) => handleChangeStatus({status: checked ? 2 : 1, id: quest.id}, quest.key)}
                 />
             )
         },
@@ -124,6 +124,19 @@ export default function ChallengeCompilationPage(params) {
             ),
         }
     ];
+
+    // 上下架
+    function handleChangeStatus({id, status}, key){
+      const index = data.findIndex((item) => item.key === key);
+      updateStatusCollection({id, status})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+          data[index].status = status;
+          setData([...data]);
+        }
+      })
+    };
 
     async function deleteT(id) {
       await deleteCollection({id})

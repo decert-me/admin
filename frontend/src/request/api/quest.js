@@ -95,6 +95,15 @@ import serviceAxios from "../index";
         })
     }
 
+    // 更新合辑上下架状态
+    export const updateStatusCollection = (data) => {
+        return serviceAxios({
+            url: `/collection/updateStatus`,
+            method: "post",
+            data
+        })
+    }
+
     // 更新合辑
     export const updateCollection = (data) => {
         return serviceAxios({
