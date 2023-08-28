@@ -20,7 +20,7 @@ export default function ChallengeCompilationPage(params) {
     const columns = [
         {
           title: 'ID',
-          dataIndex: 'ID',
+          dataIndex: 'id',
           render: (tokenId) => (
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
           )
