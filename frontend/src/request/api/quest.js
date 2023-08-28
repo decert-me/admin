@@ -59,3 +59,11 @@ import serviceAxios from "../index";
         })
     }
     
+    // 创建合辑
+    export const createCollection = (data) => {
+        return serviceAxios({
+            url: `/collection/create`,
+            method: "post",
+            data
+        })
+    }
