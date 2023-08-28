@@ -21,7 +21,7 @@ import serviceAxios from "../index";
         })
     }
 
-    // 获取合辑地址
+    // 获取合辑列表
     export const getCollectionList = (data) => {
         return serviceAxios({
             url: `/collection/list`,
