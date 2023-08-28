@@ -2,7 +2,7 @@ import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import "./index.scss";
 import { useEffect, useState } from "react";
-import { getCollectionList } from "../../request/api/quest";
+import { deleteCollection, getCollectionList } from "../../request/api/quest";
 import { format } from "../../utils/format";
 
 const isTest = window.location.host.indexOf("localhost") === -1;
@@ -111,7 +111,7 @@ export default function ChallengeCompilationPage(params) {
                 <Popconfirm
                   title="移除合辑"
                   description="确定要移除该合辑吗?"
-                //   onConfirm={() => deleteT(Number(quest.id))}
+                  onConfirm={() => deleteT(Number(quest.id))}
                   okText="确定"
                   cancelText="取消"
                 >
@@ -124,6 +124,19 @@ export default function ChallengeCompilationPage(params) {
             ),
         }
     ];
+
+    async function deleteT(id) {
+      await deleteCollection({id})
+      .then(res => {
+        if (res.code === 0) {
+            message.success(res.msg);
+        }
+      })
+      .catch(err => {
+          message.error(err);
+      })
+      getList()
+    }
 
     function getList(page) {
       if (page) {

@@ -86,10 +86,19 @@ import serviceAxios from "../index";
         })
     }
 
-    // 创建合辑
+    // 更新合辑
     export const updateCollection = (data) => {
         return serviceAxios({
             url: `/collection/update`,
+            method: "post",
+            data
+        })
+    }
+
+    // 更新合辑
+    export const deleteCollection = (data) => {
+        return serviceAxios({
+            url: `/collection/delete`,
             method: "post",
             data
         })
