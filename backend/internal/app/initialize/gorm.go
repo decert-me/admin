@@ -33,6 +33,7 @@ func RegisterTables(db *gorm.DB) {
 		model.Language{},
 		model.Theme{},
 		model.Quest{},
+		model.Collection{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))
