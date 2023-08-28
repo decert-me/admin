@@ -29,6 +29,7 @@ type UpdateCollectionStatusRequest struct {
 
 type GetCollectionQuestRequest struct {
 	ID uint `json:"id"`
+	PageInfo
 }
 
 type UpdateCollectionQuestSortRequest struct {

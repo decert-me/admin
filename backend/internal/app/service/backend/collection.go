@@ -99,7 +99,7 @@ func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
 
 // GetCollectionQuest 获取合辑下的挑战
 func GetCollectionQuest(r request.GetCollectionQuestRequest) (list []model.Quest, err error) {
-	err = global.DB.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Order("collection_sort desc").Find(&list).Error
+	err = global.DB.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Scopes(Paginate(r.Page, r.PageSize)).Order("collection_sort desc").Find(&list).Error
 	return
 }
 
