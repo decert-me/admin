@@ -10,7 +10,8 @@ import AuthGuard from './components/AuthGuard';
 import HomePage from './views/Home';
 import { TutorialsAddPage, TutorialsBuildLogPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
 import { TagsAddPage, TagsModifyPage, TagsPage } from './views/Tags';
-import { ChallengeListPage, ChallengeModifyPage } from './views/Challenge';
+import { ChallengeAddPage, ChallengeCompilationPage, ChallengeListPage, ChallengeModifyPage } from './views/Challenge';
+import ChallengeCompilationModifyPage from './views/Challenge/ChallengeCompilationModifyPage';
 
 function App() {
   return (
@@ -79,13 +80,30 @@ function App() {
 
         {/* 挑战 */}
         <Route 
-          path="challenge" 
+          path="challenge/list" 
+          element={<ChallengeListPage />} 
+        />
+        <Route 
+          path="challenge/list/:id" 
           element={<ChallengeListPage />} 
         />
         <Route 
           path="challenge/modify/:id/:tokenId" 
           element={<ChallengeModifyPage />} 
         />
+        <Route 
+          path="challenge/compilation"
+          element={<ChallengeCompilationPage />} 
+        />
+        <Route 
+          path="challenge/compilation/modify/:id"
+          element={<ChallengeCompilationModifyPage />}
+        />
+        <Route 
+          path="challenge/add" 
+          element={<ChallengeAddPage />} 
+        />
+
 
       </Route>
     </Routes>
