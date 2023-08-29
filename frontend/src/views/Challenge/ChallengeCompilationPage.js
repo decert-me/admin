@@ -67,16 +67,16 @@ export default function ChallengeCompilationPage(params) {
         },
         {
           title: '时长',
-          dataIndex: 'time',
-          render: (time) => (
-            <p>{time}</p>
+          dataIndex: 'estimate_time',
+          render: (estimate_time) => (
+            <p>{estimate_time / 60}min</p>
           )
         },
         {
-          title: '挑战数量',
-          dataIndex: 'time',
-          render: (time) => (
-            <p>{time}</p>
+          title: '铸造数量',
+          dataIndex: 'claim_num',
+          render: (claim_num) => (
+            <p>{claim_num}</p>
           )
         },
         {
