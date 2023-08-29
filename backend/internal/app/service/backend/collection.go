@@ -44,7 +44,7 @@ func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetC
 			continue
 		}
 		var claimNumTotal, challengeNumTotal, estimateTimeTotal int64
-		for tokenId := range TokenIDList {
+		for _, tokenId := range TokenIDList {
 			var claimNum, challengeNum int64
 			// 统计铸造数量
 			global.DB.Model(&model.UserChallenges{}).Where("token_id = ?", tokenId).Count(&claimNum)
@@ -99,11 +99,17 @@ func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
 
 // GetCollectionQuest 获取合辑下的挑战
 func GetCollectionQuest(r request.GetCollectionQuestRequest) (list []model.Quest, err error) {
-	err = global.DB.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Scopes(Paginate(r.Page, r.PageSize)).Order("collection_sort desc").Find(&list).Error
+	err = global.DB.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Order("collection_sort desc").Find(&list).Error
 	return
 }
 
 // UpdateCollectionQuestSort 编辑合辑下的挑战排序
 func UpdateCollectionQuestSort(r request.UpdateCollectionQuestSortRequest) error {
-	return global.DB.Model(&model.Quest{}).Where("id = ?", r.ID).Update("collection_sort", r.CollectionSort).Error
+	for i := 0; i < len(r.ID); i++ {
+		err := global.DB.Model(&model.Quest{}).Where("id = ?", r.ID[len(r.ID)-i-1]).Update("collection_sort", i).Error
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

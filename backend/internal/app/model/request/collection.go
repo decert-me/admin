@@ -29,10 +29,9 @@ type UpdateCollectionStatusRequest struct {
 
 type GetCollectionQuestRequest struct {
 	ID uint `json:"id"`
-	PageInfo
 }
 
 type UpdateCollectionQuestSortRequest struct {
-	ID             uint `json:"id"`
-	CollectionSort int  `json:"collection_sort"`
+	ID []uint `json:"id"`
+	//CollectionSort []int  `json:"collection_sort"`
 }

@@ -15,7 +15,7 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	limit := req.PageSize
 	offset := req.PageSize * (req.Page - 1)
 
-	db := global.DB.Model(&model.Quest{})
+	db := global.DB.Model(&model.Quest{}).Where("style = 1")
 	db.Where("disabled = false")
 	db.Where(&req.Quest)
 	err = db.Count(&total).Error
@@ -76,15 +76,21 @@ func UpdateQuestStatus(req request.UpdateQuestStatusRequest) error {
 
 // UpdateQuest 修改挑战
 func UpdateQuest(req request.UpdateQuestRequest) error {
-	if req.EstimateTime == nil || req.CollectionID == nil {
+	if req.CollectionID == nil {
 		return errors.New("参数错误")
 	}
 	data := map[string]interface{}{
-		"quest_data":    gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', '%d')", *req.EstimateTime)),
 		"collection_id": *req.CollectionID,
+	}
+	if req.EstimateTime != nil {
+		data["quest_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', '%d')", *req.EstimateTime))
+	} else {
+		data["quest_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', 'null')"))
 	}
 	if req.Difficulty != nil {
 		data["meta_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', '%d')", *req.Difficulty))
+	} else {
+		data["meta_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', 'null')"))
 	}
 	raw := global.DB.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
 	if raw.RowsAffected == 0 {
