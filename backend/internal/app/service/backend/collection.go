@@ -60,6 +60,7 @@ func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetC
 		list[i].ClaimNum = claimNumTotal
 		list[i].ChallengeNum = challengeNumTotal
 		list[i].EstimateTime = estimateTimeTotal
+		list[i].QuestNum = int64(len(TokenIDList))
 	}
 	return
 }
