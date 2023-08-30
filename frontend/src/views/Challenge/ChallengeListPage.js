@@ -1,7 +1,7 @@
 import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
 import React, { useEffect, useState } from "react";
 import "./index.scss";
-import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuestStatus } from "../../request/api/quest";
+import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -144,30 +144,68 @@ export default function ChallengeListPage(params) {
             key: 'action',
             render: (_, quest) => (
               <Space size="middle">
-                <Button 
-                  type="link" 
-                  className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
-                >编辑</Button>
-                <Popconfirm
-                  title="移除挑战"
-                  description="确定要移除该挑战吗?"
-                  onConfirm={() => deleteT(Number(quest.id))}
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <Button 
-                  type="link" 
-                  className="p0"
-                >删除</Button>
-                </Popconfirm>
+                {
+                  id ?
+                  // 移除合辑
+                  <Popconfirm
+                    title="移出合辑"
+                    description="确定要移出该挑战吗?"
+                    onConfirm={() => updateT(Number(quest.id))}
+                    okText="确定"
+                    cancelText="取消"
+                  >
+                    <Button 
+                    type="link" 
+                    className="p0"
+                  >移出合辑</Button>
+                  </Popconfirm>
+                  :
+                  <>
+                    <Button 
+                      type="link" 
+                      className="p0"
+                      onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
+                    >编辑</Button>
+                    <Popconfirm
+                      title="删除挑战"
+                      description="确定要删除该挑战吗?"
+                      onConfirm={() => deleteT(Number(quest.id))}
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <Button 
+                      type="link" 
+                      className="p0"
+                    >删除</Button>
+                    </Popconfirm>
+                  </>
+                }
               </Space>
             ),
         }
     ];
 
+    // 移出合辑
+    function updateT(id) {
+      updateQuest({
+        id, collection_id: 0
+      })
+      .then(res => {
+        if (res.code === 0) {
+            message.success(res.msg);
+        }
+      })
+      .catch(err => {
+          message.error(err);
+      })
+      getList()
+    }
+
     // 上下架
     function handleChangeStatus({status, id}, key) {
+      if (id) {
+        return
+      }
       const index = data.findIndex((item) => item.key === key);
       updateQuestStatus({id, status})
       .then(res => {
@@ -299,7 +337,7 @@ export default function ChallengeListPage(params) {
     return (
         <div className="challenge" key={location.pathname}>
             <div className="tabel-title">
-                <h2>挑战列表</h2>
+                <h2>{id && "合辑管理/"}挑战列表</h2>
                 <Space size="large">
                   {
                     !id &&
