@@ -20,11 +20,12 @@ export default function ChallengeModifyPage(params) {
     let [collection, setCollection] = useState([]);
     const [loading, setLoading] = useState(false);
     
-    function onFinish({difficulty, estimateTime, collection_id, type}) {
+    function onFinish({difficulty, estimateTime, collection_id, type, sort}) {
         updateQuest({
             id: Number(id), 
             difficulty, 
             estimate_time: estimateTime * 60,
+            sort,
             collection_id: type === "default" ? 0 : collection_id
         })
         .then(res => {
@@ -64,6 +65,7 @@ export default function ChallengeModifyPage(params) {
                 fields = [
                     {name: ["difficulty"], value: data.metadata.attributes.difficulty},
                     {name: ["estimateTime"], value: data.quest_data.estimateTime / 60},
+                    {name: ["sort"], value: Number(data.sort)},
                     {name: ["type"], value: data.collection_id === 0 ? "default" : "compilation"},
                     {name: ["collection_id"], value: data.collection_id}
                 ];
@@ -117,6 +119,12 @@ export default function ChallengeModifyPage(params) {
                                 {label: "困难", value: 2},
                             ]}
                         />
+                    </Form.Item>
+                    <Form.Item
+                        label="权重"
+                        name="sort"
+                    >
+                        <InputNumber controls={false} />
                     </Form.Item>
                     <Form.Item
                         label="时长"

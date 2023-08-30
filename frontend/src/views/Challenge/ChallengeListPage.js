@@ -60,6 +60,10 @@ export default function ChallengeListPage(params) {
 
     const columns = [
         {
+          title: '权重',
+          dataIndex: 'sort'
+        },
+        {
           title: '挑战编号',
           dataIndex: 'tokenId',
           render: (tokenId) => (
@@ -338,10 +342,7 @@ export default function ChallengeListPage(params) {
         <div className="challenge" key={location.pathname}>
             <div className="tabel-title">
                 <h2>{id && "合辑管理/"}挑战列表</h2>
-                <Space size="large">
-                  {
-                    !id &&
-                    <>
+                {/* <Space size="large">
                       <Button 
                           onClick={() => toTop(true)} 
                           disabled={!hasSelected}
@@ -356,9 +357,7 @@ export default function ChallengeListPage(params) {
                       >
                           取消置顶
                       </Button>
-                    </>
-                  }
-                </Space>
+                </Space> */}
             </div>
             {
               id ? 
@@ -383,7 +382,7 @@ export default function ChallengeListPage(params) {
             </DndContext>
               :
               <Table 
-                  rowSelection={rowSelection} 
+                  // rowSelection={rowSelection} 
                   columns={columns} 
                   dataSource={data} 
                   rowClassName={(record) => record.top && "toTop"}
