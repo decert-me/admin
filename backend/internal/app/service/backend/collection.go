@@ -90,7 +90,20 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 
 // DeleteCollection 删除合辑
 func DeleteCollection(r request.DeleteCollectionRequest) error {
-	return global.DB.Where("id = ?", r.ID).Delete(&model.Quest{}).Error
+	tx := global.DB.Begin()
+	// 清除挑战合辑状态
+	err := tx.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Update("collection_id", 0).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 删除合辑
+	err = tx.Model(&model.Quest{}).Where("id = ?", r.ID).Delete(&model.Quest{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
 }
 
 // UpdateCollectionStatus 更新合辑状态
