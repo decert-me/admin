@@ -6,8 +6,8 @@ import (
 
 type GetQuestListRes struct {
 	model.Quest
-	ClaimNum     int64 `json:"claim_num"`     // 铸造数量
-	ChallengeNum int64 `json:"challenge_num"` // 挑战人次
+	ClaimNum     int64 `gorm:"-" json:"claim_num"`     // 铸造数量
+	ChallengeNum int64 `gorm:"-" json:"challenge_num"` // 挑战人次
 }
 
 type ChallengeUsers struct {
