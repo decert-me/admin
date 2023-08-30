@@ -206,12 +206,12 @@ export default function ChallengeListPage(params) {
     }
 
     // 上下架
-    function handleChangeStatus({status, id}, key) {
+    function handleChangeStatus({status, id: paramsId}, key) {
       if (id) {
         return
       }
       const index = data.findIndex((item) => item.key === key);
-      updateQuestStatus({id, status})
+      updateQuestStatus({id: paramsId, status})
       .then(res => {
         if (res.code === 0) {
           message.success(res.msg);
