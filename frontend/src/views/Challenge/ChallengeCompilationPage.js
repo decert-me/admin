@@ -19,6 +19,10 @@ export default function ChallengeCompilationPage(params) {
 
     const columns = [
         {
+          title: '权重',
+          dataIndex: 'sort'
+        },
+        {
           title: 'ID',
           dataIndex: 'id',
           render: (tokenId) => (

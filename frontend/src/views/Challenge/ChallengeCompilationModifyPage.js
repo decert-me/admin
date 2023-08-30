@@ -3,7 +3,7 @@ import {
     ArrowLeftOutlined,
     PlusOutlined
   } from '@ant-design/icons';
-import { Button, Form, Input, Select, Upload, message } from "antd";
+import { Button, Form, Input, InputNumber, Select, Upload, message } from "antd";
 import { UploadProps } from "../../utils/props";
 import { useEffect, useState } from "react";
 import { getCollectionDetail, updateCollection } from "../../request/api/quest";
@@ -50,6 +50,7 @@ export default function ChallengeCompilationModifyPage(params) {
                     {name: ["author"], value: res.data.author},
                     {name: ["cover"], value: "https://ipfs.decert.me/"+res.data.cover},
                     {name: ["difficulty"], value: res.data.difficulty},
+                    {name: ["sort"], value: Number(data.sort)},
                 ]
                 setFields([...fields]);
             }
@@ -149,6 +150,13 @@ export default function ChallengeCompilationModifyPage(params) {
                             {label: "简单", value: 0}
                         ]}
                     />
+                </Form.Item>
+
+                <Form.Item
+                    label="权重"
+                    name="sort"
+                >
+                    <InputNumber controls={false} />
                 </Form.Item>
 
                 <Form.Item>
