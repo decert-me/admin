@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import "./index.scss";
 import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
@@ -47,6 +47,7 @@ export default function ChallengeListPage(params) {
   
     const { formatTimestamp } = format();
     const navigateTo = useNavigate();
+    const location = useLocation();
     const { id } = useParams();
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);     //  多选框: 选中的挑战
@@ -273,8 +274,12 @@ export default function ChallengeListPage(params) {
     }
 
     useEffect(() => {
-        init();
-    },[])
+      pageConfig = {
+        page: 0, pageSize: 10, total: 0
+      }
+      setPageConfig({...pageConfig});
+      init();
+    },[location])
 
     useEffect(() => {
       if (isChange) {
@@ -292,7 +297,7 @@ export default function ChallengeListPage(params) {
     },[data])
     
     return (
-        <div className="challenge">
+        <div className="challenge" key={location.pathname}>
             <div className="tabel-title">
                 <h2>挑战列表</h2>
                 <Space size="large">

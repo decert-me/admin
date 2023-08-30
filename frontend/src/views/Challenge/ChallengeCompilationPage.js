@@ -73,6 +73,13 @@ export default function ChallengeCompilationPage(params) {
           )
         },
         {
+          title: '挑战数量',
+          dataIndex: 'quest_num',
+          render: (quest_num) => (
+            <p>{quest_num}</p>
+          )
+        },
+        {
           title: '铸造数量',
           dataIndex: 'claim_num',
           render: (claim_num) => (
