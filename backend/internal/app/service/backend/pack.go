@@ -70,6 +70,7 @@ func Pack(req request.PackRequest) error {
 	var tutorial model.Tutorial
 	err := global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).First(&tutorial).Error
 	if err != nil {
+		UpdateTutorialPackStatus(req.ID, 3)
 		return err
 	}
 	data := []model.Tutorial{tutorial}
@@ -77,6 +78,7 @@ func Pack(req request.PackRequest) error {
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
 		fmt.Println("Error:", err)
+		UpdateTutorialPackStatus(req.ID, 3)
 		return err
 	}
 	// 写入JSON
@@ -84,6 +86,7 @@ func Pack(req request.PackRequest) error {
 	file, err := os.Create(path.Join(global.CONFIG.Pack.Path, "tutorials.json"))
 	if err != nil {
 		fmt.Println("Error:", err)
+		UpdateTutorialPackStatus(req.ID, 3)
 		return err
 	}
 	defer file.Close()
@@ -91,6 +94,7 @@ func Pack(req request.PackRequest) error {
 	_, err = file.Write(jsonData)
 	if err != nil {
 		fmt.Println("Error:", err)
+		UpdateTutorialPackStatus(req.ID, 3)
 		return err
 	}
 	// npm run build -- blockchain-basic
@@ -100,6 +104,7 @@ func Pack(req request.PackRequest) error {
 	stdoutRes, stdoutErr, err := execCommand(global.CONFIG.Pack.Path, "npm", args...)
 	if err != nil {
 		fmt.Println(err)
+		UpdateTutorialPackStatus(req.ID, 3)
 		return err
 	}
 	var packLog strings.Builder
@@ -168,6 +173,14 @@ func Pack(req request.PackRequest) error {
 	// Build completed successfully
 	// Error running build command:
 	return nil
+}
+
+func UpdateTutorialPackStatus(id uint, status uint8) (err error) {
+	raw := global.DB.Model(&model.Tutorial{}).Where("id = ?", id).Update("pack_status", status)
+	if raw.RowsAffected == 0 {
+		return errors.New("更新失败")
+	}
+	return raw.Error
 }
 
 // PackDelExcessFile 删除多余文件
