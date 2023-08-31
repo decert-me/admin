@@ -67,7 +67,7 @@ export default function ChallengeModifyPage(params) {
                     {name: ["estimateTime"], value: data.quest_data.estimateTime / 60},
                     {name: ["sort"], value: Number(data.sort)},
                     {name: ["type"], value: data.collection_id === 0 ? "default" : "compilation"},
-                    {name: ["collection_id"], value: data.collection_id}
+                    {name: ["collection_id"], value: data.collection_id === 0 ? null : data.collection_id}
                 ];
                 setFields([...fields]);
             }
