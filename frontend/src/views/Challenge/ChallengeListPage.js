@@ -348,7 +348,7 @@ export default function ChallengeListPage(params) {
               {
                 id ? 
                   <Space style={{cursor: "pointer"}} onClick={() => navigateTo("/dashboard/challenge/compilation")}>
-                    <ArrowLeftOutlined /><h2>合辑管理/{decodeURIComponent(location.search.split("=")[1])}</h2>
+                    <ArrowLeftOutlined /><h2><span style={{color: "#999999"}}>合辑管理</span>/{decodeURIComponent(location.search.split("=")[1])}</h2>
                   </Space>
                 :
                   <h2>挑战列表</h2>
