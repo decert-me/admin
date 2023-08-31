@@ -7,7 +7,7 @@ cd backend
 ## 编译
 ```bash
 # 主程序
-go build
+go build -o decert_admin
 ```
 ## 配置
 ```bash
