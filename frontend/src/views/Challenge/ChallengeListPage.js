@@ -1,7 +1,10 @@
 import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
+import {
+  ArrowLeftOutlined,
+} from '@ant-design/icons';
 import React, { useEffect, useState } from "react";
 import "./index.scss";
-import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuestStatus } from "../../request/api/quest";
+import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -14,8 +17,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-
-const isTest = window.location.host.indexOf("localhost") === -1;
+const location = window.location.host;
+const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
 const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
 const opensea = isTest ? "https://opensea.io/assets/matic/0xc8E9cd4921E54c4163870092Ca8d9660e967B53d" : "https://testnets.opensea.io/assets/mumbai/0x66C54CB10Ef3d038aaBA2Ac06d2c25B326be8142"
 
@@ -59,6 +62,10 @@ export default function ChallengeListPage(params) {
     });
 
     const columns = [
+        {
+          title: '权重',
+          dataIndex: 'sort'
+        },
         {
           title: '挑战编号',
           dataIndex: 'tokenId',
@@ -144,32 +151,70 @@ export default function ChallengeListPage(params) {
             key: 'action',
             render: (_, quest) => (
               <Space size="middle">
-                <Button 
-                  type="link" 
-                  className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
-                >编辑</Button>
-                <Popconfirm
-                  title="移除挑战"
-                  description="确定要移除该挑战吗?"
-                  onConfirm={() => deleteT(Number(quest.id))}
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <Button 
-                  type="link" 
-                  className="p0"
-                >删除</Button>
-                </Popconfirm>
+                {
+                  id ?
+                  // 移除合辑
+                  <Popconfirm
+                    title="移出合辑"
+                    description="确定要移出该挑战吗?"
+                    onConfirm={() => updateT(Number(quest.id))}
+                    okText="确定"
+                    cancelText="取消"
+                  >
+                    <Button 
+                    type="link" 
+                    className="p0"
+                  >移出合辑</Button>
+                  </Popconfirm>
+                  :
+                  <>
+                    <Button 
+                      type="link" 
+                      className="p0"
+                      onClick={() => navigateTo(`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`)}
+                    >编辑</Button>
+                    <Popconfirm
+                      title="删除挑战"
+                      description="确定要删除该挑战吗?"
+                      onConfirm={() => deleteT(Number(quest.id))}
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <Button 
+                      type="link" 
+                      className="p0"
+                    >删除</Button>
+                    </Popconfirm>
+                  </>
+                }
               </Space>
             ),
         }
     ];
 
+    // 移出合辑
+    function updateT(id) {
+      updateQuest({
+        id, collection_id: 0
+      })
+      .then(res => {
+        if (res.code === 0) {
+            message.success(res.msg);
+        }
+      })
+      .catch(err => {
+          message.error(err);
+      })
+      getList()
+    }
+
     // 上下架
-    function handleChangeStatus({status, id}, key) {
+    function handleChangeStatus({status, id: paramsId}, key) {
+      if (id) {
+        return
+      }
       const index = data.findIndex((item) => item.key === key);
-      updateQuestStatus({id, status})
+      updateQuestStatus({id: paramsId, status})
       .then(res => {
         if (res.code === 0) {
           message.success(res.msg);
@@ -279,6 +324,7 @@ export default function ChallengeListPage(params) {
       }
       setPageConfig({...pageConfig});
       init();
+      console.log(decodeURIComponent(location.search));
     },[location])
 
     useEffect(() => {
@@ -299,11 +345,15 @@ export default function ChallengeListPage(params) {
     return (
         <div className="challenge" key={location.pathname}>
             <div className="tabel-title">
-                <h2>挑战列表</h2>
-                <Space size="large">
-                  {
-                    !id &&
-                    <>
+              {
+                id ? 
+                  <Space style={{cursor: "pointer"}} onClick={() => navigateTo("/dashboard/challenge/compilation")}>
+                    <ArrowLeftOutlined /><h2>合辑管理/{decodeURIComponent(location.search.split("=")[1])}</h2>
+                  </Space>
+                :
+                  <h2>挑战列表</h2>
+              }
+                {/* <Space size="large">
                       <Button 
                           onClick={() => toTop(true)} 
                           disabled={!hasSelected}
@@ -318,9 +368,7 @@ export default function ChallengeListPage(params) {
                       >
                           取消置顶
                       </Button>
-                    </>
-                  }
-                </Space>
+                </Space> */}
             </div>
             {
               id ? 
@@ -345,7 +393,7 @@ export default function ChallengeListPage(params) {
             </DndContext>
               :
               <Table 
-                  rowSelection={rowSelection} 
+                  // rowSelection={rowSelection} 
                   columns={columns} 
                   dataSource={data} 
                   rowClassName={(record) => record.top && "toTop"}

@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { deleteCollection, getCollectionList, updateStatusCollection } from "../../request/api/quest";
 import { format } from "../../utils/format";
 
-const isTest = window.location.host.indexOf("localhost") === -1;
-const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
+const location = window.location.host;
+const host = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? "http://192.168.1.10:8087" : "https://decert.me";
 
 export default function ChallengeCompilationPage(params) {
     
@@ -19,10 +19,14 @@ export default function ChallengeCompilationPage(params) {
 
     const columns = [
         {
+          title: '权重',
+          dataIndex: 'sort'
+        },
+        {
           title: 'ID',
           dataIndex: 'id',
           render: (tokenId) => (
-            <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
+            <a className="underline" href={`${host}/collection/${tokenId}`} target="_blank">{tokenId}</a>
           )
         },
         {
@@ -36,7 +40,7 @@ export default function ChallengeCompilationPage(params) {
           title: '标题',
           dataIndex: 'title',
           render: (title, quest) => (
-            <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+            <a className="underline" href={`${host}/collection/${quest.id}`} target="_blank">{title}</a>
           )
         },
         {
@@ -113,8 +117,8 @@ export default function ChallengeCompilationPage(params) {
                 <Button 
                   type="link" 
                   className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/list/${quest.id}`)}
-                >排序</Button>
+                  onClick={() => navigateTo(`/dashboard/challenge/list/${quest.id}?label=${quest.title}`)}
+                >目录</Button>
                 <Popconfirm
                   title="移除合辑"
                   description="确定要移除该合辑吗?"

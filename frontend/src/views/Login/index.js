@@ -8,12 +8,12 @@ import { userCaptcha, userLogin } from '../../request/api/public';
 export default function LoginPage(params) {
 
     const { login } = useAuth();
-    const [captcha, setCaptcha] = useState();
+    let [captcha, setCaptcha] = useState();
 
     const onFinish = (values) => {
-        const { username, password, captcha } = values;
+        const { username, password, captcha: captchaValue } = values;
         userLogin({
-            username, password, captcha, CaptchaId: captcha.captchaId
+            username, password, captcha: captchaValue, CaptchaId: captcha.captchaId
         })
         .then(res => {
             if (res.code === 0) {
@@ -28,8 +28,9 @@ export default function LoginPage(params) {
         userCaptcha()
         .then(res => {
             if (res?.code === 0) {
-                const { picPath, captchaId } = res.data;
-                setCaptcha({picPath, captchaId})
+                captcha = res.data;
+                setCaptcha({...captcha});
+                console.log(captcha);
             }
         })
     }

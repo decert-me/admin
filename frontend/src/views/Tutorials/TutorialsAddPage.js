@@ -86,7 +86,7 @@ export default function TutorialsAddPage(params) {
         if (challenge) {
             await getQuest({id: Number(challenge)})
             .then(res => {
-                if (res.status !== 0) {
+                if (res.code !== 0) {
                     flag = false;
                     return;
                 }
