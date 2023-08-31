@@ -211,12 +211,12 @@ export default function ChallengeCompilationPage(params) {
                 columns={columns} 
                 dataSource={data} 
                 // rowClassName={(record) => record.top && "toTop"}
-                // pagination={{
-                //     current: pageConfig.page, 
-                //     total: pageConfig.total, 
-                //     pageSize: pageConfig.pageSize, 
-                //     onChange: (page) => getList(page)
-                // }} 
+                pagination={{
+                    current: pageConfig.page, 
+                    total: pageConfig.total, 
+                    pageSize: pageConfig.pageSize, 
+                    onChange: (page) => getList(page)
+                }} 
             />
         </div>
     )
