@@ -24,6 +24,15 @@ func GetQuestList(c *gin.Context) {
 	}
 }
 
+// GetQuest 获取挑战详情
+func GetQuest(c *gin.Context) {
+	if list, err := backend.GetQuest(c.Param("id")); err != nil {
+		response.FailWithMessage("获取失败："+err.Error(), c)
+	} else {
+		response.OkWithData(list, c)
+	}
+}
+
 // TopQuest 置顶挑战
 func TopQuest(c *gin.Context) {
 	var r request.TopQuestRequest

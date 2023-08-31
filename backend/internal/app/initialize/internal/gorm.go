@@ -27,7 +27,7 @@ func (g *_gorm) Config(Prefix string) *gorm.Config {
 	config := &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true, NamingStrategy: schema.NamingStrategy{
 		TablePrefix:   Prefix,
 		SingularTable: true,
-	}}
+	}, SkipDefaultTransaction: true}
 	_default := logger.New(NewWriter(log.New(os.Stdout, "\r\n", log.LstdFlags)), logger.Config{
 		SlowThreshold: 200 * time.Millisecond,
 		LogLevel:      logger.Warn,

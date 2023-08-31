@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	"math"
 )
 
 // GetQuestList 获取挑战列表
@@ -22,7 +23,7 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	if err != nil {
 		return res, total, err
 	}
-	db.Order("top desc,token_id desc")
+	db.Order("sort desc,token_id desc")
 	if req.OrderKey == "token_id" {
 		fmt.Println(req.OrderKey)
 		fmt.Println(req.Desc)
@@ -54,10 +55,16 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	return res, total, err
 }
 
+// GetQuest 获取挑战详情
+func GetQuest(id string) (quest response.GetQuestRes, err error) {
+	err = global.DB.Model(&model.Quest{}).Where("token_id", id).First(&quest).Error
+	return
+}
+
 // TopQuest 置顶挑战
 func TopQuest(req request.TopQuestRequest) error {
-	for i, id := range req.ID {
-		err := global.DB.Model(&model.Quest{}).Where("id = ?", id).Update("top", req.Top[i]).Error
+	for _, id := range req.ID {
+		err := global.DB.Model(&model.Quest{}).Where("id = ?", id).Update("sort", math.MaxInt).Error
 		if err != nil {
 			return err
 		}
@@ -91,6 +98,9 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		data["meta_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', '%d')", *req.Difficulty))
 	} else {
 		data["meta_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{attributes,difficulty}', 'null')"))
+	}
+	if req.Sort != nil {
+		data["sort"] = *req.Sort
 	}
 	raw := global.DB.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
 	if raw.RowsAffected == 0 {
