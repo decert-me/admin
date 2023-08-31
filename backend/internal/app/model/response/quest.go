@@ -25,5 +25,5 @@ type GetQuestChallengeUserRes struct {
 
 type GetQuestRes struct {
 	model.Quest
-	Claimed bool `gorm:"claimed" json:"claimed"`
+	//Claimed bool `gorm:"claimed" json:"claimed"`
 }

@@ -43,6 +43,14 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 }
 
 func CreateTutorial(tutorial model.Tutorial) (res model.Tutorial, err error) {
+	// 判断挑战是否存在
+	if tutorial.Challenge != nil && *tutorial.Challenge != 0 {
+		var count int64
+		err = global.DB.Model(&model.Quest{}).Where("token_id = ?", *tutorial.Challenge).Count(&count).Error
+		if count == 0 {
+			return res, errors.New("挑战不存在")
+		}
+	}
 	err = global.DB.Create(&tutorial).Error
 	if err != nil {
 		if err == gorm.ErrDuplicatedKey {

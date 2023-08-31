@@ -24,6 +24,7 @@ func CreateCollection(r request.CreateCollectionRequest) error {
 		Cover:       r.Cover,
 		Author:      r.Author,
 		Style:       2,
+		Sort:        r.Sort,
 	}
 	return global.DB.Model(&model.Quest{}).Create(&collection).Error
 }
@@ -35,7 +36,7 @@ func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetC
 	if err != nil {
 		return
 	}
-	err = db.Scopes(Paginate(r.Page, r.PageSize)).Find(&list).Error
+	err = db.Scopes(Paginate(r.Page, r.PageSize)).Order("sort desc,add_ts desc").Find(&list).Error
 	for i := 0; i < len(list); i++ {
 		// 合辑下的挑战
 		var TokenIDList []int64
@@ -80,6 +81,7 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 		Cover:       r.Cover,
 		Author:      r.Author,
 		Style:       2,
+		Sort:        r.Sort,
 	}
 	raw := global.DB.Model(&model.Quest{}).Where("id = ?", r.ID).Updates(&collection)
 	if raw.RowsAffected == 0 {
