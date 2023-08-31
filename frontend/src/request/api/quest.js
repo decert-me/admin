@@ -1,4 +1,3 @@
-import questAxios from "../quest";
 import serviceAxios from "../index";
 
 
@@ -6,8 +5,8 @@ import serviceAxios from "../index";
 
     //     获取挑战详情
     export const getQuest = ({id}) => {
-        return questAxios({
-            url: `/quests/${id}`,
+        return serviceAxios({
+            url: `/quest/${id}`,
             method: "get"
         })
     }

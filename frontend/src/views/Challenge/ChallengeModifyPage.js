@@ -59,7 +59,7 @@ export default function ChallengeModifyPage(params) {
         })
         getQuest({id: Number(tokenId)})
         .then(res => {
-            if (res.status === 0) {
+            if (res.code === 0) {
                 data = res.data;
                 setData({...data});
                 fields = [
