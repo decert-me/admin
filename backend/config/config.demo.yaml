@@ -41,3 +41,9 @@ casbin:
 pack:
   path: "/home/cdeer/code/decert-go/admin/tutorials"         # tutorials 项目路径
   publish-path: "/home/cdeer/code/decertme/tutorials/build"  # 打包后的路径
+
+# captcha configuration
+captcha:
+  key-long: 6
+  img-width: 240
+  img-height: 80
