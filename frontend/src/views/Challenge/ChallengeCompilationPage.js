@@ -117,7 +117,7 @@ export default function ChallengeCompilationPage(params) {
                 <Button 
                   type="link" 
                   className="p0"
-                  onClick={() => navigateTo(`/dashboard/challenge/list/${quest.id}`)}
+                  onClick={() => navigateTo(`/dashboard/challenge/list/${quest.id}?label=${quest.title}`)}
                 >目录</Button>
                 <Popconfirm
                   title="移除合辑"

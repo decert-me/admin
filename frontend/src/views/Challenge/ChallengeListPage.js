@@ -1,4 +1,7 @@
 import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
+import {
+  ArrowLeftOutlined,
+} from '@ant-design/icons';
 import React, { useEffect, useState } from "react";
 import "./index.scss";
 import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
@@ -321,6 +324,7 @@ export default function ChallengeListPage(params) {
       }
       setPageConfig({...pageConfig});
       init();
+      console.log(decodeURIComponent(location.search));
     },[location])
 
     useEffect(() => {
@@ -341,7 +345,14 @@ export default function ChallengeListPage(params) {
     return (
         <div className="challenge" key={location.pathname}>
             <div className="tabel-title">
-                <h2>{id && "合辑管理/"}挑战列表</h2>
+              {
+                id ? 
+                  <Space style={{cursor: "pointer"}} onClick={() => navigateTo("/dashboard/challenge/compilation")}>
+                    <ArrowLeftOutlined /><h2>合辑管理/{decodeURIComponent(location.search.split("=")[1])}</h2>
+                  </Space>
+                :
+                  <h2>挑战列表</h2>
+              }
                 {/* <Space size="large">
                       <Button 
                           onClick={() => toTop(true)} 
