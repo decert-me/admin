@@ -14,7 +14,7 @@ type Quest struct {
 	AddTs          int64          `gorm:"column:add_ts;autoCreateTime" json:"addTs"`
 	TokenId        int64          `gorm:"column:token_id;UNIQUE;not null;" json:"tokenId"`
 	Type           uint8          `gorm:"column:type" json:"type" form:"type"`                       // 0:问答;1:编程
-	Difficulty     uint8          `gorm:"column:difficulty" json:"difficulty"`                       // 0:easy;1:moderate;2:difficult
+	Difficulty     *uint8         `gorm:"column:difficulty" json:"difficulty"`                       // 0:easy;1:moderate;2:difficult
 	EstimateTime   uint8          `gorm:"column:estimate_time" json:"-"`                             // 预估时间/min
 	Creator        string         `gorm:"column:creator;type:varchar" json:"creator" form:"creator"` // 用户 address
 	MetaData       datatypes.JSON `gorm:"column:meta_data" json:"metadata"`                          // 元数据
