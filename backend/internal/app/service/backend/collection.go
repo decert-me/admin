@@ -19,12 +19,12 @@ func CreateCollection(r request.CreateCollectionRequest) error {
 	collection := model.Quest{
 		TokenId:     tokenID - 1,
 		Title:       r.Title,
-		Difficulty:  r.Difficulty,
 		Description: r.Description,
 		Cover:       r.Cover,
 		Author:      r.Author,
 		Style:       2,
 		Sort:        r.Sort,
+		Difficulty:  r.Difficulty,
 	}
 	return global.DB.Model(&model.Quest{}).Create(&collection).Error
 }
@@ -76,12 +76,12 @@ func GetCollectionDetail(r request.GetCollectionDetailRequest) (detail model.Que
 func UpdateCollection(r request.UpdateCollectionRequest) error {
 	collection := model.Quest{
 		Title:       r.Title,
-		Difficulty:  r.Difficulty,
 		Description: r.Description,
 		Cover:       r.Cover,
 		Author:      r.Author,
 		Style:       2,
 		Sort:        r.Sort,
+		Difficulty:  r.Difficulty,
 	}
 	raw := global.DB.Model(&model.Quest{}).Where("id = ?", r.ID).Updates(&collection)
 	if raw.RowsAffected == 0 {

@@ -23,6 +23,8 @@ func main() {
 	//initialize.CheckConfig()
 	// 初始化缓存
 	global.TokenCache = initialize.TokenCache()
+	// 初始化打包状态
+	initialize.InitTutorialPackStatus()
 	// 初始化casbin
 	system.CasbinInit()
 	core.RunWindowsServer()
