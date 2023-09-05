@@ -193,9 +193,11 @@ export default function ChallengeListPage(params) {
     ];
 
     // 移出合辑
-    async function updateT(id) {
+    async function updateT(selectId) {
+      const selectData = data.filter(e => e.id === selectId)[0];
+      const collection_id = selectData.collection_id.filter(e => e != id);
       await updateQuest({
-        id, collection_id: 0
+        collection_id, id: selectId
       })
       .then(res => {
         if (res.code === 0) {
@@ -324,14 +326,12 @@ export default function ChallengeListPage(params) {
       }
       setPageConfig({...pageConfig});
       init();
-      console.log(decodeURIComponent(location.search));
     },[location])
 
     useEffect(() => {
       if (isChange) {
         setIsChange(false);
-        const id = data.map(e => Number(e.id));
-        updateCollectionQuestSort({id})
+        updateCollectionQuestSort({collection_id: Number(id), id: data.map(e => Number(e.id))})
         .then(res => {
           if (res.code === 0) {
             message.success(res.msg);
