@@ -55,9 +55,6 @@ export default function ChallengeListPage(params) {
     const location = useLocation();
     const { id } = useParams();
 
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);     //  多选框: 选中的挑战
-    const [topLoad, setTopLoad] = useState(false);    //  置顶等待
-
     let [search_key, setSearch_key] = useState("");    //  搜索
     let [data, setData] = useState([]);
     let [isChange, setIsChange] = useState();
@@ -255,31 +252,6 @@ export default function ChallengeListPage(params) {
         })
         getList()
     }
-    
-    const onSelectChange = (newSelectedRowKeys) => {
-        setSelectedRowKeys(newSelectedRowKeys);
-    };
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: onSelectChange,
-    };
-    const hasSelected = selectedRowKeys.length > 0;
-
-
-    // 挑战置顶
-    function toTop(status) {
-        setTopLoad(true);
-        const statusArr = Array(selectedRowKeys.length).fill(status);
-        topQuest({id: selectedRowKeys, top: statusArr})
-        .then(res => {
-          setTopLoad(false);
-          if (res.code === 0) {
-            message.success(res.msg);
-            setSelectedRowKeys([...[]]);
-            getList()
-          }
-        })
-    }
 
     async function getList(page) {
         if (page) {
@@ -379,20 +351,6 @@ export default function ChallengeListPage(params) {
                   <h2>挑战列表</h2>
               }
                 <Space size="large">
-                      {/* <Button 
-                          onClick={() => toTop(true)} 
-                          disabled={!hasSelected}
-                          loading={topLoad}
-                      >
-                          置顶
-                      </Button>
-                      <Button 
-                          onClick={() => toTop(false)} 
-                          disabled={!hasSelected}
-                          loading={topLoad}
-                      >
-                          取消置顶
-                      </Button> */}
                       {
                         id ? 
                         <Button 
