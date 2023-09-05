@@ -193,8 +193,8 @@ export default function ChallengeListPage(params) {
     ];
 
     // 移出合辑
-    function updateT(id) {
-      updateQuest({
+    async function updateT(id) {
+      await updateQuest({
         id, collection_id: 0
       })
       .then(res => {
