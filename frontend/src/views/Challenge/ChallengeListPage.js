@@ -69,7 +69,10 @@ export default function ChallengeListPage(params) {
         {
           title: '挑战编号',
           dataIndex: 'tokenId',
-          render: (tokenId) => (
+          render: (tokenId, quest) => (
+            id ?
+            <a className="underline" href={`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`} target="">{tokenId}</a>
+            :
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
           )
         },
