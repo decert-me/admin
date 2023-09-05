@@ -1,6 +1,7 @@
-import { Button, Popconfirm, Space, Switch, Table, Tooltip, message } from "antd";
+import { Button, Input, Popconfirm, Space, Switch, Table, Tooltip, message } from "antd";
 import {
   ArrowLeftOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
 import React, { useEffect, useState } from "react";
 import "./index.scss";
@@ -16,6 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useRequest } from 'ahooks';
 
 const location = window.location.host;
 const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
@@ -55,10 +57,17 @@ export default function ChallengeListPage(params) {
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);     //  多选框: 选中的挑战
     const [topLoad, setTopLoad] = useState(false);    //  置顶等待
+
+    let [search_key, setSearch_key] = useState("");    //  搜索
     let [data, setData] = useState([]);
     let [isChange, setIsChange] = useState();
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
+    });
+
+    const { run } = useRequest(changeSearch, {
+      debounceWait: 500,
+      manual: true,
     });
 
     const columns = [
@@ -282,7 +291,7 @@ export default function ChallengeListPage(params) {
         if (id) {
           res = await getCollectionQuestList({id: Number(id)});
         }else{
-          res = await getQuestList(pageConfig);
+          res = await getQuestList({...pageConfig, search_key});
         }
 
         if (res.code === 0) {
@@ -320,6 +329,15 @@ export default function ChallengeListPage(params) {
         },
       }),
     );
+
+    function changeSearch(params) {
+      search_key = params;
+      setSearch_key(search_key);
+      pageConfig = {
+        page: 0, pageSize: 10, total: 0
+      }
+      init();
+    }
 
     function init(params) {
         pageConfig.page += 1;
@@ -360,8 +378,8 @@ export default function ChallengeListPage(params) {
                 :
                   <h2>挑战列表</h2>
               }
-                {/* <Space size="large">
-                      <Button 
+                <Space size="large">
+                      {/* <Button 
                           onClick={() => toTop(true)} 
                           disabled={!hasSelected}
                           loading={topLoad}
@@ -374,8 +392,18 @@ export default function ChallengeListPage(params) {
                           loading={topLoad}
                       >
                           取消置顶
-                      </Button>
-                </Space> */}
+                      </Button> */}
+                      {
+                        id ? 
+                        <Button 
+                          // onClick={() => }
+                        >
+                          添加挑战
+                        </Button>
+                        :
+                        <Input prefix={<SearchOutlined />} onChange={(e) => run(e.target.value)} />
+                      }
+                </Space>
             </div>
             {
               id ? 
