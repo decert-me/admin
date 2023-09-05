@@ -1,4 +1,4 @@
-import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
+import { Button, Popconfirm, Space, Switch, Table, Tooltip, message } from "antd";
 import {
   ArrowLeftOutlined,
 } from '@ant-design/icons';
@@ -71,7 +71,9 @@ export default function ChallengeListPage(params) {
           dataIndex: 'tokenId',
           render: (tokenId, quest) => (
             id ?
-            <a className="underline" href={`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`} target="">{tokenId}</a>
+            <Tooltip title="点此管理挑战">
+              <a className="underline" href={`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`} target="">{tokenId}</a>
+            </Tooltip>
             :
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
           )
@@ -92,7 +94,9 @@ export default function ChallengeListPage(params) {
           title: '标题',
           dataIndex: 'title',
           render: (title, quest) => (
-            <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+            <Tooltip title="查看挑战网页效果">
+              <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+            </Tooltip>
           )
         },
         {
