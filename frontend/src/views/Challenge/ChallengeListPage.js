@@ -382,11 +382,6 @@ export default function ChallengeListPage(params) {
     }
 
     function init(params) {
-      if (location.search) {
-        let serch = new URLSearchParams(location.search);
-        search_key = serch.get("tokenId");
-        setSearch_key(search_key);
-      }
         pageConfig.page += 1;
         setPageConfig({...pageConfig});
         getList()
@@ -397,6 +392,11 @@ export default function ChallengeListPage(params) {
         page: 0, pageSize: 10, total: 0
       }
       setPageConfig({...pageConfig});
+      if (location.search) {
+        let serch = new URLSearchParams(location.search);
+        search_key = serch.get("tokenId");
+        setSearch_key(search_key);
+      }
       init();
     },[location])
 
