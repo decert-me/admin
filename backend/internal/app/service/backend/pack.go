@@ -3,16 +3,18 @@ package backend
 import (
 	"backend/internal/app/global"
 	"backend/internal/app/model"
+	"backend/internal/app/model/receive"
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
 	"backend/internal/app/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/imroc/req/v3"
 	"github.com/tidwall/gjson"
+	"go.uber.org/zap"
 	"os"
 	"path"
-	"strings"
 	"sync"
 	"time"
 )
@@ -63,115 +65,92 @@ func GetPackLog(req request.GetPackLogRequest) (packLog []model.PackLog, total i
 }
 
 // Pack  打包
-func Pack(req request.PackRequest) error {
+func Pack(r request.PackRequest) error {
 	l.Lock()
 	defer l.Unlock()
 	// 查询数据库
 	var tutorial model.Tutorial
-	err := global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).First(&tutorial).Error
+	err := global.DB.Model(&model.Tutorial{}).Where("id = ?", r.ID).First(&tutorial).Error
 	if err != nil {
-		UpdateTutorialPackStatus(req.ID, 3)
+		UpdateTutorialPackStatus(r.ID, 3)
 		return err
 	}
-	data := []model.Tutorial{tutorial}
-	// 生成JSON
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	client := req.C().SetTimeout(10 * time.Minute)
+	if global.CONFIG.Pack.Server == "" {
+		UpdateTutorialPackStatus(r.ID, 3)
+		return errors.New("打包服务器地址不能为空")
+	}
+	// 发送请求
+	url := fmt.Sprintf("%s/pack/pack", global.CONFIG.Pack.Server)
+	res, err := client.R().SetBodyJsonMarshal(tutorial).Post(url)
 	if err != nil {
-		fmt.Println("Error:", err)
-		UpdateTutorialPackStatus(req.ID, 3)
+		UpdateTutorialPackStatus(r.ID, 3)
 		return err
 	}
-	// 写入JSON
-	// 将JSON数据写入文件
-	file, err := os.Create(path.Join(global.CONFIG.Pack.Path, "tutorials.json"))
+	// 解析JSON
+	var packReceive receive.PackReceive
+	err = json.Unmarshal(res.Bytes(), &packReceive)
 	if err != nil {
-		fmt.Println("Error:", err)
-		UpdateTutorialPackStatus(req.ID, 3)
+		UpdateTutorialPackStatus(r.ID, 3)
 		return err
 	}
-	defer file.Close()
+	if packReceive.Code != 0 {
+		UpdateTutorialPackStatus(r.ID, 3)
+		return errors.New(gjson.Get(res.String(), "msg").String())
+	}
 
-	_, err = file.Write(jsonData)
-	if err != nil {
-		fmt.Println("Error:", err)
-		UpdateTutorialPackStatus(req.ID, 3)
-		return err
-	}
-	// npm run build -- blockchain-basic
-	//args := []string{"run", "build", "--", tutorial.CatalogueName}
-	args := []string{"run", "build"}
-	dir := global.CONFIG.Pack.Path
-	stdoutRes, stdoutErr, err := execCommand(global.CONFIG.Pack.Path, "npm", args...)
-	if err != nil {
-		fmt.Println(err)
-		UpdateTutorialPackStatus(req.ID, 3)
-		return err
-	}
-	var packLog strings.Builder
-	for _, v := range stdoutErr {
-		packLog.WriteString(v + "<br />")
-	}
-	fmt.Println(stdoutRes)
-	fmt.Println(stdoutErr)
-	var success bool
-	var startPage string
-	for _, v := range stdoutRes {
-		v = strings.Replace(v, "\n", "", -1)
-		// 判断打包是否成功
-		if !success && v == "Build completed successfully" {
-			success = true
-		}
-		if gjson.Valid(v) {
-			startPage = gjson.Get(v, "startPage").String()
-		}
-	}
-	var status uint8
-	if success {
-		status = 2
-	} else {
-		status = 3
-	}
 	// 写入打包日志
 	err = global.DB.Model(&model.PackLog{}).Create(&model.PackLog{
-		TutorialID: req.ID,
-		Status:     status,
+		TutorialID: r.ID,
+		Status:     packReceive.Data.PackLog.Status,
 	}).Error
 	if err != nil {
 		return err
 	}
-	if status == 2 {
-		packLog.Reset()
-		packLog.WriteString("打包成功  <br />")
-		packLog.WriteString(fmt.Sprintf("打包时间：%s <br />", time.Now().Format("2006-01-02 15:04:05")))
-		if tutorial.CommitHash != nil && *tutorial.CommitHash != "" {
-			packLog.WriteString(fmt.Sprintf("版本：%s <br />", *tutorial.CommitHash))
-		}
-	}
-	if tutorial.PackStatus == 2 && status == 3 {
-		// 写入日志
-		err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
-			Updates(&model.Tutorial{PackLog: packLog.String()}).Error
-		if err != nil {
-			return err
-		}
-		return errors.New("打包失败")
-	}
-	// 将结果写入数据库
-	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).
-		Updates(&model.Tutorial{StartPage: startPage, PackStatus: status, PackLog: packLog.String()}).Error
+	// 写入日志
+	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", r.ID).
+		Updates(&packReceive.Data.Tutorial).Error
 	if err != nil {
 		return err
 	}
-	// 删除多余文件
-	//PackDelExcessFile(dir + "/build")
-	// 复制文件
-	//utils.CopyContents(path.Join(dir, "build", tutorial.CatalogueName), path.Join(dir, "build"))
+	// 下载文件
+	downUrl := fmt.Sprintf("%s/resource/%s", global.CONFIG.Pack.Server, packReceive.Data.FileName)
+	fileRes, err := client.R().Get(downUrl)
+	if err != nil {
+		UpdateTutorialPackStatus(r.ID, 3)
+		return err
+	}
+	// 写入文件
+	file, err := os.Create(fmt.Sprintf("%s/%s.zip", global.CONFIG.Pack.PublishPath, tutorial.CatalogueName))
+	if err != nil {
+		UpdateTutorialPackStatus(r.ID, 3)
+		global.LOG.Error("创建文件失败", zap.Error(err))
+		return err
+	}
+	_, err = file.Write(fileRes.Bytes())
+	if err != nil {
+		global.LOG.Error("写入文件失败", zap.Error(err))
+		UpdateTutorialPackStatus(r.ID, 3)
+		return err
+	}
+	// 解压文件
+	zipFilePath := fmt.Sprintf("%s/%s.zip", global.CONFIG.Pack.PublishPath, tutorial.CatalogueName)
+	unzipPath := fmt.Sprintf("%s/%s", global.CONFIG.Pack.PublishPath, tutorial.CatalogueName)
+	fmt.Println("zipFilePath", zipFilePath)
+	fmt.Println("unzipPath", unzipPath)
+	err = utils.Unzip(zipFilePath, unzipPath)
+	if err != nil {
+		global.LOG.Error("解压文件失败", zap.Error(err))
+		UpdateTutorialPackStatus(r.ID, 3)
+		return err
+	}
 	// 删除文件
-	//os.RemoveAll(path.Join(dir, "build", tutorial.CatalogueName))
-	// 复制文件到发布项目路径
-	utils.CopyContents(path.Join(dir, "build"), global.CONFIG.Pack.PublishPath)
-	// Build completed successfully
-	// Error running build command:
+	err = os.Remove(zipFilePath)
+	if err != nil {
+		global.LOG.Error("删除文件失败", zap.Error(err))
+		UpdateTutorialPackStatus(r.ID, 3)
+		return err
+	}
 	return nil
 }
 
@@ -201,8 +180,3 @@ func PackDelExcessFile(dir string) {
 		}
 	}
 }
-
-// 打包失败通知
-// 打包成功后复制文件
-
-// 解析视频
