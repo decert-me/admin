@@ -1,10 +1,11 @@
-import { Button, Popconfirm, Space, Switch, Table, message } from "antd";
+import { Button, Checkbox, Input, Modal, Popconfirm, Space, Spin, Switch, Table, Tooltip, message } from "antd";
 import {
   ArrowLeftOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./index.scss";
-import { deleteQuest, getCollectionQuestList, getQuestList, topQuest, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
+import { addQuestToCollection, deleteQuest, getCollectionQuestList, getQuestList, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -16,6 +17,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useRequest } from 'ahooks';
+import InfiniteScroll from "../../components/InfiniteScroll";
+import CustomLoading from "../../components/InfiniteScroll/CustomLoading";
 
 const location = window.location.host;
 const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
@@ -52,13 +56,25 @@ export default function ChallengeListPage(params) {
     const navigateTo = useNavigate();
     const location = useLocation();
     const { id } = useParams();
+    const scrollRef = useRef(null);
 
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);     //  多选框: 选中的挑战
-    const [topLoad, setTopLoad] = useState(false);    //  置顶等待
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    let [search_key, setSearch_key] = useState("");    //  搜索
     let [data, setData] = useState([]);
     let [isChange, setIsChange] = useState();
+    let [modalPage, setModalPage] = useState({
+      page: 0, pageSize: 20, total: 0
+    });
+    let [modalData, setModalData] = useState([]);
+    let [checkedList, setCheckedList] = useState([]);
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
+    });
+
+    const { run } = useRequest(changeSearch, {
+      debounceWait: 500,
+      manual: true,
     });
 
     const columns = [
@@ -69,7 +85,12 @@ export default function ChallengeListPage(params) {
         {
           title: '挑战编号',
           dataIndex: 'tokenId',
-          render: (tokenId) => (
+          render: (tokenId, quest) => (
+            id ?
+            <Tooltip title="点此管理挑战">
+              <a className="underline" href={`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`} target="">{tokenId}</a>
+            </Tooltip>
+            :
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
           )
         },
@@ -89,7 +110,9 @@ export default function ChallengeListPage(params) {
           title: '标题',
           dataIndex: 'title',
           render: (title, quest) => (
-            <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+            <Tooltip title="查看挑战网页效果">
+              <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+            </Tooltip>
           )
         },
         {
@@ -193,9 +216,11 @@ export default function ChallengeListPage(params) {
     ];
 
     // 移出合辑
-    async function updateT(id) {
+    async function updateT(selectId) {
+      const selectData = data.filter(e => e.id === selectId)[0];
+      const collection_id = selectData.collection_id.filter(e => e != id);
       await updateQuest({
-        id, collection_id: 0
+        collection_id, id: selectId
       })
       .then(res => {
         if (res.code === 0) {
@@ -237,31 +262,6 @@ export default function ChallengeListPage(params) {
         })
         getList()
     }
-    
-    const onSelectChange = (newSelectedRowKeys) => {
-        setSelectedRowKeys(newSelectedRowKeys);
-    };
-    const rowSelection = {
-        selectedRowKeys,
-        onChange: onSelectChange,
-    };
-    const hasSelected = selectedRowKeys.length > 0;
-
-
-    // 挑战置顶
-    function toTop(status) {
-        setTopLoad(true);
-        const statusArr = Array(selectedRowKeys.length).fill(status);
-        topQuest({id: selectedRowKeys, top: statusArr})
-        .then(res => {
-          setTopLoad(false);
-          if (res.code === 0) {
-            message.success(res.msg);
-            setSelectedRowKeys([...[]]);
-            getList()
-          }
-        })
-    }
 
     async function getList(page) {
         if (page) {
@@ -272,8 +272,9 @@ export default function ChallengeListPage(params) {
         let res;
         if (id) {
           res = await getCollectionQuestList({id: Number(id)});
+          getChallenge()
         }else{
-          res = await getQuestList(pageConfig);
+          res = await getQuestList({...pageConfig, search_key});
         }
 
         if (res.code === 0) {
@@ -312,6 +313,68 @@ export default function ChallengeListPage(params) {
       }),
     );
 
+    function getChallenge(params) {
+      modalPage.page += 1;
+      setModalPage({...modalPage})
+      getQuestList({...modalPage, search_key})
+      .then(res => {
+        if (res.code === 0) {
+          modalPage.total = res.data.total;
+          setModalPage({...modalPage});
+          const arr = res.data.list;
+          const checked = [];
+          arr.forEach(e => {
+            e.checked = e.collection_id.indexOf(Number(id)) !== -1;
+            e.checked && checked.push(e.id);
+          })
+          const checkboxArr = arr.map(e => {
+            return {
+              label: e.title, value: e.id
+            }
+          })
+          modalData = modalData.concat(checkboxArr);
+          setModalData([...modalData]);
+          checkedList = checkedList.concat(checked);
+          setCheckedList([...checkedList]);
+        }
+      })
+    }
+
+    function changeChecked(params) {
+      checkedList = params;
+      setCheckedList([...checkedList]);
+    }
+
+    function changeCollection() {
+      addQuestToCollection({collection_id: Number(id), id: checkedList})
+      .then(res => {
+        if (res.code === 0) {
+          message.success(res.msg);
+          pageConfig = {
+            page: 0, pageSize: 10, total: 0
+          }
+          init();
+          setIsModalOpen(false);
+        }else{
+          message.error(res.msg);
+        }
+      })
+    }
+
+    function changeSearch(params) {
+      search_key = params;
+      setSearch_key(search_key);
+      modalPage = {
+        page: 0, pageSize: 20, total: 0
+      }
+      modalData = [];
+      setModalData([...modalData]);
+      pageConfig = {
+        page: 0, pageSize: 10, total: 0
+      }
+      init();
+    }
+
     function init(params) {
         pageConfig.page += 1;
         setPageConfig({...pageConfig});
@@ -324,14 +387,12 @@ export default function ChallengeListPage(params) {
       }
       setPageConfig({...pageConfig});
       init();
-      console.log(decodeURIComponent(location.search));
     },[location])
 
     useEffect(() => {
       if (isChange) {
         setIsChange(false);
-        const id = data.map(e => Number(e.id));
-        updateCollectionQuestSort({id})
+        updateCollectionQuestSort({collection_id: Number(id), id: data.map(e => Number(e.id))})
         .then(res => {
           if (res.code === 0) {
             message.success(res.msg);
@@ -353,23 +414,63 @@ export default function ChallengeListPage(params) {
                 :
                   <h2>挑战列表</h2>
               }
-                {/* <Space size="large">
-                      <Button 
-                          onClick={() => toTop(true)} 
-                          disabled={!hasSelected}
-                          loading={topLoad}
-                      >
-                          置顶
-                      </Button>
-                      <Button 
-                          onClick={() => toTop(false)} 
-                          disabled={!hasSelected}
-                          loading={topLoad}
-                      >
-                          取消置顶
-                      </Button>
-                </Space> */}
+                <Space size="large">
+                      {
+                        id ? 
+                        <Button 
+                          type="primary"
+                          onClick={() => setIsModalOpen(true)}
+                        >
+                          添加挑战
+                        </Button>
+                        :
+                        <Input prefix={<SearchOutlined />} onChange={(e) => run(e.target.value)} />
+                      }
+                </Space>
             </div>
+            <Modal 
+              title="添加挑战"
+              open={isModalOpen} 
+              onOk={() => changeCollection()} 
+              onCancel={() => setIsModalOpen(false)}
+              closeIcon={null}
+              okText="添加"
+              cancelText="取消"
+              bodyStyle={{
+                textAlign: "center"
+              }}
+            >
+              <Input prefix={<SearchOutlined />} onChange={(e) => run(e.target.value)} style={{marginBottom: "10px"}} />
+              <div 
+                ref={scrollRef}
+                style={{
+                  overflowY: "auto",
+                  height: "300px",
+                }}
+              >
+                <Checkbox.Group
+                  options={modalData}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px"
+                  }}
+                  defaultValue={checkedList}
+                  onChange={e => changeChecked(e)}
+                />
+                {
+                  modalPage.page * modalPage.pageSize < modalPage.total &&
+                    <InfiniteScroll
+                        scrollRef={scrollRef}
+                        func={getChallenge}
+                        isCustom={true}
+                        components={(
+                          <CustomLoading className="sbt-loading" />
+                      )}
+                    />
+                }
+              </div>
+            </Modal>
             {
               id ? 
               <DndContext sensors={sensors} modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>

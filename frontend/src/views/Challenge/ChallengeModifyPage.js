@@ -26,7 +26,7 @@ export default function ChallengeModifyPage(params) {
             difficulty, 
             estimate_time: estimateTime * 60,
             sort,
-            collection_id: type === "default" ? 0 : collection_id
+            collection_id: type === "default" ? [] : collection_id
         })
         .then(res => {
             if (res.code === 0) {
@@ -66,8 +66,8 @@ export default function ChallengeModifyPage(params) {
                     {name: ["difficulty"], value: data.metadata.attributes.difficulty},
                     {name: ["estimateTime"], value: data.quest_data.estimateTime / 60},
                     {name: ["sort"], value: Number(data.sort)},
-                    {name: ["type"], value: data.collection_id === 0 ? "default" : "compilation"},
-                    {name: ["collection_id"], value: data.collection_id === 0 ? null : data.collection_id}
+                    {name: ["type"], value: data.collection_id.length === 0 ? "default" : "compilation"},
+                    {name: ["collection_id"], value: data.collection_id}
                 ];
                 setFields([...fields]);
             }
@@ -154,6 +154,8 @@ export default function ChallengeModifyPage(params) {
                             }]}
                         >
                             <Select
+                                mode="multiple"
+                                allowClear
                                 options={collection}
                             />
                         </Form.Item>

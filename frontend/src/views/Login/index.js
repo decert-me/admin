@@ -24,7 +24,6 @@ export default function LoginPage(params) {
     };
 
     function getCaptcha() {
-        // TODO: 获取验证码
         userCaptcha()
         .then(res => {
             if (res?.code === 0) {

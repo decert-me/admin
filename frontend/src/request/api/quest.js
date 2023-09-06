@@ -129,3 +129,12 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 修改合辑内的挑战
+    export const addQuestToCollection = (data) => {
+        return serviceAxios({
+            url: `/collection/addQuestToCollection`,
+            method: "post",
+            data
+        })
+    }
