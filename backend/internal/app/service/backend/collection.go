@@ -6,7 +6,9 @@ import (
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
 	"errors"
+	"fmt"
 	"github.com/tidwall/gjson"
+	"gorm.io/gorm"
 )
 
 // CreateCollection 创建合辑
@@ -19,6 +21,7 @@ func CreateCollection(r request.CreateCollectionRequest) error {
 		Style:       2,
 		Sort:        r.Sort,
 		Difficulty:  r.Difficulty,
+		Status:      2,
 	}
 	return global.DB.Model(&model.Collection{}).Create(&collection).Error
 }
@@ -88,7 +91,7 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 func DeleteCollection(r request.DeleteCollectionRequest) error {
 	tx := global.DB.Begin()
 	// 删除合辑
-	err := tx.Model(&model.Collection{}).Where("collection_id = ?", r.ID).Delete(&model.Collection{}).Error
+	err := tx.Model(&model.Collection{}).Where("id = ?", r.ID).Delete(&model.Collection{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -96,6 +99,12 @@ func DeleteCollection(r request.DeleteCollectionRequest) error {
 	// CollectionRelate
 	var collectionRelateList []model.CollectionRelate
 	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Find(&collectionRelateList).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 删除合辑关系表
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Delete(&model.CollectionRelate{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -109,19 +118,13 @@ func DeleteCollection(r request.DeleteCollectionRequest) error {
 			return err
 		}
 		// 下架
-		if count <= 1 {
+		if count == 0 {
 			err = tx.Model(&model.Quest{}).Where("id = ?", v.QuestID).Update("collection_status", 1).Error
 			if err != nil {
 				tx.Rollback()
 				return err
 			}
 		}
-	}
-	// 删除合辑关系表
-	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Delete(&model.CollectionRelate{}).Error
-	if err != nil {
-		tx.Rollback()
-		return err
 	}
 	return tx.Commit().Error
 }
@@ -142,6 +145,12 @@ func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
 		tx.Rollback()
 		return err
 	}
+	// 更新CollectionRelate状态
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Update("status", r.Status).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	// 判断是否需要更新Quest状态
 	for _, v := range collectionRelateList {
 		var count int64
@@ -150,8 +159,9 @@ func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
 			tx.Rollback()
 			return err
 		}
+		fmt.Println("上架状态", r.Status, count)
 		// 下架
-		if r.Status == 1 && count <= 1 {
+		if r.Status == 2 && count == 0 {
 			err = tx.Model(&model.Quest{}).Where("id = ?", v.QuestID).Update("collection_status", 1).Error
 			if err != nil {
 				tx.Rollback()
@@ -159,7 +169,7 @@ func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
 			}
 		}
 		// 上架
-		if r.Status == 2 && count == 0 {
+		if r.Status == 1 && count > 0 {
 			err = tx.Model(&model.Quest{}).Where("id = ?", v.QuestID).Update("collection_status", 2).Error
 			if err != nil {
 				tx.Rollback()
@@ -167,12 +177,7 @@ func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
 			}
 		}
 	}
-	// 更新CollectionRelate状态
-	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Update("status", r.Status).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+
 	return tx.Commit().Error
 }
 
@@ -232,6 +237,22 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 			tx.Rollback()
 			return err
 		}
+		// 更新Quest状态
+		UpdateQuestCollectionStatus(tx, v)
 	}
 	return tx.Commit().Error
+}
+
+// UpdateQuestCollectionStatus 更新Quest是否在合辑状态
+func UpdateQuestCollectionStatus(tx *gorm.DB, id uint) {
+	var count int64
+	tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", id).Where("status = 1").Count(&count)
+	// 合辑
+	if count <= 1 {
+		tx.Model(&model.Quest{}).Where("id = ?", id).Update("collection_status", 2)
+	}
+	// 独立
+	if count == 0 {
+		tx.Model(&model.Quest{}).Where("id = ?", id).Update("collection_status", 1)
+	}
 }
