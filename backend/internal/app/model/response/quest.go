@@ -6,8 +6,9 @@ import (
 
 type GetQuestListRes struct {
 	model.Quest
-	ClaimNum     int64 `gorm:"-" json:"claim_num"`     // 铸造数量
-	ChallengeNum int64 `gorm:"-" json:"challenge_num"` // 挑战人次
+	ClaimNum     int64  `gorm:"-" json:"claim_num"`     // 铸造数量
+	ChallengeNum int64  `gorm:"-" json:"challenge_num"` // 挑战人次
+	CollectionID []uint `gorm:"-" json:"collection_id"` // 合辑ID
 }
 
 type ChallengeUsers struct {
@@ -25,5 +26,6 @@ type GetQuestChallengeUserRes struct {
 
 type GetQuestRes struct {
 	model.Quest
+	CollectionID []uint `gorm:"-" json:"collection_id"` // 合辑ID
 	//Claimed bool `gorm:"claimed" json:"claimed"`
 }

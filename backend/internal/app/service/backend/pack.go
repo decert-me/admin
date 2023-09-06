@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/imroc/req/v3"
-	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	"os"
 	"path"
@@ -95,10 +94,9 @@ func Pack(r request.PackRequest) error {
 		return err
 	}
 	if packReceive.Code != 0 {
-		UpdateTutorialPackStatus(r.ID, 3)
-		return errors.New(gjson.Get(res.String(), "msg").String())
+		packReceive.Data.PackLog.Status = 3
+		packReceive.Data.Tutorial.PackLog = packReceive.Data.Message
 	}
-
 	// 写入打包日志
 	err = global.DB.Model(&model.PackLog{}).Create(&model.PackLog{
 		TutorialID: r.ID,
@@ -112,6 +110,9 @@ func Pack(r request.PackRequest) error {
 		Updates(&packReceive.Data.Tutorial).Error
 	if err != nil {
 		return err
+	}
+	if packReceive.Data.PackLog.Status == 3 {
+		return errors.New("打包失败")
 	}
 	// 下载文件
 	downUrl := fmt.Sprintf("%s/resource/%s", global.CONFIG.Pack.Server, packReceive.Data.FileName)
