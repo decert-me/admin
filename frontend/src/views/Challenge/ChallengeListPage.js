@@ -80,7 +80,13 @@ export default function ChallengeListPage(params) {
     const columns = [
         {
           title: '权重',
-          dataIndex: 'sort'
+          dataIndex: 'sort',
+          render: (sort, record, index) => (
+            id ?
+            <p>{index + 1}</p>
+            :
+            <p>{sort}</p>
+          )
         },
         {
           title: '挑战编号',
