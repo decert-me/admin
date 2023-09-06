@@ -109,20 +109,8 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if req.Sort != nil {
 		data["sort"] = *req.Sort
 	}
-	if len(*req.CollectionID) != 0 {
-		data["collection_status"] = 2
-	} else {
-		data["collection_status"] = 1
-	}
+
 	tx := global.DB.Begin()
-	raw := tx.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
-	if raw.RowsAffected == 0 {
-		return errors.New("更新失败")
-	}
-	if raw.Error != nil {
-		tx.Rollback()
-		return raw.Error
-	}
 	// 查询quest
 	var quest model.Quest
 	err := tx.Model(&model.Quest{}).Where("id = ?", req.ID).First(&quest).Error
@@ -137,6 +125,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		return err
 	}
 	// 写入collection关系表
+	var exist bool
 	for _, id := range *req.CollectionID {
 		// 判断集合是否存在
 		var collection model.Collection
@@ -150,13 +139,31 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 			CollectionID: id,
 			QuestID:      req.ID,
 			TokenID:      quest.TokenId,
+			Status:       collection.Status,
 		}).Error
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
+		if exist == false && collection.Status == 1 {
+			exist = true
+		}
 	}
-	UpdateCollectionStatusAuto() // 更新合辑下架状态
+	if len(*req.CollectionID) != 0 && exist {
+		data["collection_status"] = 2
+	} else {
+		data["collection_status"] = 1
+	}
+	// 更新Quest
+	raw := tx.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
+	if raw.RowsAffected == 0 {
+		return errors.New("更新失败")
+	}
+	if raw.Error != nil {
+		tx.Rollback()
+		return raw.Error
+	}
+	UpdateCollectionStatusAuto(tx) // 更新合辑下架状态
 	return tx.Commit().Error
 }
 
@@ -166,26 +173,26 @@ func DeleteQuest(req request.DeleteQuestRequest) error {
 	if raw.RowsAffected == 0 {
 		return errors.New("删除失败")
 	}
-	UpdateCollectionStatusAuto() // 更新合辑下架状态
+	UpdateCollectionStatusAuto(global.DB) // 更新合辑下架状态
 	return raw.Error
 }
 
 // UpdateCollectionStatusAuto 更新合辑下架状态
-func UpdateCollectionStatusAuto() error {
+func UpdateCollectionStatusAuto(tx *gorm.DB) error {
 	var collectionList []model.Collection
-	err := global.DB.Model(&model.Collection{}).Find(&collectionList).Error
+	err := tx.Model(&model.Collection{}).Find(&collectionList).Error
 	if err != nil {
 		return err
 	}
 	for _, v := range collectionList {
 		var count int64
-		err = global.DB.Model(&model.CollectionRelate{}).Where("collection_id = ?", v.ID).Where("status = 1").Count(&count).Error
+		err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", v.ID).Where("status = 1").Count(&count).Error
 		if err != nil {
 			return err
 		}
 		// 更改下架状态
 		if count == 0 {
-			err = global.DB.Model(&model.Collection{}).Where("id = ?", v.ID).Update("status", 2).Error
+			err = tx.Model(&model.Collection{}).Where("id = ?", v.ID).Update("status", 2).Error
 			if err != nil {
 				return err
 			}

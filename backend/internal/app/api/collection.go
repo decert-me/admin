@@ -17,7 +17,7 @@ func CreateCollection(c *gin.Context) {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
-	if backend.CreateCollection(r) != nil {
+	if err = backend.CreateCollection(r); err != nil {
 		global.LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败 "+err.Error(), c)
 	} else {
@@ -64,7 +64,7 @@ func UpdateCollection(c *gin.Context) {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
-	if backend.UpdateCollection(r) != nil {
+	if err = backend.UpdateCollection(r); err != nil {
 		global.LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败 "+err.Error(), c)
 	} else {
@@ -80,7 +80,7 @@ func DeleteCollection(c *gin.Context) {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
-	if backend.DeleteCollection(r) != nil {
+	if err = backend.DeleteCollection(r); err != nil {
 		global.LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败 "+err.Error(), c)
 	} else {
@@ -96,7 +96,7 @@ func UpdateCollectionStatus(c *gin.Context) {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
-	if backend.UpdateCollectionStatus(r) != nil {
+	if err = backend.UpdateCollectionStatus(r); err != nil {
 		global.LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败 "+err.Error(), c)
 	} else {
@@ -129,7 +129,7 @@ func UpdateCollectionQuestSort(c *gin.Context) {
 		response.FailWithMessage("参数错误", c)
 		return
 	}
-	if backend.UpdateCollectionQuestSort(r) != nil {
+	if err = backend.UpdateCollectionQuestSort(r); err != nil {
 		global.LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败 "+err.Error(), c)
 	} else {
