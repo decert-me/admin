@@ -94,7 +94,7 @@ export default function ChallengeListPage(params) {
           render: (tokenId, quest) => (
             id ?
             <Tooltip title="点此管理挑战">
-              <a className="underline" href={`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`} target="">{tokenId}</a>
+              <a className="underline" href={`/dashboard/challenge/list?tokenId=${quest.tokenId}`} target="">{tokenId}</a>
             </Tooltip>
             :
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
@@ -382,6 +382,11 @@ export default function ChallengeListPage(params) {
     }
 
     function init(params) {
+      if (location.search) {
+        let serch = new URLSearchParams(location.search);
+        search_key = serch.get("tokenId");
+        setSearch_key(search_key);
+      }
         pageConfig.page += 1;
         setPageConfig({...pageConfig});
         getList()
