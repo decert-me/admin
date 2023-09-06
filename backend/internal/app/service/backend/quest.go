@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"math"
+	"strconv"
 )
 
 // GetQuestList 获取挑战列表
@@ -19,10 +20,6 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	db := global.DB.Model(&model.Quest{}).Where("style = 1")
 	db.Where("disabled = false")
 	db.Where(&req.Quest)
-	err = db.Count(&total).Error
-	if err != nil {
-		return res, total, err
-	}
 	db.Order("sort desc,token_id desc")
 	if req.OrderKey == "token_id" {
 		fmt.Println(req.OrderKey)
@@ -37,6 +34,10 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	}
 	if req.SearchKey != "" {
 		db.Where("quest.title ILIKE ? OR quest.description ILIKE ?", "%"+req.SearchKey+"%", "%"+req.SearchKey+"%")
+		tokenID, err := strconv.Atoi(req.SearchKey)
+		if err == nil {
+			db.Or("quest.token_id = ?", tokenID)
+		}
 	}
 	if req.Address != "" {
 		db.Select("quest.*,c.claimed")
@@ -44,12 +45,18 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 	} else {
 		db.Select("*")
 	}
+	err = db.Count(&total).Error
+	if err != nil {
+		return res, total, err
+	}
 	err = db.Limit(limit).Offset(offset).Find(&res).Error
 	for i := 0; i < len(res); i++ {
 		// 统计铸造数量
 		global.DB.Model(&model.UserChallenges{}).Where("token_id = ?", res[i].TokenId).Count(&res[i].ClaimNum)
 		// 统计挑战人次
 		global.DB.Model(&model.UserChallengeLog{}).Where("token_id = ?", res[i].TokenId).Count(&res[i].ChallengeNum)
+		// 获取挑战合辑
+		global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", res[i].TokenId).Find(&res[i].CollectionID)
 	}
 
 	return res, total, err
@@ -58,6 +65,8 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 // GetQuest 获取挑战详情
 func GetQuest(id string) (quest response.GetQuestRes, err error) {
 	err = global.DB.Model(&model.Quest{}).Where("token_id", id).First(&quest).Error
+	// 获取所属合辑
+	global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", id).Find(&quest.CollectionID)
 	return
 }
 
@@ -86,9 +95,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if req.CollectionID == nil {
 		return errors.New("参数错误")
 	}
-	data := map[string]interface{}{
-		"collection_id": *req.CollectionID,
-	}
+	data := map[string]interface{}{}
 	if req.EstimateTime != nil {
 		data["quest_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(quest_data, '{estimateTime}', '%d')", *req.EstimateTime))
 	} else {
@@ -102,14 +109,55 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if req.Sort != nil {
 		data["sort"] = *req.Sort
 	}
-	raw := global.DB.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
+	if len(*req.CollectionID) != 0 {
+		data["collection_status"] = 2
+	} else {
+		data["collection_status"] = 1
+	}
+	tx := global.DB.Begin()
+	raw := tx.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
 	}
 	if raw.Error != nil {
+		tx.Rollback()
 		return raw.Error
 	}
-	return nil
+	// 查询quest
+	var quest model.Quest
+	err := tx.Model(&model.Quest{}).Where("id = ?", req.ID).First(&quest).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 清除原有关系
+	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Delete(&model.CollectionRelate{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 写入collection关系表
+	for _, id := range *req.CollectionID {
+		// 判断集合是否存在
+		var collection model.Collection
+		err = tx.Model(&model.Collection{}).Where("id = ?", id).First(&collection).Error
+		if err != nil {
+			tx.Rollback()
+			return errors.New("集合不存在")
+		}
+		// 写入关系
+		err = tx.Model(&model.CollectionRelate{}).Create(&model.CollectionRelate{
+			CollectionID: id,
+			QuestID:      req.ID,
+			TokenID:      quest.TokenId,
+		}).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	UpdateCollectionStatusAuto() // 更新合辑下架状态
+	return tx.Commit().Error
 }
 
 // DeleteQuest 删除挑战
@@ -118,5 +166,30 @@ func DeleteQuest(req request.DeleteQuestRequest) error {
 	if raw.RowsAffected == 0 {
 		return errors.New("删除失败")
 	}
+	UpdateCollectionStatusAuto() // 更新合辑下架状态
 	return raw.Error
+}
+
+// UpdateCollectionStatusAuto 更新合辑下架状态
+func UpdateCollectionStatusAuto() error {
+	var collectionList []model.Collection
+	err := global.DB.Model(&model.Collection{}).Find(&collectionList).Error
+	if err != nil {
+		return err
+	}
+	for _, v := range collectionList {
+		var count int64
+		err = global.DB.Model(&model.CollectionRelate{}).Where("collection_id = ?", v.ID).Where("status = 1").Count(&count).Error
+		if err != nil {
+			return err
+		}
+		// 更改下架状态
+		if count == 0 {
+			err = global.DB.Model(&model.Collection{}).Where("id = ?", v.ID).Update("status", 2).Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

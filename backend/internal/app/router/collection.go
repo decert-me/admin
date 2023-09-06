@@ -17,6 +17,7 @@ func InitCollectionRouter(Router *gin.RouterGroup) {
 		routersWithAuth.POST("delete", api.DeleteCollection)                             // 删除合辑
 		routersWithAuth.POST("updateStatus", api.UpdateCollectionStatus)                 // 更新合辑状态
 		routersWithAuth.POST("updateCollectionQuestSort", api.UpdateCollectionQuestSort) // 编辑合辑下的挑战排序
+		routersWithAuth.POST("addQuestToCollection", api.AddQuestToCollection)           // 添加挑战到合辑
 	}
 	{
 		routers.POST("collectionQuest", api.GetCollectionQuest) // 获取合辑下的挑战

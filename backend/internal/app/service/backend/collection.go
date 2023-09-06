@@ -11,13 +11,7 @@ import (
 
 // CreateCollection 创建合辑
 func CreateCollection(r request.CreateCollectionRequest) error {
-	var tokenID int64
-	err := global.DB.Model(&model.Quest{}).Select("MIN(token_id)").Find(&tokenID).Error
-	if err != nil {
-		return err
-	}
-	collection := model.Quest{
-		TokenId:     tokenID - 1,
+	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
 		Cover:       r.Cover,
@@ -26,12 +20,12 @@ func CreateCollection(r request.CreateCollectionRequest) error {
 		Sort:        r.Sort,
 		Difficulty:  r.Difficulty,
 	}
-	return global.DB.Model(&model.Quest{}).Create(&collection).Error
+	return global.DB.Model(&model.Collection{}).Create(&collection).Error
 }
 
 // GetCollectionList 获取合辑列表
 func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetCollectionListRes, total int64, err error) {
-	db := global.DB.Model(&model.Quest{}).Where("style = 2")
+	db := global.DB.Model(&model.Collection{})
 	err = db.Count(&total).Error
 	if err != nil {
 		return
@@ -40,7 +34,7 @@ func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetC
 	for i := 0; i < len(list); i++ {
 		// 合辑下的挑战
 		var TokenIDList []int64
-		err := global.DB.Model(&model.Quest{}).Select("token_id").Where("collection_id = ?", list[i].ID).Find(&TokenIDList).Error
+		err := global.DB.Model(&model.CollectionRelate{}).Select("token_id").Where("collection_id = ?", list[i].ID).Find(&TokenIDList).Error
 		if err != nil {
 			continue
 		}
@@ -67,14 +61,14 @@ func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetC
 }
 
 // GetCollectionDetail 获取合辑详情
-func GetCollectionDetail(r request.GetCollectionDetailRequest) (detail model.Quest, err error) {
-	err = global.DB.Model(&model.Quest{}).Where("id = ?", r.ID).First(&detail).Error
+func GetCollectionDetail(r request.GetCollectionDetailRequest) (detail model.Collection, err error) {
+	err = global.DB.Model(&model.Collection{}).Where("id = ?", r.ID).First(&detail).Error
 	return
 }
 
 // UpdateCollection 更新合辑
 func UpdateCollection(r request.UpdateCollectionRequest) error {
-	collection := model.Quest{
+	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
 		Cover:       r.Cover,
@@ -83,7 +77,7 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 		Sort:        r.Sort,
 		Difficulty:  r.Difficulty,
 	}
-	raw := global.DB.Model(&model.Quest{}).Where("id = ?", r.ID).Updates(&collection)
+	raw := global.DB.Model(&model.Collection{}).Where("id = ?", r.ID).Updates(&collection)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
 	}
@@ -93,14 +87,38 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 // DeleteCollection 删除合辑
 func DeleteCollection(r request.DeleteCollectionRequest) error {
 	tx := global.DB.Begin()
-	// 清除挑战合辑状态
-	err := tx.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Update("collection_id", 0).Error
+	// 删除合辑
+	err := tx.Model(&model.Collection{}).Where("collection_id = ?", r.ID).Delete(&model.Collection{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
-	// 删除合辑
-	err = tx.Model(&model.Quest{}).Where("id = ?", r.ID).Delete(&model.Quest{}).Error
+	// CollectionRelate
+	var collectionRelateList []model.CollectionRelate
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Find(&collectionRelateList).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 判断是否需要更新Quest状态
+	for _, v := range collectionRelateList {
+		var count int64
+		err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", v.QuestID).Where("status = 1").Count(&count).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		// 下架
+		if count <= 1 {
+			err = tx.Model(&model.Quest{}).Where("id = ?", v.QuestID).Update("collection_status", 1).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	// 删除合辑关系表
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Delete(&model.CollectionRelate{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -110,17 +128,67 @@ func DeleteCollection(r request.DeleteCollectionRequest) error {
 
 // UpdateCollectionStatus 更新合辑状态
 func UpdateCollectionStatus(r request.UpdateCollectionStatusRequest) error {
-	return global.DB.Model(&model.Quest{}).Where("id = ?", r.ID).Update("status", r.Status).Error
+	tx := global.DB.Begin()
+	err := tx.Model(&model.Collection{}).Where("id = ?", r.ID).Update("status", r.Status).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// CollectionRelate
+	var collectionRelateList []model.CollectionRelate
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Find(&collectionRelateList).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 判断是否需要更新Quest状态
+	for _, v := range collectionRelateList {
+		var count int64
+		err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", v.QuestID).Where("status = 1").Count(&count).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		// 下架
+		if r.Status == 1 && count <= 1 {
+			err = tx.Model(&model.Quest{}).Where("id = ?", v.QuestID).Update("collection_status", 1).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		// 上架
+		if r.Status == 2 && count == 0 {
+			err = tx.Model(&model.Quest{}).Where("id = ?", v.QuestID).Update("collection_status", 2).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+	// 更新CollectionRelate状态
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.ID).Update("status", r.Status).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit().Error
 }
 
 // GetCollectionQuest 获取合辑下的挑战
 func GetCollectionQuest(r request.GetCollectionQuestRequest) (questList []response.GetQuestListRes, err error) {
-	err = global.DB.Model(&model.Quest{}).Where("collection_id = ?", r.ID).Order("collection_sort desc").Find(&questList).Error
+	err = global.DB.Model(&model.CollectionRelate{}).Select("quest.*").
+		Joins("left join quest ON collection_relate.quest_id=quest.id").
+		Where("collection_relate.collection_id = ?", r.ID).
+		Order("collection_relate.sort desc").Find(&questList).Error
 	for i := 0; i < len(questList); i++ {
 		// 统计铸造数量
 		global.DB.Model(&model.UserChallenges{}).Where("token_id = ?", questList[i].TokenId).Count(&questList[i].ClaimNum)
 		// 统计挑战人次
 		global.DB.Model(&model.UserChallengeLog{}).Where("token_id = ?", questList[i].TokenId).Count(&questList[i].ChallengeNum)
+		// 获取挑战合辑
+		global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", questList[i].TokenId).Find(&questList[i].CollectionID)
 	}
 	return
 }
@@ -128,10 +196,42 @@ func GetCollectionQuest(r request.GetCollectionQuestRequest) (questList []respon
 // UpdateCollectionQuestSort 编辑合辑下的挑战排序
 func UpdateCollectionQuestSort(r request.UpdateCollectionQuestSortRequest) error {
 	for i := 0; i < len(r.ID); i++ {
-		err := global.DB.Model(&model.Quest{}).Where("id = ?", r.ID[len(r.ID)-i-1]).Update("collection_sort", i).Error
+		err := global.DB.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.CollectionID).Where("quest_id = ?", r.ID[len(r.ID)-i-1]).Update("sort", i).Error
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// AddQuestToCollection 添加挑战到合辑
+func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
+	tx := global.DB.Begin()
+	// 删除原有关系
+	err := tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.CollectionID).Delete(&model.CollectionRelate{}).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	for _, v := range r.ID {
+		// 查询Quest信息
+		var quest model.Quest
+		err = tx.Model(&model.Quest{}).Where("id = ?", v).First(&quest).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		// 添加到合辑
+		collectionRelate := model.CollectionRelate{
+			CollectionID: r.CollectionID,
+			QuestID:      v,
+			TokenID:      quest.TokenId,
+		}
+		err = tx.Model(&model.CollectionRelate{}).Create(&collectionRelate).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	return tx.Commit().Error
 }

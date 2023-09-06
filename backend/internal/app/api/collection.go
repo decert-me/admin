@@ -136,3 +136,19 @@ func UpdateCollectionQuestSort(c *gin.Context) {
 		response.OkWithMessage("更新成功", c)
 	}
 }
+
+// AddQuestToCollection 添加挑战到合辑内
+func AddQuestToCollection(c *gin.Context) {
+	var r request.AddQuestToCollectionRequest
+	err := c.ShouldBindJSON(&r)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+	if err = backend.AddQuestToCollection(r); err != nil {
+		global.LOG.Error("添加失败!", zap.Error(err))
+		response.FailWithMessage("添加失败 "+err.Error(), c)
+	} else {
+		response.OkWithMessage("添加成功", c)
+	}
+}

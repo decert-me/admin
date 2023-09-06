@@ -13,4 +13,5 @@ type _PackReceive struct {
 	PackLog   model.PackLog  `json:"pack_log"`
 	StartPage string         `json:"start_page"`
 	FileName  string         `json:"file_name"`
+	Message   string         `json:"message"`
 }
