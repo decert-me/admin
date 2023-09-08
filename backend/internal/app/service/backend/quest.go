@@ -134,12 +134,18 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 			tx.Rollback()
 			return errors.New("集合不存在")
 		}
+		var status uint8
+		if quest.Status == 2 {
+			status = 2
+		} else {
+			status = collection.Status
+		}
 		// 写入关系
 		err = tx.Model(&model.CollectionRelate{}).Create(&model.CollectionRelate{
 			CollectionID: id,
 			QuestID:      req.ID,
 			TokenID:      quest.TokenId,
-			Status:       collection.Status,
+			Status:       status,
 		}).Error
 		if err != nil {
 			tx.Rollback()

@@ -29,7 +29,7 @@ type Collection struct {
 	Style            int            `gorm:"style;default:1" json:"style" `                            // 1:单独;2:合辑
 	Cover            string         `gorm:"column:cover;comment:封面图" json:"cover"`
 	Author           string         `gorm:"column:author;type:varchar(64);comment:合辑作者" json:"author"`
-	Sort             int            `gorm:"column:sort;default:0" json:"sort"` // 	排序
+	Sort             *int           `gorm:"column:sort;default:0" json:"sort"` // 	排序
 	CollectionStatus uint8          `gorm:"column:collection_status;default:0" json:"-"`
 }
 

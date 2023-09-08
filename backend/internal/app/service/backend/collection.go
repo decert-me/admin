@@ -13,6 +13,9 @@ import (
 
 // CreateCollection 创建合辑
 func CreateCollection(r request.CreateCollectionRequest) error {
+	if r.Sort == nil {
+		return errors.New("排序sort不能为空")
+	}
 	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
@@ -71,6 +74,9 @@ func GetCollectionDetail(r request.GetCollectionDetailRequest) (detail model.Col
 
 // UpdateCollection 更新合辑
 func UpdateCollection(r request.UpdateCollectionRequest) error {
+	if r.Sort == nil {
+		return errors.New("排序sort不能为空")
+	}
 	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
