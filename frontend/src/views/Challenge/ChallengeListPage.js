@@ -80,7 +80,13 @@ export default function ChallengeListPage(params) {
     const columns = [
         {
           title: '权重',
-          dataIndex: 'sort'
+          dataIndex: 'sort',
+          render: (sort, record, index) => (
+            id ?
+            <p>{index + 1}</p>
+            :
+            <p>{sort}</p>
+          )
         },
         {
           title: '挑战编号',
@@ -88,7 +94,7 @@ export default function ChallengeListPage(params) {
           render: (tokenId, quest) => (
             id ?
             <Tooltip title="点此管理挑战">
-              <a className="underline" href={`/dashboard/challenge/modify/${quest.id}/${quest.tokenId}`} target="">{tokenId}</a>
+              <a className="underline" href={`/dashboard/challenge/list?tokenId=${quest.tokenId}`} target="">{tokenId}</a>
             </Tooltip>
             :
             <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
@@ -386,6 +392,11 @@ export default function ChallengeListPage(params) {
         page: 0, pageSize: 10, total: 0
       }
       setPageConfig({...pageConfig});
+      if (location.search) {
+        let serch = new URLSearchParams(location.search);
+        search_key = serch.get("tokenId");
+        setSearch_key(search_key);
+      }
       init();
     },[location])
 
