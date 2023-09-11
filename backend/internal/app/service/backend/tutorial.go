@@ -4,6 +4,7 @@ import (
 	"backend/internal/app/global"
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
+	"backend/internal/app/utils"
 	"errors"
 	"gorm.io/gorm"
 )
@@ -75,6 +76,24 @@ func DeleteTutorial(req request.DelTutorialRequest) (err error) {
 }
 
 func UpdateTutorial(tutorial model.Tutorial) (err error) {
+	// 先查找
+	var oldTutorial model.Tutorial
+	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", tutorial.ID).First(&oldTutorial).Error
+	if err != nil {
+		return err
+	}
+	ignore := []string{"Model", "Difficulty", "EstimateTime", "Category", "Language", "CatalogueName", "StartPage", "Status", "PackStatus", "PackLog", "Top"}
+	var mark bool
+	for _, v := range utils.DiffStructs(tutorial, oldTutorial) {
+		if utils.SliceIsExist(ignore, v) {
+			continue
+		}
+		mark = true
+	}
+	if !mark {
+		return nil
+	}
+	// 判断挑战是否存在2
 	raw := global.DB.Where("id = ?", tutorial.ID).Updates(&tutorial)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
