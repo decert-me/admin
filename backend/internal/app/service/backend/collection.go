@@ -13,16 +13,12 @@ import (
 
 // CreateCollection 创建合辑
 func CreateCollection(r request.CreateCollectionRequest) error {
-	if r.Sort == nil {
-		return errors.New("排序sort不能为空")
-	}
 	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
 		Cover:       r.Cover,
 		Author:      r.Author,
 		Style:       2,
-		Sort:        r.Sort,
 		Difficulty:  r.Difficulty,
 		Status:      2,
 	}
