@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
     VideoCameraOutlined,
-    ReadOutlined,
-    LoadingOutlined
+    ReadOutlined
   } from '@ant-design/icons';
 import { buildTutorial, deleteTutorial, getTutorial, getTutorialList, topTutorial, updateTutorialStatus } from "../../request/api/tutorial";
 import { getLabelList } from "../../request/api/tags";
@@ -13,8 +12,6 @@ import Polling from "../../components/Polling";
 export default function TutorialsListPage(params) {
     
     const navigateTo = useNavigate();
-    const [selectedRowKeys, setSelectedRowKeys] = useState([]);   //  列表所选item
-    const [topLoad, setTopLoad] = useState(false);    //  置顶等待
     let [loading, setLoading] = useState(false);    //  打包loading
     let [tags, setTags] = useState([]);
     let [lang, setLang] = useState([]);
@@ -91,32 +88,6 @@ export default function TutorialsListPage(params) {
           }
         })
     }
-
-    // 教程置顶
-    function toTop(status) {
-      setTopLoad(true);
-      const statusArr = Array(selectedRowKeys.length).fill(status);
-      topTutorial({id: selectedRowKeys, top: statusArr})
-      .then(res => {
-        setTopLoad(false);
-        if (res.code === 0) {
-          message.success(res.msg);
-          setSelectedRowKeys([...[]]);
-          getList()
-        }
-      })
-    }
-
-    const hasSelected = selectedRowKeys.length > 0;
-
-    const onSelectChange = (newSelectedRowKeys) => {
-      setSelectedRowKeys(newSelectedRowKeys);
-    };
-
-    const rowSelection = {
-      selectedRowKeys,
-      onChange: onSelectChange,
-    };
 
     const columns = [
         {
@@ -311,20 +282,6 @@ export default function TutorialsListPage(params) {
             <h2>教程列表</h2>
             <Space size="large">
               <Button 
-                onClick={() => toTop(true)}
-                disabled={!hasSelected} 
-                loading={topLoad}
-              >
-                置顶
-              </Button>
-              <Button 
-                onClick={() => toTop(false)}
-                disabled={!hasSelected} 
-                loading={topLoad}
-              >
-                取消置顶
-              </Button>
-              <Button 
                 type="primary"
                 onClick={() => navigateTo("/dashboard/tutorials/add")}
               >创建教程</Button>
@@ -332,7 +289,6 @@ export default function TutorialsListPage(params) {
           </div>
 
             <Table 
-              rowSelection={rowSelection}
               columns={columns} 
               dataSource={data} 
               rowClassName={(record) => record.top && "toTop"}
