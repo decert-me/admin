@@ -19,7 +19,6 @@ func CreateCollection(r request.CreateCollectionRequest) error {
 		Cover:       r.Cover,
 		Author:      r.Author,
 		Style:       2,
-		Sort:        r.Sort,
 		Difficulty:  r.Difficulty,
 		Status:      2,
 	}
@@ -71,6 +70,9 @@ func GetCollectionDetail(r request.GetCollectionDetailRequest) (detail model.Col
 
 // UpdateCollection 更新合辑
 func UpdateCollection(r request.UpdateCollectionRequest) error {
+	if r.Sort == nil {
+		return errors.New("排序sort不能为空")
+	}
 	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
@@ -218,6 +220,13 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 		tx.Rollback()
 		return err
 	}
+	// 查询合辑状态
+	var collection model.Collection
+	err = tx.Model(&model.Collection{}).Where("id = ?", r.CollectionID).First(&collection).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	for _, v := range r.ID {
 		// 查询Quest信息
 		var quest model.Quest
@@ -231,6 +240,7 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 			CollectionID: r.CollectionID,
 			QuestID:      v,
 			TokenID:      quest.TokenId,
+			Status:       collection.Status,
 		}
 		err = tx.Model(&model.CollectionRelate{}).Create(&collectionRelate).Error
 		if err != nil {

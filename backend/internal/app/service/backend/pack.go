@@ -136,7 +136,7 @@ func Pack(r request.PackRequest) error {
 	}
 	// 解压文件
 	zipFilePath := fmt.Sprintf("%s/%s.zip", global.CONFIG.Pack.PublishPath, tutorial.CatalogueName)
-	unzipPath := fmt.Sprintf("%s/%s", global.CONFIG.Pack.PublishPath, tutorial.CatalogueName)
+	unzipPath := fmt.Sprintf("%s", global.CONFIG.Pack.PublishPath)
 	fmt.Println("zipFilePath", zipFilePath)
 	fmt.Println("unzipPath", unzipPath)
 	err = utils.Unzip(zipFilePath, unzipPath)

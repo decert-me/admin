@@ -39,7 +39,7 @@ casbin:
   model-path: "assets/rbac_model.conf"
 
 pack:
-  service: "http://192.168.1.26:8889"                 # 打包模块URL
+  server: "http://192.168.1.26:8889"                 # 打包模块URL
   publish-path: "/Users/mac/Code/tutorials/publish"   # 打包后的文件存放路径（发布目录）
 
 # captcha configuration
