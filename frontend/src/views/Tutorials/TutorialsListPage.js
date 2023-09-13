@@ -90,6 +90,14 @@ export default function TutorialsListPage(params) {
     }
 
     const columns = [
+      {
+        title: '权重',
+        dataIndex: 'tutorial_sort',
+        key: 'tutorial_sort',
+        render: (tutorial_sort) => (
+            <p>{tutorial_sort}</p>
+          )
+        },
         {
           title: '封面图',
           dataIndex: 'img',
