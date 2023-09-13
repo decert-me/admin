@@ -107,3 +107,15 @@ func TopTutorial(c *gin.Context) {
 		response.OkWithMessage("操作成功", c)
 	}
 }
+
+// UpdateTutorialSort 修改教程排序
+func UpdateTutorialSort(c *gin.Context) {
+	var req request.UpdateTutorialSortRequest
+	_ = c.ShouldBindJSON(&req)
+	if err := backend.UpdateTutorialSort(req); err != nil {
+		global.LOG.Error("操作失败!", zap.Error(err))
+		response.FailWithMessage("操作失败："+err.Error(), c)
+	} else {
+		response.OkWithMessage("操作成功", c)
+	}
+}

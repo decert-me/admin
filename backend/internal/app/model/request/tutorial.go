@@ -23,3 +23,8 @@ type TopTutorialRequest struct {
 	ID  []uint  `json:"id"`
 	Top []*bool `json:"top"`
 }
+
+type UpdateTutorialSortRequest struct {
+	ID           uint `json:"id"`
+	TutorialSort *int `json:"tutorial_sort"`
+}

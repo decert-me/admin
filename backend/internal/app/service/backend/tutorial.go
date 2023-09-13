@@ -39,7 +39,7 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Order("top desc,created_at desc").Find(&tutorialList).Error
+	err = db.Limit(limit).Offset(offset).Order("tutorial_sort desc,created_at desc").Find(&tutorialList).Error
 	return tutorialList, total, err
 }
 
@@ -82,7 +82,7 @@ func UpdateTutorial(tutorial model.Tutorial) (err error) {
 	if err != nil {
 		return err
 	}
-	ignore := []string{"Model", "Difficulty", "EstimateTime", "Category", "Language", "CatalogueName", "StartPage", "Status", "PackStatus", "PackLog", "Top"}
+	ignore := []string{"Model", "Difficulty", "EstimateTime", "Category", "Language", "CatalogueName", "StartPage", "Status", "PackStatus", "PackLog", "Top", "TutorialSort"}
 	var mark bool
 	for _, v := range utils.DiffStructs(tutorial, oldTutorial) {
 		if utils.SliceIsExist(ignore, v) {
@@ -90,13 +90,13 @@ func UpdateTutorial(tutorial model.Tutorial) (err error) {
 		}
 		mark = true
 	}
-	if !mark {
-		return nil
-	}
 	// 判断挑战是否存在2
 	raw := global.DB.Where("id = ?", tutorial.ID).Updates(&tutorial)
 	if raw.RowsAffected == 0 {
 		return errors.New("更新失败")
+	}
+	if !mark {
+		return nil
 	}
 	Pack(request.PackRequest{ID: tutorial.ID})
 	return raw.Error
@@ -125,4 +125,10 @@ func TopTutorial(req request.TopTutorialRequest) (err error) {
 	}
 
 	return nil
+}
+
+// UpdateTutorialSort 修改教程排序
+func UpdateTutorialSort(req request.UpdateTutorialSortRequest) (err error) {
+	err = global.DB.Model(&model.Tutorial{}).Where("id = ?", req.ID).Update("tutorial_sort", req.TutorialSort).Error
+	return
 }
