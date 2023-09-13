@@ -135,10 +135,6 @@ export default function ChallengeModifyPage(params) {
                     <Form.Item
                         label="合辑名称"
                         name="collection_id"
-                        rules={[{
-                            required: true,
-                            message: '请输入合辑名称!',
-                        }]}
                     >
                         <Select
                             mode="multiple"
