@@ -133,33 +133,19 @@ export default function ChallengeModifyPage(params) {
                         <InputNumber controls={false} addonAfter="min" />
                     </Form.Item>
                     <Form.Item
-                        label="挑战类型"
-                        name="type"
+                        label="合辑名称"
+                        name="collection_id"
+                        rules={[{
+                            required: true,
+                            message: '请输入合辑名称!',
+                        }]}
                     >
-                        <Radio.Group 
-                            options={[
-                                {label: "独立挑战", value: "default"},
-                                {label: "选择合辑", value: "compilation"}
-                            ]} 
+                        <Select
+                            mode="multiple"
+                            allowClear
+                            options={collection}
                         />
                     </Form.Item>
-                    {
-                        type === "compilation" && 
-                        <Form.Item
-                            label="合辑名称"
-                            name="collection_id"
-                            rules={[{
-                                required: true,
-                                message: '请输入合辑名称!',
-                            }]}
-                        >
-                            <Select
-                                mode="multiple"
-                                allowClear
-                                options={collection}
-                            />
-                        </Form.Item>
-                    }
                     <Form.Item>
                         <Button type="primary" htmlType="submit" loading={loading}>
                             保存
