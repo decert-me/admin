@@ -1,11 +1,15 @@
 import { useState } from "react";
+import { getJwt } from "../utils/parse";
 
 export const useLocalStorage = (keyName, defaultValue) => {
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const value = window.localStorage.getItem(keyName);
-
       if (value) {
+        if (keyName === "token") {
+          // 检测token是否过期
+          getJwt(value)
+        }
         return JSON.parse(value);
       } else {
         window.localStorage.setItem(keyName, JSON.stringify(defaultValue));
