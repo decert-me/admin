@@ -113,7 +113,7 @@ export default function TutorialsModifyPage(params) {
     };
 
     function create(obj) {
-        updateTutorial({...obj, id: Number(id)})
+        updateTutorial({...obj, id: Number(id), tutorial_sort: tutorial_sort || 0})
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
