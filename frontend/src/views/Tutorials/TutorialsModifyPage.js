@@ -341,10 +341,6 @@ export default function TutorialsModifyPage(params) {
                 <Form.Item
                     label="权重"
                     name="tutorial_sort"
-                    rules={[{
-                        required: true,
-                        message: '请输入权重!',
-                    }]}
                 >
                     <InputNumber controls={false} />
                 </Form.Item>
