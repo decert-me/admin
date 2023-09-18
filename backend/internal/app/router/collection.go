@@ -7,7 +7,6 @@ import (
 )
 
 func InitCollectionRouter(Router *gin.RouterGroup) {
-	routers := Router.Group("collection")
 	routersWithAuth := Router.Group("collection").Use(middleware.JWTAuth())
 	{
 		routersWithAuth.POST("create", api.CreateCollection)                             // 创建合辑
@@ -18,8 +17,6 @@ func InitCollectionRouter(Router *gin.RouterGroup) {
 		routersWithAuth.POST("updateStatus", api.UpdateCollectionStatus)                 // 更新合辑状态
 		routersWithAuth.POST("updateCollectionQuestSort", api.UpdateCollectionQuestSort) // 编辑合辑下的挑战排序
 		routersWithAuth.POST("addQuestToCollection", api.AddQuestToCollection)           // 添加挑战到合辑
-	}
-	{
-		routers.POST("collectionQuest", api.GetCollectionQuest) // 获取合辑下的挑战
+		routersWithAuth.POST("collectionQuest", api.GetCollectionQuest)                  // 获取合辑下的挑战
 	}
 }
