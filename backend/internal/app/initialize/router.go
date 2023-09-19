@@ -67,6 +67,7 @@ func Routers() *gin.Engine {
 		router.InitVideoRouter(v1Group)
 		router.InitQuestRouter(v1Group)
 		router.InitCollectionRouter(v1Group)
+		router.InitAccountRouter(v1Group)
 	}
 	global.LOG.Info("router register success")
 	return Router
