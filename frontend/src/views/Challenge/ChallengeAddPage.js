@@ -89,11 +89,11 @@ export default function ChallengeAddPage(params) {
                 </Form.Item>
 
                 <Form.Item
-                    label="合辑作者"
+                    label="合辑作者ID"
                     name="author"
                     rules={[{
                         required: true,
-                        message: '请输入合辑作者!',
+                        message: '请输入合辑作者ID!',
                     }]}
                 >
                     <Input />

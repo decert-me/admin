@@ -6,9 +6,9 @@ export const useLocalStorage = (keyName, defaultValue) => {
     try {
       const value = window.localStorage.getItem(keyName);
       if (value) {
-        if (keyName === "token") {
+        if (keyName === "token" && !getJwt(value)) {
           // 检测token是否过期
-          getJwt(value)
+          // return
         }
         return JSON.parse(value);
       } else {
