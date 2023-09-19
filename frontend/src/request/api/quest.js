@@ -138,3 +138,13 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 获取地址信息
+    export const getAddressInfo = (data) => {
+        return serviceAxios({
+            url: `/account/getAddressInfo`,
+            method: "post",
+            data
+        })
+    }
+    

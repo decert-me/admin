@@ -6,7 +6,7 @@ import {
 import { Button, Form, Input, InputNumber, Select, Upload, message } from "antd";
 import { UploadProps } from "../../utils/props";
 import { useEffect, useState } from "react";
-import { getCollectionDetail, updateCollection } from "../../request/api/quest";
+import { getAddressInfo, getCollectionDetail, updateCollection } from "../../request/api/quest";
 const { TextArea } = Input;
 
 
@@ -18,9 +18,14 @@ export default function ChallengeCompilationModifyPage(params) {
     let [fields, setFields] = useState([]);
     let [data, setData] = useState();
 
-    function onFinish(values) {
+    async function onFinish(values) {
         try {
             const cover = values.cover?.file?.response?.data?.hash || data.cover;
+            const { author } = values;
+            const res = await getAddressInfo({address: author})
+            if (res.code !== 0) {
+                return
+            }
             updateCollection({...values, cover, id: Number(id)})
             .then(res => {
                 if (res.code === 0) {

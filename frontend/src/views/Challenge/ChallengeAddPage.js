@@ -6,7 +6,7 @@ import {
 import { Button, Form, Input, Select, Upload, message } from "antd";
 import { UploadProps } from "../../utils/props";
 import { useState } from "react";
-import { createCollection } from "../../request/api/quest";
+import { createCollection, getAddressInfo } from "../../request/api/quest";
 const { TextArea } = Input;
 
 
@@ -15,9 +15,14 @@ export default function ChallengeAddPage(params) {
     const navigateTo = useNavigate();
     const [loading, setLoading] = useState(false);
 
-    function onFinish(values) {
+    async function onFinish(values) {
         try {
             const cover = values.cover.file.response.data.hash;
+            const { author } = values;
+            const res = await getAddressInfo({address: author})
+            if (res.code !== 0) {
+                return
+            }
             createCollection({...values, cover})
             .then(res => {
                 if (res.code === 0) {
