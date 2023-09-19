@@ -66,7 +66,7 @@ export default function ChallengeCompilationPage(params) {
           title: '难度',
           dataIndex: 'difficulty',
           render: (difficulty) => (
-            <p>{difficulty === 0 ? "简单" : difficulty === 1 ? "一般" : difficulty === 2 ? "困难" : "/"}</p>
+            <p>{difficulty === 0 ? "简单" : difficulty === 1 ? "中等" : difficulty === 2 ? "困难" : "/"}</p>
           )
         },
         {

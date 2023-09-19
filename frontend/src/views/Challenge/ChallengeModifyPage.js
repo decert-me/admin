@@ -115,7 +115,7 @@ export default function ChallengeModifyPage(params) {
                         <Select
                             options={[
                                 {label: "简单", value: 0},
-                                {label: "一般", value: 1},
+                                {label: "中等", value: 1},
                                 {label: "困难", value: 2},
                             ]}
                         />
