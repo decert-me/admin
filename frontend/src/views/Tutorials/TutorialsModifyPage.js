@@ -68,7 +68,7 @@ export default function TutorialsModifyPage(params) {
     const onFinish = async(values) => {
         setLoading(true);
         const {
-            repoUrl, label, docType, desc, 
+            repoUrl, label, docType, desc, tutorial_sort,
             challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime
         } = values;
@@ -93,14 +93,14 @@ export default function TutorialsModifyPage(params) {
         }
         if (doctype === "doc") {
             const obj = {
-                repoUrl, label, docType, img, desc, 
+                repoUrl, label, docType, img, desc, tutorial_sort,
                 challenge, branch, docPath, commitHash,
                 category, language, difficulty, estimateTime
             }
             create(obj)
         }else{
             const obj = {
-                url, label, img, desc, 
+                url, label, img, desc, tutorial_sort,
                 challenge, videoCategory,
                 category, language, difficulty, estimateTime, docType: "video"
             }
@@ -113,7 +113,7 @@ export default function TutorialsModifyPage(params) {
     };
 
     function create(obj) {
-        updateTutorial({...obj, id: Number(id)})
+        updateTutorial({...obj, id: Number(id), tutorial_sort: obj.tutorial_sort || 0})
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
@@ -175,6 +175,10 @@ export default function TutorialsModifyPage(params) {
             {
                 name: ['difficulty'],
                 value: tutorial?.difficulty
+            },
+            {
+                name: ['tutorial_sort'],
+                value: tutorial?.tutorial_sort
             },
 
             // 文档
@@ -330,6 +334,13 @@ export default function TutorialsModifyPage(params) {
                 <Form.Item
                     label="挑战编号"
                     name="challenge"
+                >
+                    <InputNumber controls={false} />
+                </Form.Item>
+
+                <Form.Item
+                    label="权重"
+                    name="tutorial_sort"
                 >
                     <InputNumber controls={false} />
                 </Form.Item>

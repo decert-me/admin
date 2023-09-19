@@ -76,7 +76,7 @@ export default function TutorialsAddPage(params) {
     const onFinish = async(values) => {
         setLoading(true);
         const {
-            repoUrl, label, catalogueName, docType, desc, 
+            repoUrl, label, catalogueName, docType, desc, tutorial_sort,
             challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime
         } = values;
@@ -101,14 +101,14 @@ export default function TutorialsAddPage(params) {
 
         if (doctype === "doc") {
             const obj = {
-                repoUrl, label, catalogueName, docType, img, desc, 
+                repoUrl, label, catalogueName, docType, img, desc, tutorial_sort,
                 challenge, branch, docPath, commitHash,
                 category, language, difficulty, estimateTime
             }
             create(obj)
         }else{
             const obj = {
-                url, label, catalogueName, img, desc, 
+                url, label, catalogueName, img, desc, tutorial_sort,
                 challenge, videoCategory,
                 category, language, difficulty, estimateTime, docType: "video"
             }
@@ -249,6 +249,13 @@ export default function TutorialsAddPage(params) {
                 <Form.Item
                     label="挑战编号"
                     name="challenge"
+                >
+                    <InputNumber controls={false} />
+                </Form.Item>
+                
+                <Form.Item
+                    label="权重"
+                    name="tutorial_sort"
                 >
                     <InputNumber controls={false} />
                 </Form.Item>
