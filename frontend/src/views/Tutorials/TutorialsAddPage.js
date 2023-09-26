@@ -80,7 +80,7 @@ export default function TutorialsAddPage(params) {
         const {
             repoUrl, label, catalogueName, docType, desc, tutorial_sort,
             challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
-            category, language, difficulty, estimateTime
+            category, language, difficulty, estimateTime, mdbookTranslator
         } = values;
         const img = values.img.file.response.data.hash;
 
@@ -105,7 +105,7 @@ export default function TutorialsAddPage(params) {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, tutorial_sort,
                 challenge, branch, docPath, commitHash,
-                category, language, difficulty, estimateTime
+                category, language, difficulty, estimateTime, mdbookTranslator
             }
             create(obj)
         }else{
@@ -472,6 +472,15 @@ export default function TutorialsAddPage(params) {
                                     <Input placeholder="默认为最新" />
                                 </Form.Item>
                             </>
+                        }
+                        {
+                            docType === "mdBook" && 
+                            <Form.Item
+                                label="翻译位置"
+                                name="mdbookTranslator"
+                            >
+                                <Input placeholder="默认为null" />
+                            </Form.Item>
                         }
                     </>
                 }
