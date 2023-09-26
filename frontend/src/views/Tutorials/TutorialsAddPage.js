@@ -23,6 +23,8 @@ export default function TutorialsAddPage(params) {
     
     const [form] = Form.useForm();
     const videoCategory = Form.useWatch("videoCategory", form);
+    const docType = Form.useWatch("docType", form);
+    
     const videoUrl = Form.useWatch("url", form);
     const navigateTo = useNavigate();
 
@@ -439,6 +441,7 @@ export default function TutorialsAddPage(params) {
                                             {label: "Docusaurus", value: "docusaurus"},
                                             {label: "GitBook", value: "gitbook"},
                                             {label: "mdBook", value: "mdBook"},
+                                            {label: "page", value: "page"},
                                         ]}
                                         style={{
                                             width: 120
@@ -447,24 +450,29 @@ export default function TutorialsAddPage(params) {
                                 </Form.Item>                
                             } />
                         </Form.Item>
-                        <Form.Item
-                            label="分支"
-                            name="branch"
-                        >
-                            <Input placeholder="默认为main分支" />
-                        </Form.Item>
-                        <Form.Item
-                            label="教程文档目录"
-                            name="docPath"
-                        >
-                            <Input placeholder="默认为根目录" />
-                        </Form.Item>
-                        <Form.Item
-                            label="教程文档commitHash"
-                            name="commitHash"
-                        >
-                            <Input placeholder="默认为最新" />
-                        </Form.Item>
+                        {
+                            docType !== "page" &&
+                            <>
+                                <Form.Item
+                                    label="分支"
+                                    name="branch"
+                                >
+                                    <Input placeholder="默认为main分支" />
+                                </Form.Item>
+                                <Form.Item
+                                    label="教程文档目录"
+                                    name="docPath"
+                                >
+                                    <Input placeholder="默认为根目录" />
+                                </Form.Item>
+                                <Form.Item
+                                    label="教程文档commitHash"
+                                    name="commitHash"
+                                >
+                                    <Input placeholder="默认为最新" />
+                                </Form.Item>
+                            </>
+                        }
                     </>
                 }
 

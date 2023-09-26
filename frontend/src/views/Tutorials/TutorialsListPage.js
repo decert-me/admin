@@ -10,7 +10,10 @@ import { getLabelList } from "../../request/api/tags";
 import Polling from "../../components/Polling";
 
 export default function TutorialsListPage(params) {
-    
+  
+    const location = window.location.host;
+    const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
+    const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
     const navigateTo = useNavigate();
     let [loading, setLoading] = useState(false);    //  打包loading
     let [tags, setTags] = useState([]);
@@ -112,7 +115,7 @@ export default function TutorialsListPage(params) {
           key: 'label',
           render: (text, tutorial) => (
             tutorial.status == 2 ?
-            <a className="tabel-item-title newline-omitted underline" href={`${window.location.host.indexOf("https://decert.me") !== -1 ? "https://decert.me" : "http://192.168.1.10:8087"}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{text}</a>
+            <a className="tabel-item-title newline-omitted underline" href={`${host}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{text}</a>
             :
             <p className="tabel-item-title newline-omitted">{text}</p>
           )

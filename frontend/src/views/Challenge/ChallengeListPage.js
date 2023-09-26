@@ -144,7 +144,7 @@ export default function ChallengeListPage(params) {
             title: '难度',
             dataIndex: 'metadata',
             render: ({attributes}) => (
-              <p>{attributes.difficulty === 0 ? "简单" : attributes.difficulty === 1 ? "一般" : attributes.difficulty === 2 ? "困难" : "/"}</p>
+              <p>{attributes.difficulty === 0 ? "简单" : attributes.difficulty === 1 ? "中等" : attributes.difficulty === 2 ? "困难" : "/"}</p>
             )
         },
         {
