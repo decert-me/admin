@@ -239,6 +239,7 @@ func GetSelfInfo(c *gin.Context) {
 	if err != nil {
 		global.LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
+		return
 	}
 
 	response.OkWithDetailed(response.UserInfo{
