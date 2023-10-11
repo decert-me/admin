@@ -115,7 +115,7 @@ export default function TutorialsListPage(params) {
           key: 'label',
           render: (text, tutorial) => (
             tutorial.status == 2 ?
-            <a className="tabel-item-title newline-omitted underline" href={`${host}/tutorial/${tutorial.startPage.replace("/README", "")}/`} target="_blank">{text}</a>
+            <a className="tabel-item-title newline-omitted underline" href={`${host}/tutorial/${tutorial.startPage.replace(/\/README/i, "")}/`} target="_blank">{text}</a>
             :
             <p className="tabel-item-title newline-omitted">{text}</p>
           )
