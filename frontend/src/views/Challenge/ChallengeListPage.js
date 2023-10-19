@@ -59,7 +59,8 @@ export default function ChallengeListPage(params) {
     const scrollRef = useRef(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [isOk, setIsOk] = useState(false);
+    
     let [search_key, setSearch_key] = useState("");    //  搜索
     let [data, setData] = useState([]);
     let [isChange, setIsChange] = useState();
@@ -342,6 +343,7 @@ export default function ChallengeListPage(params) {
           setModalData([...modalData]);
           checkedList = checkedList.concat(checked);
           setCheckedList([...checkedList]);
+          setIsOk(true);
         }
       })
     }
@@ -431,6 +433,7 @@ export default function ChallengeListPage(params) {
                         <Button 
                           type="primary"
                           onClick={() => setIsModalOpen(true)}
+                          disabled={!isOk}
                         >
                           添加挑战
                         </Button>
