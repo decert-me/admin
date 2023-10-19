@@ -71,7 +71,7 @@ export default function TutorialsModifyPage(params) {
         const {
             repoUrl, label, docType, desc, tutorial_sort,
             challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
-            category, language, difficulty, estimateTime
+            category, language, difficulty, estimateTime, mdbookTranslator
         } = values;
         const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
 
@@ -96,7 +96,7 @@ export default function TutorialsModifyPage(params) {
             const obj = {
                 repoUrl, label, docType, img, desc, tutorial_sort,
                 challenge, branch, docPath, commitHash,
-                category, language, difficulty, estimateTime
+                category, language, difficulty, estimateTime, mdbookTranslator
             }
             create(obj)
         }else{
@@ -203,7 +203,10 @@ export default function TutorialsModifyPage(params) {
                 name: ['commitHash'],
                 value: tutorial?.commitHash
             },
-
+            {
+                name: ['mdbookTranslator'],
+                value: tutorial?.mdbookTranslator
+            },
             // 视频
             {
                 name: ['url'],
@@ -553,6 +556,15 @@ export default function TutorialsModifyPage(params) {
                                     <Input placeholder="默认为最新" />
                                 </Form.Item>
                             </>
+                        }
+                        {
+                            docType === "mdBook" && 
+                            <Form.Item
+                                label="翻译位置"
+                                name="mdbookTranslator"
+                            >
+                                <Input placeholder="默认为null" />
+                            </Form.Item>
                         }
                     </>
                 }
