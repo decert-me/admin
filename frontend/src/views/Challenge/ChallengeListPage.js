@@ -469,7 +469,8 @@ export default function ChallengeListPage(params) {
                     flexDirection: "column",
                     gap: "10px"
                   }}
-                  defaultValue={checkedList}
+                  // defaultValue={checkedList}
+                  value={checkedList}
                   onChange={e => changeChecked(e)}
                 />
                 {
