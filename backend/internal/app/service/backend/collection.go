@@ -214,8 +214,15 @@ func UpdateCollectionQuestSort(r request.UpdateCollectionQuestSortRequest) error
 // AddQuestToCollection 添加挑战到合辑
 func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 	tx := global.DB.Begin()
+	// 查询原有Quest ID 列表
+	var questIDList []uint
+	err := tx.Model(&model.CollectionRelate{}).Select("quest_id").Where("collection_id = ?", r.CollectionID).Find(&questIDList).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	// 删除原有关系
-	err := tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.CollectionID).Delete(&model.CollectionRelate{}).Error
+	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.CollectionID).Delete(&model.CollectionRelate{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -250,6 +257,18 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 		// 更新Quest状态
 		UpdateQuestCollectionStatus(tx, v)
 	}
+	// 合辑里没有Quest，将Collection下架
+	if len(r.ID) == 0 {
+		err = tx.Model(&model.Collection{}).Where("id = ?", r.CollectionID).Update("status", 2).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+	// 更新Quest状态
+	for _, questID := range questIDList {
+		UpdateQuestCollectionStatus(tx, questID)
+	}
 	return tx.Commit().Error
 }
 
@@ -258,7 +277,7 @@ func UpdateQuestCollectionStatus(tx *gorm.DB, id uint) {
 	var count int64
 	tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", id).Where("status = 1").Count(&count)
 	// 合辑
-	if count <= 1 {
+	if count == 1 {
 		tx.Model(&model.Quest{}).Where("id = ?", id).Update("collection_status", 2)
 	}
 	// 独立
