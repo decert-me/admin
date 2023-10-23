@@ -24,7 +24,7 @@ export default function ChallengeModifyPage(params) {
         updateQuest({
             id: Number(id), 
             difficulty, 
-            estimate_time: estimateTime !== 0 ? estimateTime * 60 : null,
+            estimate_time: estimateTime && estimateTime !== 0 ? estimateTime * 60 : null,
             sort,
             collection_id: type === "default" ? [] : collection_id
         })
