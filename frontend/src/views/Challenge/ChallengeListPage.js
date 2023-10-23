@@ -83,9 +83,6 @@ export default function ChallengeListPage(params) {
           title: '权重',
           dataIndex: 'sort',
           render: (sort, record, index) => (
-            id ?
-            <p>{index + 1}</p>
-            :
             <p>{sort}</p>
           )
         },
@@ -221,6 +218,8 @@ export default function ChallengeListPage(params) {
             ),
         }
     ];
+
+    id && columns.splice(0,1);
 
     // 移出合辑
     async function updateT(selectId) {
