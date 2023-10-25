@@ -335,8 +335,35 @@ export default function ChallengeListPage(params) {
             e.checked && checked.push(e.id);
           })
           const checkboxArr = arr.map(e => {
+            console.log(e);
             return {
-              label: e.title, value: e.id
+              label: (
+                <div style={{
+                  width: "425px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between"
+                }}>
+                  <p>{e.tokenId}</p>
+                  <p>{e.title}</p>
+                  <div style={{
+                    width: "100px",
+                    height: "100px",
+                    display: "flex",
+                    alignItems: "center"
+                  }}>
+                    <img 
+                      src={e.metadata.image.replace("ipfs://", "https://ipfs.decert.me/")} 
+                      alt="" 
+                      style={{
+                        maxHeight: "100%",
+                        maxWidth: "100%"
+                      }} 
+                    />
+                  </div>
+                </div>
+              ),
+              value: e.id
             }
           })
           modalData = modalData.concat(checkboxArr);
