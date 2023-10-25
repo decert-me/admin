@@ -49,4 +49,5 @@ type DeleteQuestRequest struct {
 
 type GetQuestCollectionAddListRequest struct {
 	PageInfo
+	SearchKey string `json:"search_key" form:"search_key"` // 搜索关键字
 }

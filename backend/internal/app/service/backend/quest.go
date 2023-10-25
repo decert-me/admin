@@ -243,6 +243,13 @@ func GetQuestCollectionAddList(req request.GetQuestCollectionAddListRequest) (re
 	db.Where("quest.style = 1")
 	db.Where("quest.disabled = false")
 	db.Where("cr.id is null")
+	if req.SearchKey != "" {
+		db.Where("quest.title ILIKE ? OR quest.description ILIKE ?", "%"+req.SearchKey+"%", "%"+req.SearchKey+"%")
+		tokenID, err := strconv.Atoi(req.SearchKey)
+		if err == nil {
+			db.Or("quest.token_id = ?", tokenID)
+		}
+	}
 	db.Order("quest.sort desc,quest.token_id desc")
 	err = db.Count(&total).Error
 	if err != nil {
