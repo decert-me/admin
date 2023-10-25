@@ -206,3 +206,25 @@ func UpdateCollectionStatusAuto(tx *gorm.DB) error {
 	}
 	return nil
 }
+
+// GetQuestCollectionAddList 获取待添加到合辑挑战列表
+func GetQuestCollectionAddList(req request.GetQuestCollectionAddListRequest) (res []response.GetQuestCollectionAddListRes, total int64, err error) {
+	limit := req.PageSize
+	offset := req.PageSize * (req.Page - 1)
+	db := global.DB.Model(&model.Quest{})
+	db.Joins("left join collection_relate cr on quest.token_id = cr.token_id")
+	db.Where("quest.style = 1")
+	db.Where("quest.disabled = false")
+	db.Where("cr.id is null")
+	db.Order("quest.sort desc,quest.token_id desc")
+	err = db.Count(&total).Error
+	if err != nil {
+		return res, total, err
+	}
+	err = db.Limit(limit).Offset(offset).Find(&res).Error
+	for i := 0; i < len(res); i++ {
+		// 获取挑战合辑
+		global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", res[i].TokenId).Find(&res[i].CollectionID)
+	}
+	return
+}

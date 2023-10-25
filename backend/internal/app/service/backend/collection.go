@@ -222,11 +222,11 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 		return err
 	}
 	// 删除原有关系
-	err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.CollectionID).Delete(&model.CollectionRelate{}).Error
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	//err = tx.Model(&model.CollectionRelate{}).Where("collection_id = ?", r.CollectionID).Delete(&model.CollectionRelate{}).Error
+	//if err != nil {
+	//	tx.Rollback()
+	//	return err
+	//}
 	// 查询合辑状态
 	var collection model.Collection
 	err = tx.Model(&model.Collection{}).Where("id = ?", r.CollectionID).First(&collection).Error
@@ -258,13 +258,13 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 		UpdateQuestCollectionStatus(tx, v)
 	}
 	// 合辑里没有Quest，将Collection下架
-	if len(r.ID) == 0 {
-		err = tx.Model(&model.Collection{}).Where("id = ?", r.CollectionID).Update("status", 2).Error
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
+	//if len(r.ID) == 0 {
+	//	err = tx.Model(&model.Collection{}).Where("id = ?", r.CollectionID).Update("status", 2).Error
+	//	if err != nil {
+	//		tx.Rollback()
+	//		return err
+	//	}
+	//}
 	// 更新Quest状态
 	for _, questID := range questIDList {
 		UpdateQuestCollectionStatus(tx, questID)

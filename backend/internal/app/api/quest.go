@@ -24,6 +24,22 @@ func GetQuestList(c *gin.Context) {
 	}
 }
 
+// GetQuestCollectionAddList 获取待添加到合辑挑战列表
+func GetQuestCollectionAddList(c *gin.Context) {
+	var r request.GetQuestCollectionAddListRequest
+	_ = c.ShouldBindJSON(&r)
+	if list, total, err := backend.GetQuestCollectionAddList(r); err != nil {
+		response.FailWithMessage("获取失败："+err.Error(), c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     r.Page,
+			PageSize: r.PageSize,
+		}, "获取成功", c)
+	}
+}
+
 // GetQuest 获取挑战详情
 func GetQuest(c *gin.Context) {
 	if list, err := backend.GetQuest(c.Param("id")); err != nil {

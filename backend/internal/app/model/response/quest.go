@@ -29,3 +29,8 @@ type GetQuestRes struct {
 	CollectionID []uint `gorm:"-" json:"collection_id"` // 合辑ID
 	//Claimed bool `gorm:"claimed" json:"claimed"`
 }
+
+type GetQuestCollectionAddListRes struct {
+	model.Quest
+	CollectionID []uint `gorm:"-" json:"collection_id"` // 合辑ID
+}

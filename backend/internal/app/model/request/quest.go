@@ -46,3 +46,7 @@ type UpdateQuestStatusRequest struct {
 type DeleteQuestRequest struct {
 	ID uint `json:"id"`
 }
+
+type GetQuestCollectionAddListRequest struct {
+	PageInfo
+}
