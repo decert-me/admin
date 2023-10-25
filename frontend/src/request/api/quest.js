@@ -46,6 +46,15 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 获取合辑可添加的挑战列表
+    export const getQuestCollectionAddList = (data) => {
+        return serviceAxios({
+            url: `/quest/getQuestCollectionAddList`,
+            method: "post",
+            data
+        })
+    }
     
 // ============================ post ============================
 

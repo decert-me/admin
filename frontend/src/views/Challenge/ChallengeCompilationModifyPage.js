@@ -21,11 +21,11 @@ export default function ChallengeCompilationModifyPage(params) {
     async function onFinish(values) {
         try {
             const cover = values.cover?.file?.response?.data?.hash || data.cover;
-            const { author } = values;
-            const res = await getAddressInfo({address: author})
-            if (res.code !== 0) {
-                return
-            }
+            // const { author } = values;
+            // const res = await getAddressInfo({address: author})
+            // if (res.code !== 0) {
+            //     return
+            // }
             updateCollection({...values, cover, id: Number(id)})
             .then(res => {
                 if (res.code === 0) {
@@ -133,11 +133,11 @@ export default function ChallengeCompilationModifyPage(params) {
                 </Form.Item>
 
                 <Form.Item
-                    label="合辑作者ID"
+                    label="合辑作者地址"
                     name="author"
                     rules={[{
                         required: true,
-                        message: '请输入合辑作者ID!',
+                        message: '请输入合辑作者地址!',
                     }]}
                 >
                     <Input />

@@ -5,7 +5,7 @@ import {
 } from '@ant-design/icons';
 import React, { useEffect, useRef, useState } from "react";
 import "./index.scss";
-import { addQuestToCollection, deleteQuest, getCollectionQuestList, getQuestList, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
+import { addQuestToCollection, deleteQuest, getCollectionQuestList, getQuestCollectionAddList, getQuestList, updateCollectionQuestSort, updateQuest, updateQuestStatus } from "../../request/api/quest";
 import { format } from "../../utils/format";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -83,9 +83,6 @@ export default function ChallengeListPage(params) {
           title: '权重',
           dataIndex: 'sort',
           render: (sort, record, index) => (
-            id ?
-            <p>{index + 1}</p>
-            :
             <p>{sort}</p>
           )
         },
@@ -222,6 +219,8 @@ export default function ChallengeListPage(params) {
         }
     ];
 
+    id && columns.splice(0,1);
+
     // 移出合辑
     async function updateT(selectId) {
       const selectData = data.filter(e => e.id === selectId)[0];
@@ -323,7 +322,8 @@ export default function ChallengeListPage(params) {
     function getChallenge(params) {
       modalPage.page += 1;
       setModalPage({...modalPage})
-      getQuestList({...modalPage, search_key})
+
+      getQuestCollectionAddList({...modalPage, search_key})
       .then(res => {
         if (res.code === 0) {
           modalPage.total = res.data.total;
@@ -335,8 +335,35 @@ export default function ChallengeListPage(params) {
             e.checked && checked.push(e.id);
           })
           const checkboxArr = arr.map(e => {
+            console.log(e);
             return {
-              label: e.title, value: e.id
+              label: (
+                <div style={{
+                  width: "425px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between"
+                }}>
+                  <p>{e.tokenId}</p>
+                  <p>{e.title}</p>
+                  <div style={{
+                    width: "100px",
+                    height: "100px",
+                    display: "flex",
+                    alignItems: "center"
+                  }}>
+                    <img 
+                      src={e.metadata.image.replace("ipfs://", "https://ipfs.decert.me/")} 
+                      alt="" 
+                      style={{
+                        maxHeight: "100%",
+                        maxWidth: "100%"
+                      }} 
+                    />
+                  </div>
+                </div>
+              ),
+              value: e.id
             }
           })
           modalData = modalData.concat(checkboxArr);
@@ -361,6 +388,10 @@ export default function ChallengeListPage(params) {
           pageConfig = {
             page: 0, pageSize: 10, total: 0
           }
+          modalPage.page = 0;
+          setModalPage({...modalPage})
+          modalData = [];
+          setModalData([...modalData]);
           init();
           setIsModalOpen(false);
         }else{
@@ -469,7 +500,8 @@ export default function ChallengeListPage(params) {
                     flexDirection: "column",
                     gap: "10px"
                   }}
-                  defaultValue={checkedList}
+                  // defaultValue={checkedList}
+                  value={checkedList}
                   onChange={e => changeChecked(e)}
                 />
                 {
