@@ -92,8 +92,20 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 // DeleteCollection 删除合辑
 func DeleteCollection(r request.DeleteCollectionRequest) error {
 	tx := global.DB.Begin()
+	// 查询合辑状态
+	var collection model.Collection
+	err := tx.Model(&model.Collection{}).Where("id = ?", r.ID).First(&collection).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 判断合辑是否存在NFT
+	if collection.TokenId != 0 {
+		tx.Rollback()
+		return errors.New("合辑已生成NFT，无法删除")
+	}
 	// 删除合辑
-	err := tx.Model(&model.Collection{}).Where("id = ?", r.ID).Delete(&model.Collection{}).Error
+	err = tx.Model(&model.Collection{}).Where("id = ?", r.ID).Delete(&model.Collection{}).Error
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -111,6 +123,7 @@ func DeleteCollection(r request.DeleteCollectionRequest) error {
 		tx.Rollback()
 		return err
 	}
+
 	// 判断是否需要更新Quest状态
 	for _, v := range collectionRelateList {
 		var count int64
@@ -233,6 +246,11 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 	if err != nil {
 		tx.Rollback()
 		return err
+	}
+	// 判断合辑是否存在NFT
+	if collection.TokenId != 0 {
+		tx.Rollback()
+		return errors.New("合辑已生成NFT，无法修改")
 	}
 	for _, v := range r.ID {
 		// 查询Quest信息

@@ -5,6 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
+	"backend/internal/app/utils"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -118,6 +119,28 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		tx.Rollback()
 		return err
 	}
+	// 查询原有关系
+	var collectionIDList []uint
+	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Pluck("collection_id", &collectionIDList).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 需要移除的关系
+	for _, v := range utils.CollectionSubtract(collectionIDList, *req.CollectionID) {
+		// 查询合辑状态
+		var collection model.Collection
+		err := tx.Model(&model.Collection{}).Where("id = ?", v).First(&collection).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		// 判断合辑是否存在NFT
+		if collection.TokenId != 0 {
+			tx.Rollback()
+			return errors.New("合辑已生成NFT，无法删除")
+		}
+	}
 	// 清除原有关系
 	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Delete(&model.CollectionRelate{}).Error
 	if err != nil {
@@ -133,6 +156,10 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		if err != nil {
 			tx.Rollback()
 			return errors.New("集合不存在")
+		}
+		// 判断合辑是否存在NFT
+		if collection.TokenId != 0 {
+			return errors.New("合辑已生成NFT，无法删除")
 		}
 		var status uint8
 		if quest.Status == 2 {

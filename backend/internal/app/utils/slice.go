@@ -11,3 +11,14 @@ func SliceMin[T constraints.Ordered](slice []T) (index int, m T) {
 	}
 	return
 }
+
+// CollectionSubtract 合集相减
+func CollectionSubtract[T comparable](a, b []T) []T {
+	result := make([]T, 0)
+	for _, v := range a {
+		if !SliceIsExist(b, v) {
+			result = append(result, v)
+		}
+	}
+	return result
+}
