@@ -123,7 +123,12 @@ export default function TutorialsAddPage(params) {
     };
 
     function create(obj) {
-        createTutorial(obj)
+        // 如果是单页应用则单独处理
+        let repoUrl;
+        if (docType === "page") {
+            repoUrl = obj.repoUrl.replace("https://github.com", "https://raw.githubusercontent.com").replace("/blob","");
+        }
+        createTutorial(repoUrl ? {...obj, repoUrl} : obj)
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
