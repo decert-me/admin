@@ -46,3 +46,8 @@ type UpdateQuestStatusRequest struct {
 type DeleteQuestRequest struct {
 	ID uint `json:"id"`
 }
+
+type GetQuestCollectionAddListRequest struct {
+	PageInfo
+	SearchKey string `json:"search_key" form:"search_key"` // 搜索关键字
+}

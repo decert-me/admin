@@ -115,7 +115,14 @@ func IPFSUploadFile(header *multipart.FileHeader) (err error, hash string) {
 	// 发送请求
 	url := fmt.Sprintf("%s/upload/image", GetIPFSUploadAPI())
 	client := req.C().SetTimeout(120 * time.Second)
-	res, err := client.R().SetFileReader("file", header.Filename, reader).Post(url)
+	res, err := client.R().SetFileUpload(req.FileUpload{
+		ParamName: "file",
+		FileName:  header.Filename,
+		GetFileContent: func() (io.ReadCloser, error) {
+			return io.NopCloser(reader), nil
+		},
+		ContentType: header.Header.Get("Content-Type"),
+	}).Post(url)
 	if err != nil {
 		go BalanceIPFS()
 		return err, hash

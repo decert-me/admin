@@ -5,6 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
+	"backend/internal/app/utils"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -118,6 +119,28 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		tx.Rollback()
 		return err
 	}
+	// 查询原有关系
+	var collectionIDList []uint
+	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Pluck("collection_id", &collectionIDList).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	// 需要移除的关系
+	for _, v := range utils.CollectionSubtract(collectionIDList, *req.CollectionID) {
+		// 查询合辑状态
+		var collection model.Collection
+		err := tx.Model(&model.Collection{}).Where("id = ?", v).First(&collection).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		// 判断合辑是否存在NFT
+		if collection.TokenId != 0 {
+			tx.Rollback()
+			return errors.New("合辑已生成NFT，无法删除")
+		}
+	}
 	// 清除原有关系
 	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Delete(&model.CollectionRelate{}).Error
 	if err != nil {
@@ -133,6 +156,10 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		if err != nil {
 			tx.Rollback()
 			return errors.New("集合不存在")
+		}
+		// 判断合辑是否存在NFT
+		if collection.TokenId != 0 {
+			return errors.New("合辑已生成NFT，无法删除")
 		}
 		var status uint8
 		if quest.Status == 2 {
@@ -205,4 +232,33 @@ func UpdateCollectionStatusAuto(tx *gorm.DB) error {
 		}
 	}
 	return nil
+}
+
+// GetQuestCollectionAddList 获取待添加到合辑挑战列表
+func GetQuestCollectionAddList(req request.GetQuestCollectionAddListRequest) (res []response.GetQuestCollectionAddListRes, total int64, err error) {
+	limit := req.PageSize
+	offset := req.PageSize * (req.Page - 1)
+	db := global.DB.Model(&model.Quest{})
+	db.Joins("left join collection_relate cr on quest.token_id = cr.token_id")
+	db.Where("quest.style = 1")
+	db.Where("quest.disabled = false")
+	db.Where("cr.id is null")
+	if req.SearchKey != "" {
+		db.Where("quest.title ILIKE ? OR quest.description ILIKE ?", "%"+req.SearchKey+"%", "%"+req.SearchKey+"%")
+		tokenID, err := strconv.Atoi(req.SearchKey)
+		if err == nil {
+			db.Or("quest.token_id = ?", tokenID)
+		}
+	}
+	db.Order("quest.sort desc,quest.token_id desc")
+	err = db.Count(&total).Error
+	if err != nil {
+		return res, total, err
+	}
+	err = db.Limit(limit).Offset(offset).Find(&res).Error
+	for i := 0; i < len(res); i++ {
+		// 获取挑战合辑
+		global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", res[i].TokenId).Find(&res[i].CollectionID)
+	}
+	return
 }

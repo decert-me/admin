@@ -2,7 +2,10 @@ package backend
 
 import (
 	"backend/internal/app/model/request"
+	"fmt"
+	"github.com/getsentry/sentry-go"
 	"testing"
+	"time"
 )
 
 func TestPackBuild(t *testing.T) {
@@ -19,4 +22,19 @@ func TestPackDelExcessFile(t *testing.T) {
 	//	log.Fatal(err)
 	//}
 	//utils.FileMove("/Users/mac/Code/tutorials/build/assets", "/Users/mac/Code/tutorials/build/")
+}
+
+func TestSentry(t *testing.T) {
+	if err := sentry.Init(sentry.ClientOptions{
+		Dsn:           "https://3050ad6c3b4fb6410f5f06dbcbcd88fc@o4505955390652416.ingest.sentry.io/4505955396550656",
+		EnableTracing: true,
+		// Set TracesSampleRate to 1.0 to capture 100%
+		// of transactions for performance monitoring.
+		// We recommend adjusting this value in production,
+		TracesSampleRate: 1.0,
+	}); err != nil {
+		fmt.Printf("Sentry initialization failed: %v", err)
+	}
+	defer sentry.Flush(2 * time.Second)
+	sentry.CaptureMessage("It works!")
 }
