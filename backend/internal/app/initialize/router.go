@@ -68,6 +68,7 @@ func Routers() *gin.Engine {
 		router.InitQuestRouter(v1Group)
 		router.InitCollectionRouter(v1Group)
 		router.InitAccountRouter(v1Group)
+		router.InitAirdropRouter(v1Group)
 	}
 	global.LOG.Info("router register success")
 	return Router
