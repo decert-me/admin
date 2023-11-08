@@ -2,10 +2,10 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import {
     ArrowLeftOutlined,
   } from '@ant-design/icons';
-import { Button, Form, InputNumber, Radio, Select, message } from "antd";
+import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import { useEffect, useState } from "react";
 import { getCollectionList, getQuest, updateQuest } from "../../request/api/quest";
-
+const { TextArea } = Input;
 
 export default function ChallengeModifyPage(params) {
 
@@ -20,13 +20,14 @@ export default function ChallengeModifyPage(params) {
     let [collection, setCollection] = useState([]);
     const [loading, setLoading] = useState(false);
     
-    function onFinish({difficulty, estimateTime, collection_id, type, sort}) {
+    function onFinish({difficulty, estimateTime, collection_id, type, sort, description}) {
         updateQuest({
             id: Number(id), 
             difficulty, 
             estimate_time: estimateTime && estimateTime !== 0 ? estimateTime * 60 : null,
             sort,
-            collection_id: type === "default" ? [] : collection_id
+            collection_id: type === "default" ? [] : collection_id,
+            description
         })
         .then(res => {
             if (res.code === 0) {
@@ -67,7 +68,9 @@ export default function ChallengeModifyPage(params) {
                     {name: ["estimateTime"], value: data.quest_data.estimateTime / 60},
                     {name: ["sort"], value: Number(data.sort)},
                     {name: ["type"], value: data.collection_id.length === 0 ? "default" : "compilation"},
-                    {name: ["collection_id"], value: data.collection_id}
+                    {name: ["collection_id"], value: data.collection_id},
+                    {name: ["description"], value: data.description}
+                    
                 ];
                 setFields([...fields]);
             }
@@ -103,11 +106,32 @@ export default function ChallengeModifyPage(params) {
                         <img src={data.metadata.image.replace("ipfs://", "https://ipfs.decert.me/")} alt="" style={{height: "100px"}} />
                     </Form.Item>
                     <Form.Item
-                        label="教程(不可编辑)"
+                        label="标题(不可编辑)"
                         name="title"
                     >
                         {data.title}
                     </Form.Item>
+                    {
+                        data.metadata.description ? 
+                        <Form.Item
+                            label="描述(不可编辑)"
+                            name="description"
+                        >
+                            {data.description}
+                        </Form.Item>
+                        :
+                        <Form.Item
+                            label="描述"
+                            name="description"
+                        >
+                            <TextArea 
+                                autoSize={{
+                                    minRows: 3,
+                                    maxRows: 5,
+                                }}
+                            />
+                        </Form.Item>
+                    }
                     <Form.Item
                         label="难度"
                         name="difficulty"
@@ -137,7 +161,6 @@ export default function ChallengeModifyPage(params) {
                         name="collection_id"
                     >
                         <Select
-                            mode="multiple"
                             allowClear
                             options={collection}
                         />
