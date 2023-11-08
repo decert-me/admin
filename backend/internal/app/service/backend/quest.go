@@ -8,6 +8,7 @@ import (
 	"backend/internal/app/utils"
 	"errors"
 	"fmt"
+	"github.com/tidwall/gjson"
 	"gorm.io/gorm"
 	"math"
 	"strconv"
@@ -110,7 +111,6 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if req.Sort != nil {
 		data["sort"] = *req.Sort
 	}
-
 	tx := global.DB.Begin()
 	// 查询quest
 	var quest model.Quest
@@ -119,6 +119,14 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		tx.Rollback()
 		return err
 	}
+	if req.Description != nil {
+		// 判断链上是否有数据
+		if gjson.Get(string(quest.MetaData), "description").String() != "" {
+			tx.Rollback()
+			return errors.New("链上已存在数据，无法修改")
+		}
+		data["description"] = *req.Description
+	}
 	// 查询原有关系
 	var collectionIDList []uint
 	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Pluck("collection_id", &collectionIDList).Error
@@ -126,6 +134,21 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		tx.Rollback()
 		return err
 	}
+	// 判断 collectionIDList 和 req.CollectionID是否相同
+	if utils.CollectionEqual(collectionIDList, *req.CollectionID) {
+		// 只更新Quest
+		raw := tx.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
+		if raw.RowsAffected == 0 {
+			tx.Rollback()
+			return errors.New("更新失败")
+		}
+		if raw.Error != nil {
+			tx.Rollback()
+			return raw.Error
+		}
+		return tx.Commit().Error
+	}
+
 	// 需要移除的关系
 	for _, v := range utils.CollectionSubtract(collectionIDList, *req.CollectionID) {
 		// 查询合辑状态
@@ -138,7 +161,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		// 判断合辑是否存在NFT
 		if collection.TokenId != 0 {
 			tx.Rollback()
-			return errors.New("合辑已生成NFT，无法删除")
+			return errors.New("合辑已生成NFT，无法修改、删除")
 		}
 	}
 	// 清除原有关系
@@ -159,7 +182,8 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		}
 		// 判断合辑是否存在NFT
 		if collection.TokenId != 0 {
-			return errors.New("合辑已生成NFT，无法删除")
+			tx.Rollback()
+			return errors.New("合辑已生成NFT，无法修改、删除")
 		}
 		var status uint8
 		if quest.Status == 2 {
@@ -190,6 +214,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	// 更新Quest
 	raw := tx.Model(&model.Quest{}).Where("id = ?", req.ID).Updates(data)
 	if raw.RowsAffected == 0 {
+		tx.Rollback()
 		return errors.New("更新失败")
 	}
 	if raw.Error != nil {
