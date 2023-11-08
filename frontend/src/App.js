@@ -12,6 +12,7 @@ import { TutorialsAddPage, TutorialsBuildLogPage, TutorialsBuildPage, TutorialsL
 import { TagsAddPage, TagsModifyPage, TagsPage } from './views/Tags';
 import { ChallengeAddPage, ChallengeCompilationPage, ChallengeListPage, ChallengeModifyPage } from './views/Challenge';
 import ChallengeCompilationModifyPage from './views/Challenge/ChallengeCompilationModifyPage';
+import { AirdropListPage } from './views/Airdrop';
 
 function App() {
   return (
@@ -104,7 +105,10 @@ function App() {
           element={<ChallengeAddPage />} 
         />
 
-
+        <Route 
+          path="airdrop/list" 
+          element={<AirdropListPage />} 
+        />
       </Route>
     </Routes>
   );

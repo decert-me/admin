@@ -26,7 +26,8 @@ serviceAxios.interceptors.response.use(
   res => {
     let data = res.data;
     // 错误返回
-    if (data.code !== 0) {
+    if ((typeof data.code === "number" && data.code !== 0) || 
+    (typeof data.status === "number"  && data.status !== 0)) {
       // reload
       if (data.data?.reload) {
         localStorage.removeItem("token");
@@ -35,6 +36,7 @@ serviceAxios.interceptors.response.use(
         window.history.go(0);
         return
       }
+      
       message.error(data.msg);
     }
     return data;
