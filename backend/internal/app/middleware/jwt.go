@@ -29,7 +29,6 @@ func JWTAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		_ = claims
 
 		c.Next()

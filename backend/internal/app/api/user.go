@@ -95,6 +95,7 @@ func tokenNext(c *gin.Context, user model.User) {
 	claims := j.CreateClaims(utils.BaseClaims{
 		UUID:        user.UUID,
 		ID:          user.ID,
+		Address:     user.Address,
 		Nickname:    user.Nickname,
 		UserName:    user.Username,
 		AuthorityId: user.AuthorityId,
@@ -125,10 +126,11 @@ func Register(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	user := &model.User{Username: r.Username, Nickname: r.Nickname, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, AuthoritySourceIds: r.AuthoritySourceIds}
-	userReturn, err := system.Register(*user)
+	user := &model.User{Username: r.Username, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId}
+	address := c.GetString("address")
+	userReturn, err := system.Register(address, *user)
 	if err != nil {
-		global.LOG.Error("注册失败!", zap.Error(err))
+		global.LOG.Error("添加失败!", zap.Error(err))
 		response.FailWithDetailed(response.UserResponse{User: userReturn}, err.Error(), c)
 	} else {
 		response.OkWithDetailed(response.UserResponse{User: userReturn}, "注册成功", c)
@@ -254,8 +256,7 @@ func UpdateUserInfo(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-
-	if err := system.UpdateUserInfo(q); err != nil {
+	if err := system.UpdateUserInfo(utils.GetUserID(c), q); err != nil {
 		global.LOG.Error("编辑失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
@@ -267,9 +268,7 @@ func UpdateSelfInfo(c *gin.Context) {
 	var q request.UpdateSelfInfo
 	_ = c.ShouldBindJSON(&q)
 
-	q.ID = utils.GetUserID(c)
-
-	if err := system.UpdateSelfInfo(q); err != nil {
+	if err := system.UpdateSelfInfo(utils.GetUserID(c), q); err != nil {
 		global.LOG.Error("编辑失败!", zap.Error(err))
 		response.FailWithMessage("设置失败", c)
 	} else {
@@ -299,5 +298,40 @@ func ResetPassword(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithMessage("重置成功", c)
+	}
+}
+
+// GetLoginMessage
+// @Tags SignApi
+// @Summary 获取登录签名消息
+// @accept application/json
+// @Produce application/json
+// @Router /sign/getLoginMessage [post]
+func GetLoginMessage(c *gin.Context) {
+	var request request.GetLoginMessageRequest
+	_ = c.ShouldBindQuery(&request)
+	if loginMessage, err := system.GetLoginMessage(request.Address); err != nil {
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(map[string]string{"loginMessage": loginMessage}, "获取成功", c)
+	}
+}
+
+// AuthLoginSign
+// @Tags SignApi
+// @Summary 校验登录签名
+// @accept application/json
+// @Produce application/json
+// @Router /sign/authLoginSign [post]
+func AuthLoginSign(c *gin.Context) {
+	var request request.AuthLoginSignRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		response.FailWithMessage("参数错误："+err.Error(), c)
+		return
+	}
+	if user, err := system.AuthLoginSignRequest(request); err != nil {
+		response.FailWithMessage("登录失败", c)
+	} else {
+		tokenNext(c, user)
 	}
 }

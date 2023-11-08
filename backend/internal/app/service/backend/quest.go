@@ -127,6 +127,10 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		}
 		data["description"] = *req.Description
 	}
+	// 修改metadata
+	if data["description"] != nil {
+		data["meta_data"] = gorm.Expr(fmt.Sprintf("jsonb_set(meta_data, '{description}', '%s')", *req.Description))
+	}
 	// 查询原有关系
 	var collectionIDList []uint
 	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Pluck("collection_id", &collectionIDList).Error

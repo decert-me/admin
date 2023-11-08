@@ -35,6 +35,7 @@ type CustomClaims struct {
 type BaseClaims struct {
 	ID          uint      `json:"id,omitempty"`
 	UUID        uuid.UUID `json:"uuid,omitempty"`
+	Address     string    `json:"address,omitempty"`
 	UserName    string    `json:"username,omitempty"`
 	Nickname    string    `json:"nickname,omitempty"`
 	AuthorityId string    `json:"authorityId,omitempty"`
