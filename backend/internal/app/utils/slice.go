@@ -22,3 +22,16 @@ func CollectionSubtract[T comparable](a, b []T) []T {
 	}
 	return result
 }
+
+// CollectionEqual 合集相等
+func CollectionEqual[T comparable](a, b []T) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for _, v := range a {
+		if !SliceIsExist(b, v) {
+			return false
+		}
+	}
+	return true
+}

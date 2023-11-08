@@ -6,9 +6,12 @@ import (
 	"backend/internal/app/utils"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/imroc/req/v3"
 	"github.com/tidwall/gjson"
+	"go.uber.org/zap"
 	"strconv"
+	"time"
 )
 
 func RunAirdrop(r request.RunAirdropReq) (err error) {
@@ -45,4 +48,20 @@ func RunAirdrop(r request.RunAirdropReq) (err error) {
 		return errors.New(gjson.Get(res.String(), "message").String())
 	}
 	return nil
+}
+
+// GetAirdropList 获取空投列表
+func GetAirdropList(r request.GetAirdropListReq) (result []byte, err error) {
+	client := req.C().SetTimeout(180 * time.Second)
+	url := global.CONFIG.Airdrop.Api + "/v1/airdrop/getAirdropList"
+	fmt.Println("URL", url)
+	res, err := client.R().SetBody(r).Post(url)
+	if err != nil {
+		global.LOG.Error("Post error", zap.Error(err))
+		return
+	}
+	if gjson.Get(res.String(), "status").Int() != 0 {
+		return nil, errors.New(gjson.Get(res.String(), "message").String())
+	}
+	return res.Bytes(), nil
 }

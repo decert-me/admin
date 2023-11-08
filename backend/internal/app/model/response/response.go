@@ -18,12 +18,16 @@ const (
 )
 
 func Result(code int, data interface{}, msg string, c *gin.Context) {
-	// 开始时间
 	c.JSON(http.StatusOK, Response{
 		code,
 		data,
 		msg,
 	})
+}
+
+func ResultWithRaw(data []byte, c *gin.Context) {
+	c.Data(http.StatusOK, "application/json", data)
+	//c.JSON(http.StatusOK, data)
 }
 
 func Ok(c *gin.Context) {

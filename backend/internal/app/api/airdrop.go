@@ -22,3 +22,19 @@ func RunAirdrop(c *gin.Context) {
 		response.Ok(c)
 	}
 }
+
+// GetAirdropList 获取空投列表
+func GetAirdropList(c *gin.Context) {
+	var req request.GetAirdropListReq
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	if result, err := backend.GetAirdropList(req); err != nil {
+		response.FailWithMessage("获取失败："+err.Error(), c)
+	} else {
+		response.ResultWithRaw(result, c)
+	}
+}
