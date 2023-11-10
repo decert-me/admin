@@ -32,7 +32,7 @@ func CasbinHandler() gin.HandlerFunc {
 			e = global.Enforcer
 		}
 
-		if sub == "999" { // root admin user
+		if sub == "888" { // root admin user
 			c.Next()
 			return
 		}
