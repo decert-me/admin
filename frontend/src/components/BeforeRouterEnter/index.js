@@ -26,6 +26,7 @@ import {
     ChallengeModifyPage,
     ChallengeCompilationModifyPage
 } from '../../views/Challenge';
+import { PersonelEditPage, PersonelListPage } from '../../views/Personel';
 
 
 
@@ -121,9 +122,20 @@ export default function BeforeRouterEnter(params) {
                 element={<ChallengeAddPage />} 
                 />
 
+                {/* 空投 */}
                 <Route 
                 path="airdrop/list" 
                 element={<AirdropListPage />} 
+                />
+
+                {/* 人员管理 */}
+                <Route 
+                path="personnel/list" 
+                element={<PersonelListPage />} 
+                />
+                <Route 
+                path="personnel/:type" 
+                element={<PersonelEditPage />} 
                 />
             </Route>
         </Routes>

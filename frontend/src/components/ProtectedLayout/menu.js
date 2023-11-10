@@ -6,7 +6,8 @@ import {
     TagsOutlined,
     ProfileOutlined,
     PartitionOutlined,
-    GiftOutlined
+    GiftOutlined,
+    TeamOutlined
   } from '@ant-design/icons';
 
 export const menu = [
@@ -46,5 +47,10 @@ export const menu = [
         label: "空投管理",
         key: "airdrop/list",
         icon: <GiftOutlined />,
+    },
+    {
+        label: "成员管理",
+        key: "personnel/list",
+        icon: <TeamOutlined />,
     },
 ]
