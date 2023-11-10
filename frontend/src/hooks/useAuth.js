@@ -5,6 +5,7 @@ import { useLocalStorage } from "./useLocalStorage";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+
   const [user, setUser] = useLocalStorage("user", null);
   const [token, setToken] = useLocalStorage("token", null);
   const [auth, setAuth] = useLocalStorage("auth", null);

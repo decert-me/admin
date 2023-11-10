@@ -12,7 +12,6 @@ export default function ChallengeModifyPage(params) {
     const [form] = Form.useForm();
     const { id, tokenId } = useParams();
     const navigateTo = useNavigate();
-    const type = Form.useWatch("type", form);
 
 
     let [data, setData] = useState();
@@ -70,7 +69,6 @@ export default function ChallengeModifyPage(params) {
                     {name: ["type"], value: data.collection_id.length === 0 ? "default" : "compilation"},
                     {name: ["collection_id"], value: data.collection_id},
                     {name: ["description"], value: data.description}
-                    
                 ];
                 setFields([...fields]);
             }

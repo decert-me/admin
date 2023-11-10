@@ -1,122 +1,77 @@
-import { LockOutlined, UserOutlined, SafetyOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Col, Form, Input, Row } from 'antd';
+import { useConnect, useDisconnect, useSignMessage } from 'wagmi';
+import { Button } from "antd";
 import { useAuth } from "../../hooks/useAuth";
 import "./index.scss";
-import { useEffect, useState } from 'react';
-import { userCaptcha, userLogin } from '../../request/api/public';
+import { authLoginSign, getLoginMessage } from '../../request/api/sign';
 
 export default function LoginPage(params) {
 
     const { login } = useAuth();
-    let [captcha, setCaptcha] = useState();
+    const { disconnect } = useDisconnect();
+    const { connect, connectors, isLoading } = useConnect({
+        onSuccess(data) {
+            goSignature(data.account);
+        },
+        onError(err) {
+            disconnect();
+            goConnect();
+            console.log("===>", err);
+        }
+    });
+    const { signMessage, signMessageAsync } = useSignMessage()
 
-    const onFinish = (values) => {
-        const { username, password, captcha: captchaValue } = values;
-        userLogin({
-            username, password, captcha: captchaValue, CaptchaId: captcha.captchaId
+    function goSignature(account) {
+        new Promise(async(resolve, reject) => {
+            // 获取nonce
+            let message;
+            await getLoginMessage({address: account})
+            .then(res => {
+                if (res.code === 0) {
+                    message = res.data.loginMessage;
+                }else{
+                    reject();
+                }
+            })
+            // 发起签名
+            signMessageAsync({ message })
+            .then(res => {
+                resolve({message, signature: res});
+            })
+            .catch(err => {
+                reject();
+            })
         })
-        .then(res => {
-            if (res.code === 0) {
+        .then(({message, signature}) => {
+            authLoginSign({
+                address: account,
+                message,
+                signature
+            })
+            .then(res => {
                 const { token, user } = res.data;
                 login(token, user);
-            }
+            })
         })
-    };
-
-    function getCaptcha() {
-        userCaptcha()
-        .then(res => {
-            if (res?.code === 0) {
-                captcha = res.data;
-                setCaptcha({...captcha});
-                console.log(captcha);
-            }
+        .catch(err => {
+            // 登陆失败 => 断开连接
+            disconnect();
         })
     }
 
-    useEffect(() => {
-        getCaptcha();
-    },[])
+    function goConnect(params) {
+        connect({connector: connectors[0]});
+    }
 
     return (
         <div className="login">
             <div className="login-content">
-                <Form
-                    name="normal_login"
-                    className="login-form"
-                    initialValues={{
-                        remember: true,
-                    }}
-                    onFinish={onFinish}
-                    >
-
-                    {/* 用户名 */}
-                    <Form.Item
-                        name="username"
-                        rules={[
-                        {
-                            required: true,
-                            message: 'Please input your Username!',
-                        },
-                        ]}
-                    >
-                        <Input prefix={<UserOutlined />} placeholder="Username" />
-                    </Form.Item>
-
-                    {/* 密码 */}
-                    <Form.Item
-                        name="password"
-                        rules={[
-                        {
-                            required: true,
-                            message: 'Please input your Password!',
-                        },
-                        ]}
-                    >
-                        <Input
-                        prefix={<LockOutlined />}
-                        type="password"
-                        placeholder="Password"
-                        />
-                    </Form.Item>
-
-                    {/* 验证码 */}
-                    <Form.Item>
-                        <Row gutter={8}>
-                        <Col span={12}>
-                            <Form.Item
-                            name="captcha"
-                            noStyle
-                            rules={[
-                                {
-                                required: true,
-                                message: 'Please input the captcha you got!',
-                                },
-                            ]}
-                            >
-                            <Input 
-                                prefix={<SafetyOutlined />}
-                                placeholder="Captcha"
-                            />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            {
-                                captcha &&
-                                <img src={captcha.picPath} alt="" className="captcha" onClick={() => getCaptcha()} />
-                            }
-                        </Col>
-                        </Row>
-                    </Form.Item>
-
-                    <Form.Item>
-                        <Button type="primary" htmlType="submit" className="login-form-button">
-                        Log in
-                        </Button>
-                    </Form.Item>
-                    Or <a href="">register now!</a>
-
-                </Form>
+                <img src="https://learnblockchain.cn/css/default/metamask-login.svg" alt="" />
+                <p>MetaMask 登录</p>
+                <Button 
+                    onClick={() => goConnect()}
+                    disabled={!connectors[0].ready}
+                    loading={isLoading}
+                >连接钱包</Button>
             </div>
         </div>
     )
