@@ -4,19 +4,29 @@
     display: flex;    
     align-items: center;
     justify-content: center;
+    background-color: #eff2f5;
     // 登录面板
     .login-content{
         width: 300px;
-        padding: 30px;
+        padding: 50px 80px;
         border-radius: 10px;
-        box-shadow: 0 0 2px #b3b3b3;
-
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        p{
+            font-size: 24px;
+            font-weight: 700;
+        }
         button{
             width: 100%;
-        }
-        .captcha{
-            width: 100%;
-            cursor: pointer;
+            height: 40px;
+            margin-top: 30px;
+            font-size: 17px;
         }
     }
+}
+p{
+    margin: 0;
 }

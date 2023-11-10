@@ -9,6 +9,7 @@ import {
 import { Layout, Menu, Button, theme } from 'antd';
 import "./index.scss";
 import { menu } from "./menu";
+import { useDisconnect } from "wagmi";
 const { Header, Sider, Content } = Layout;
 
 export const ProtectedLayout = () => {
@@ -17,6 +18,7 @@ export const ProtectedLayout = () => {
   const outlet = useOutlet();
   const location = useLocation();
   const navigateTo = useNavigate();
+  const { disconnect } = useDisconnect();
 
   const { token: { colorBgContainer }, } = theme.useToken();
   const [collapsed, setCollapsed] = useState(false);
@@ -63,6 +65,11 @@ export const ProtectedLayout = () => {
       open
     }
   }
+
+  function goDisconnect() {
+    disconnect();
+    logout();
+  }
   
   return (
     <Layout style={{height: "100vh"}} className="main">
@@ -105,9 +112,9 @@ export const ProtectedLayout = () => {
           {/* 控制台 */}
           <div className="operate">
             {!!user && (
-                <button key={"logout"} onClick={logout}>
-                  <p >Logout</p>
-                </button>
+                <Button key={"logout"} danger type="primary" onClick={goDisconnect}>
+                  Disconnect
+                </Button>
             )}
           </div>
         </Header>

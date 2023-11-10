@@ -1,116 +1,48 @@
-import { Route, Routes } from 'react-router-dom';
 import './styles/App.css';
 import './styles/index.scss';
-import { Redirect } from './components/Redirect';
-import { ProtectedLayout } from './components/ProtectedLayout';
-import LoginPage from './views/Login';
-import ProfilePage from './views/Profile';
-import SettingsPage from './views/Settings';
-import AuthGuard from './components/AuthGuard';
-import HomePage from './views/Home';
-import { TutorialsAddPage, TutorialsBuildLogPage, TutorialsBuildPage, TutorialsListPage, TutorialsModifyPage, } from './views/Tutorials';
-import { TagsAddPage, TagsModifyPage, TagsPage } from './views/Tags';
-import { ChallengeAddPage, ChallengeCompilationPage, ChallengeListPage, ChallengeModifyPage } from './views/Challenge';
-import ChallengeCompilationModifyPage from './views/Challenge/ChallengeCompilationModifyPage';
-import { AirdropListPage } from './views/Airdrop';
+import BeforeRouterEnter from './components/BeforeRouterEnter';
+import { WagmiConfig, configureChains, createConfig } from 'wagmi';
+import { polygon, polygonMumbai } from 'viem/chains';
+import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
+import { WalletConnectLegacyConnector } from 'wagmi/connectors/walletConnectLegacy';
+// import { PhantomConnector } from 'phantom-wagmi-connector';
+
+import { infuraProvider } from 'wagmi/providers/infura';
+import { publicProvider } from 'wagmi/providers/public';
+
+
+const { chains, publicClient, webSocketPublicClient } = configureChains(
+  [polygon, polygonMumbai],
+  [
+    infuraProvider({ apiKey: process.env.REACT_APP_INFURA_API_KEY }),
+    publicProvider(),
+  ],
+)
+
+const config = createConfig({
+  autoConnect: true,
+  connectors: [
+    new MetaMaskConnector({ chains }),
+    // new PhantomConnector({ chains }),
+    // new WalletConnectConnector({
+    //   chains,
+    //   options: {
+    //     projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? '',
+    //   },
+    // }),
+  ],
+  publicClient,
+  webSocketPublicClient,
+})
+
 
 function App() {
+  window.Buffer = window.Buffer || require("buffer").Buffer;
+
   return (
-    <Routes>
-      {/* 错误地址重定向 */}
-      <Route path="*" element={<Redirect />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route 
-        path="/dashboard" 
-        element={
-          <AuthGuard>
-            <ProtectedLayout/>
-          </AuthGuard>
-        }
-      >
-        <Route 
-          path="profile" 
-          element={<ProfilePage />} 
-        />
-        <Route 
-          path="settings" 
-          element={<SettingsPage />} 
-        />
-        <Route 
-          path="home" 
-          element={<HomePage />} 
-        />
-
-        {/* 教程 */}
-        <Route 
-          path="tutorials/list" 
-          element={<TutorialsListPage />} 
-        />
-        <Route 
-          path="tutorials/modify/:id" 
-          element={<TutorialsModifyPage />} 
-        />
-        <Route 
-          path="tutorials/add" 
-          element={<TutorialsAddPage />} 
-        />
-        {/* <Route 
-          path="tutorials/build" 
-          element={<TutorialsBuildPage />} 
-        />
-        <Route 
-          path="tutorials/buildlog/:id" 
-          element={<TutorialsBuildLogPage />} 
-        /> */}
-        
-
-        {/* 标签 */}
-        <Route 
-          path="tags" 
-          element={<TagsPage />} 
-        />
-        <Route 
-          path="tags/add" 
-          element={<TagsAddPage />} 
-        />
-        <Route 
-          path="tags/modify/:type/:id" 
-          element={<TagsModifyPage />} 
-        />
-
-
-        {/* 挑战 */}
-        <Route 
-          path="challenge/list" 
-          element={<ChallengeListPage />} 
-        />
-        <Route 
-          path="challenge/list/:id" 
-          element={<ChallengeListPage />} 
-        />
-        <Route 
-          path="challenge/modify/:id/:tokenId" 
-          element={<ChallengeModifyPage />} 
-        />
-        <Route 
-          path="challenge/compilation"
-          element={<ChallengeCompilationPage />} 
-        />
-        <Route 
-          path="challenge/compilation/modify/:id"
-          element={<ChallengeCompilationModifyPage />}
-        />
-        <Route 
-          path="challenge/add" 
-          element={<ChallengeAddPage />} 
-        />
-
-        <Route 
-          path="airdrop/list" 
-          element={<AirdropListPage />} 
-        />
-      </Route>
-    </Routes>
+    <WagmiConfig config={config}>
+        <BeforeRouterEnter />
+    </WagmiConfig>
   );
 }
 
