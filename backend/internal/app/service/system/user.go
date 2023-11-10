@@ -6,15 +6,24 @@ import (
 	"backend/internal/app/model/request"
 	"backend/internal/app/utils"
 	"errors"
+	"fmt"
 	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"strings"
 )
 
 // @function: Register
 // @description: 用户注册
 // @param: u model.User
 // @return: userInter model.User, err error
-func Register(u model.User) (userInter model.User, err error) {
+func Register(address string, u model.User) (userInter model.User, err error) {
+	// 校验是否超级管理员
+	if err := global.DB.Model(&model.User{}).
+		Where("address ILIKE ? AND authority_id='888'", address).
+		First(&model.User{}).Error; err != nil {
+		return userInter, errors.New("权限不足")
+	}
 	var user model.User
 	if !errors.Is(global.DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
 		return userInter, errors.New("用户名已注册")
@@ -222,4 +231,64 @@ func ResetPassword(operatorUID uint, q request.ResetPassword) (err error) {
 	err = global.DB.Model(&model.User{}).Where("id = ?", q.ID).Update("password", utils.BcryptHash(q.Password)).Error
 
 	return err
+}
+
+// GetLoginMessage
+// @description: 获取登录签名消息
+// @param: address string
+// @return: loginMessage string, err error
+func GetLoginMessage(address string) (loginMessage string, err error) {
+	loginMessage = fmt.Sprintf("Decert Admin Login\n\nWallet address:\n%s\n\n", address)
+	UUID := uuid.NewV4() // 生成UUID
+	// 存到Local Cache里
+	if err = global.TokenCache.Set(UUID.String(), []byte{}); err != nil {
+		global.LOG.Error("set nonce error: ", zap.Error(err))
+		return loginMessage, err
+	}
+	return fmt.Sprintf(loginMessage+"Nonce:\n%s", UUID), nil
+}
+
+// AuthLoginSignRequest
+// @description: 校验签名并返回Token
+// @param: c *gin.Context, req request.AuthLoginSignRequest
+// @return: token string, err error
+func AuthLoginSignRequest(req request.AuthLoginSignRequest) (user model.User, err error) {
+	if !utils.VerifySignature(req.Address, req.Signature, []byte(req.Message)) {
+		return user, errors.New("签名校验失败")
+	}
+	// 获取Nonce
+	indexNonce := strings.LastIndex(req.Message, "Nonce:")
+	if indexNonce == -1 {
+		return user, errors.New("签名已过期")
+	}
+	nonce := req.Message[indexNonce+7:]
+	// 获取Address
+	indexAddress := strings.LastIndex(req.Message, "Wallet address:")
+	if indexAddress == -1 {
+		return user, errors.New("地址错误")
+	}
+	address := req.Message[indexAddress+16 : indexNonce]
+	// 校验address
+	if strings.TrimSpace(address) != req.Address {
+		return user, errors.New("地址错误")
+	}
+	// 校验Nonce
+	_, err = global.TokenCache.Get(nonce)
+	if err != nil {
+		return user, errors.New("签名已过期")
+	}
+	// 删除Nonce
+	if err = global.TokenCache.Delete(nonce); err != nil {
+		global.LOG.Error("DelNonce error", zap.String("nonce", nonce)) // not important and continue
+	}
+	// 校验签名信息
+	if req.Message[:indexAddress] != "Decert Admin Login\n\n" {
+		return user, errors.New("签名校验失败")
+	}
+	// 校验用户信息
+	err = global.DB.Where("address ILIKE ?", req.Address).First(&user).Error
+	if err != nil {
+		return user, errors.New("用户不存在")
+	}
+	return user, nil
 }

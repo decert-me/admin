@@ -5,7 +5,6 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
-	"backend/internal/app/utils"
 	"errors"
 	_ "fmt"
 	"strings"
@@ -220,10 +219,14 @@ func GetAuthority(auth request.SetDataAuthorityRequest) (list interface{}, err e
 	return authorityResponse, err
 }
 
-func UpdateUserInfo(q request.UpdateUserInfo) error {
+func UpdateUserInfo(userID uint, q request.UpdateUserInfo) error {
+	// 校验是否超级管理员
+	if err := global.DB.Model(&model.User{}).
+		Where("id = ? AND authority_id='888'", userID).
+		First(&model.User{}).Error; err != nil {
+		return errors.New("权限不足")
+	}
 	var user model.User
-	var authority model.Authority
-
 	// check if user exists
 	err := global.DB.Where("id = ?", q.ID).First(&user).Error
 	if err != nil {
@@ -231,37 +234,35 @@ func UpdateUserInfo(q request.UpdateUserInfo) error {
 	}
 
 	// check if root admin
-	if user.AuthorityId == "999" {
+	if user.AuthorityId == "888" {
 		return errors.New("不能修改超级管理员")
 	}
 
-	// check if authority exists
-	result := global.DB.Where("authority_id = ?", q.AuthorityId).First(&authority)
-	if result.RowsAffected == 0 {
-		return errors.New("角色不存在")
-	}
-
-	user.Nickname = q.Nickname
+	user.Username = q.UserName
 	user.HeaderImg = q.HeaderImg
 	user.AuthorityId = q.AuthorityId
-	user.Password = utils.BcryptHash(q.Password)
+	user.Address = q.Address
+	//user.Password = utils.BcryptHash(q.Password)
 
-	// TODO: 事务
-	if len(q.AuthoritySourceIds) != 0 {
-		err = SetUserAuthority(user.UUID.String(), q.AuthoritySourceIds)
-		if err != nil {
-			return errors.New("设置失败")
-		}
+	err = global.DB.Model(&model.User{}).Where("id = ?", q.ID).Updates(&user).Error
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
+		return errors.New("地址或用户名重复")
 	}
-
-	return global.DB.Model(&model.User{}).Where("id = ?", q.ID).Updates(&user).Error
+	return err
 }
 
-func UpdateSelfInfo(req request.UpdateSelfInfo) error {
+func UpdateSelfInfo(userID uint, req request.UpdateSelfInfo) error {
 	var user model.User
 
-	user.Nickname = req.Nickname
+	user.Username = req.UserName
+	user.Address = req.Address
 	user.HeaderImg = req.HeaderImg
 
-	return global.DB.Model(&model.User{}).Where("id = ?", req.ID).Updates(&user).Error
+	err := global.DB.Model(&model.User{}).
+		Where("id = ?", userID).
+		Updates(&user).Error
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
+		return errors.New("地址或用户名重复")
+	}
+	return err
 }

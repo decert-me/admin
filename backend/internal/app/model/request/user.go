@@ -2,12 +2,11 @@ package request
 
 // User login structure
 type Register struct {
-	Username           string `json:"username"`
-	Password           string `json:"passWord"`
-	Nickname           string `json:"nickname"`
-	HeaderImg          string `json:"headerImg"`
-	AuthorityId        string `json:"authorityId"`
-	AuthoritySourceIds []uint `json:"authoritySourceIds"`
+	Username    string `json:"username"`
+	Address     string `json:"address"`
+	Password    string `json:"passWord"`
+	HeaderImg   string `json:"headerImg"`
+	AuthorityId string `json:"authorityId"`
 }
 
 // User login structure
@@ -32,16 +31,27 @@ type ResetPassword struct {
 }
 
 type UpdateUserInfo struct {
-	ID                 uint   `json:"id"`
-	Nickname           string `json:"nickname"`
-	HeaderImg          string `json:"headerImg"`
-	AuthorityId        string `json:"authorityId"`
-	AuthoritySourceIds []uint `json:"authoritySourceIds"`
-	Password           string `json:"password"`
+	ID uint `json:"id"`
+	//Nickname    string `json:"nickname"`
+	UserName    string `json:"userName"`
+	Address     string `json:"address"`
+	HeaderImg   string `json:"headerImg"`
+	AuthorityId string `json:"authorityId"`
+	//Password    string `json:"password"`
 }
 
 type UpdateSelfInfo struct {
-	ID        uint   `json:"id"`
-	Nickname  string `json:"nickname"`
+	UserName  string `json:"userName"`
+	Address   string `json:"address"`
 	HeaderImg string `json:"headerImg"`
+}
+
+type GetLoginMessageRequest struct {
+	Address string `json:"address" form:"address"`
+}
+
+type AuthLoginSignRequest struct {
+	Address   string `json:"address" form:"address" binding:"required"`
+	Message   string `json:"message" form:"message" binding:"required"`
+	Signature string `json:"signature" form:"signature" binding:"required"`
 }
