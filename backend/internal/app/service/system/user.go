@@ -17,10 +17,10 @@ import (
 // @description: 用户注册
 // @param: u model.User
 // @return: userInter model.User, err error
-func Register(address string, u model.User) (userInter model.User, err error) {
+func Register(userID uint, u model.User) (userInter model.User, err error) {
 	// 校验是否超级管理员
 	if err := global.DB.Model(&model.User{}).
-		Where("address ILIKE ? AND authority_id='888'", address).
+		Where("id = ? AND authority_id='888'", userID).
 		First(&model.User{}).Error; err != nil {
 		return userInter, errors.New("权限不足")
 	}
@@ -161,21 +161,28 @@ func GetUserInfoList(info request.PageInfo) (list interface{}, total int64, err 
 // @description: 删除用户
 // @param: id float64
 // @return: err error
-func DeleteUser(id uint) (err error) {
+func DeleteUser(uid, id uint) (err error) {
 	var user model.User
-	result := global.DB.Where("id = ?", id).First(&user)
-
+	result := global.DB.Where("id = ?", uid).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return errors.New("找不到该用户")
 	}
 
-	if user.AuthorityId == "999" {
+	if user.AuthorityId != "888" {
+		return errors.New("权限不足")
+	}
+	var userDel model.User
+	result = global.DB.Where("id = ?", id).First(&userDel)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return errors.New("找不到该用户")
+	}
+	if userDel.AuthorityId == "888" {
 		return errors.New("不能删除超级管理员")
 	}
-
+	//
 	// TODO: 上下级限制
 
-	err = global.DB.Where("id = ?", id).Delete(&user).Error
+	err = global.DB.Where("id = ?", id).Unscoped().Delete(&userDel).Error
 	if err != nil {
 		return err
 	}
@@ -188,19 +195,19 @@ func DeleteUser(id uint) (err error) {
 // @return: user system.User, err error
 func GetUserInfo(ID uint) (userInfo model.User, err error) {
 	var user model.User
-	err = global.DB.Model(&model.User{}).Where("id = ?", int(ID)).First(&user).Error
+	err = global.DB.Model(&model.User{}).Preload("Authority").Where("id = ?", int(ID)).First(&user).Error
 	if err != nil {
 		return user, errors.New("找不到该用户")
 	}
 
 	// 返回资源ID
-	var authoritySourceIds []uint
-	// 先查用户资源，再查角色资源
-	_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.Username).Find(&authoritySourceIds).Error
-	if len(authoritySourceIds) == 0 {
-		_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.AuthorityId).Find(&authoritySourceIds).Error
-	}
-	user.AuthoritySourceIds = authoritySourceIds
+	//var authoritySourceIds []uint
+	//// 先查用户资源，再查角色资源
+	//_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.Username).Find(&authoritySourceIds).Error
+	//if len(authoritySourceIds) == 0 {
+	//	_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.AuthorityId).Find(&authoritySourceIds).Error
+	//}
+	//user.AuthoritySourceIds = authoritySourceIds
 
 	return user, err
 }
@@ -217,7 +224,7 @@ func ResetPassword(operatorUID uint, q request.ResetPassword) (err error) {
 		return errors.New("找不到该用户")
 	}
 
-	if targetUser.AuthorityId == "999" {
+	if targetUser.AuthorityId == "888" {
 		return errors.New("不能重置超级管理员密码")
 	}
 
@@ -286,7 +293,7 @@ func AuthLoginSignRequest(req request.AuthLoginSignRequest) (user model.User, er
 		return user, errors.New("签名校验失败")
 	}
 	// 校验用户信息
-	err = global.DB.Where("address ILIKE ?", req.Address).First(&user).Error
+	err = global.DB.Where("address ILIKE ?", req.Address).Preload("Authority").First(&user).Error
 	if err != nil {
 		return user, errors.New("用户不存在")
 	}

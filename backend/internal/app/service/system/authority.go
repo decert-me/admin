@@ -96,7 +96,7 @@ func GetAuthoritySourceList() (list interface{}, err error) {
 // @param: auth model.SysAuthority
 // @return: error
 func SetDataAuthority(auth request.SetDataAuthorityRequest) error {
-	if auth.AuthorityId == "999" {
+	if auth.AuthorityId == "888" {
 		return errors.New("不能修改超级管理员权限")
 	}
 	// 开始事务

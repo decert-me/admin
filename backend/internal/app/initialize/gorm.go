@@ -37,6 +37,7 @@ func RegisterTables(db *gorm.DB) {
 		model.Quest{},
 		model.Collection{},
 		model.CollectionRelate{},
+		model.Upload{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))
@@ -57,13 +58,23 @@ func InitUser(db *gorm.DB) {
 	if count > 0 {
 		return
 	}
+	// 创建角色
+	authority := model.Authority{
+		AuthorityId:   "888",
+		AuthorityName: "超级管理员",
+	}
+	if err := db.Create(&authority).Error; err != nil {
+		global.LOG.Error("create init authority failed", zap.Error(err))
+		os.Exit(0)
+	}
 	// 创建默认用户
 	user := model.User{
 		UUID:        uuid.NewV4(),
 		Username:    "root",
 		Password:    "$2a$10$7iTyC7BlYSofctYy6.6bq.sL12FfybC/hZQ5K/5lqhuINjAAGSSw2",
 		Nickname:    "root",
-		AuthorityId: "999",
+		AuthorityId: "888",
+		Address:     "0xd2AEc55186F9f713128d48087f0e2EF5F453ca79",
 	}
 	if err := db.Create(&user).Error; err != nil {
 		global.LOG.Error("create init user failed", zap.Error(err))

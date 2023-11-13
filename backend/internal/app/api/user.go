@@ -7,6 +7,7 @@ import (
 	"backend/internal/app/model/response"
 	"backend/internal/app/service/system"
 	"backend/internal/app/utils"
+	"github.com/spf13/cast"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/user_agent"
@@ -126,9 +127,8 @@ func Register(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	user := &model.User{Username: r.Username, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId}
-	address := c.GetString("address")
-	userReturn, err := system.Register(address, *user)
+	user := &model.User{Username: r.Username, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, Address: r.Address}
+	userReturn, err := system.Register(utils.GetUserID(c), *user)
 	if err != nil {
 		global.LOG.Error("添加失败!", zap.Error(err))
 		response.FailWithDetailed(response.UserResponse{User: userReturn}, err.Error(), c)
@@ -218,7 +218,7 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := system.DeleteUser(reqId.ID); err != nil {
+	if err := system.DeleteUser(uid, reqId.ID); err != nil {
 		global.LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
@@ -234,9 +234,9 @@ func DeleteUser(c *gin.Context) {
 // @Success 200 {object} response.Response{data=map[string]interface{},msg=string} "获取用户信息"
 // @Router /user/getUserInfo [get]
 func GetSelfInfo(c *gin.Context) {
-	uid := utils.GetUserID(c)
-
-	ReqUser, err := system.GetUserInfo(uid)
+	//uid := utils.GetUserID(c)
+	uid := c.Query("id")
+	ReqUser, err := system.GetUserInfo(cast.ToUint(uid))
 
 	if err != nil {
 		global.LOG.Error("获取失败!", zap.Error(err))

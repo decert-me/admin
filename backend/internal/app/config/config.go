@@ -11,4 +11,5 @@ type Server struct {
 	IPFS    []IPFS  `mapstructure:"ipfs" json:"ipfs" yaml:"ipfs"`
 	Pack    Pack    `mapstructure:"pack" json:"pack" yaml:"pack"`
 	Airdrop Airdrop `mapstructure:"airdrop" json:"airdrop" yaml:"airdrop"`
+	Local   Local   `mapstructure:"local" json:"local" yaml:"local"`
 }

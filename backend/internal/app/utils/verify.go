@@ -7,7 +7,7 @@ var (
 	// 用户
 	LoginVerify           = Rules{"CaptchaId": {NotEmpty()}, "Captcha": {NotEmpty()}, "Username": {NotEmpty()}, "Password": {NotEmpty()}}
 	LoginVerifyNotCaptcha = Rules{"Username": {NotEmpty()}, "Password": {NotEmpty()}}
-	RegisterVerify        = Rules{"Username": {NotEmpty()}, "Password": {NotEmpty()}}
+	RegisterVerify        = Rules{"Username": {NotEmpty()}}
 	ChangePasswordVerify  = Rules{"Password": {NotEmpty()}, "NewPassword": {NotEmpty()}, "RepeatNewPassword": {NotEmpty()}}
 	AuthorityVerify       = Rules{"AuthorityId": {NotEmpty()}, "AuthorityName": {NotEmpty()}, "ParentId": {NotEmpty()}}
 	AuthorityIdVerify     = Rules{"AuthorityId": {NotEmpty()}}
