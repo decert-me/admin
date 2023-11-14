@@ -15,12 +15,8 @@ export default function AirdropList(params) {
         const newStatus = Array.isArray(filters.status) ? filters.status[0] : null;
         if (status !== newStatus) {
             status = newStatus;
-            setStatus(status);
-            pageConfig = {
-                page: 1, pageSize: 10, total: 0
-            };
-            setPageConfig({...pageConfig});
-            getList();
+            setStatus(newStatus);
+            getList(1);
         }
     };
 
@@ -115,6 +111,7 @@ export default function AirdropList(params) {
                 { text: '空投失败', value: 3 },
             ],
             filterMultiple: false,
+            filteredValue: [status],
             render: (status) => (
                 <p style={{
                     color: status === 2 ? "#09CD92" : status === 3 ? "#FF0000" : "000"
@@ -182,10 +179,13 @@ export default function AirdropList(params) {
                 dataSource={data} 
                 onChange={handleChange}
                 pagination={{
+                    simple: true,
                     current: pageConfig.page, 
                     total: pageConfig.total, 
                     pageSize: pageConfig.pageSize, 
-                    onChange: (page) => getList(page)
+                    onChange: (page) => {
+                        page !== pageConfig.page && getList(page)
+                    }
                 }} 
             />
         </div>
