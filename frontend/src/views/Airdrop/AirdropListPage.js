@@ -103,7 +103,7 @@ export default function AirdropList(params) {
             key: 'msg'
         },
         {
-            title: '状态',
+            title: `状态:${status === 1 ? "待空投" : status === 2 ? "已空投" : status === 3 ? "空投失败" : "全部"}`,
             dataIndex: 'status',
             key: 'status',
             filters: [
