@@ -18,7 +18,7 @@ export default function LoginPage(params) {
             console.log("===>", err);
         }
     });
-    const { signMessage, signMessageAsync } = useSignMessage()
+    const { signMessageAsync } = useSignMessage()
 
     function goSignature(account) {
         new Promise(async(resolve, reject) => {
@@ -48,8 +48,12 @@ export default function LoginPage(params) {
                 signature
             })
             .then(res => {
-                const { token, user } = res.data;
-                login(token, user);
+                if (res.code === 0) {                    
+                    const { token, user } = res.data;
+                    login(token, user);
+                }else{
+                    disconnect();
+                }
             })
         })
         .catch(err => {
