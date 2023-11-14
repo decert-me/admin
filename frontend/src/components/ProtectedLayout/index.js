@@ -76,7 +76,7 @@ export const ProtectedLayout = () => {
         {/* 侧边栏 */}
       <Sider trigger={null} collapsible collapsed={collapsed} className="main-sidebar">
         <div className="demo-logo-vertical" >
-            <GithubOutlined />
+            <img src={require("../../assets/logo.png")} alt="" />
         </div>
         <Menu
           theme="dark"
