@@ -17,6 +17,15 @@ export default function ChallengeCompilationPage(params) {
       page: 0, pageSize: 10, total: 0
     });
 
+    const handleChange = (pagination, filters, sorter) => {
+      const { pageSize } = pagination
+      if (pageSize !== pageConfig.pageSize) {
+          pageConfig.pageSize = pageSize;
+          setPageConfig({...pageConfig});
+          getList();
+        }
+    };
+
     const columns = [
         {
           title: '权重',
@@ -210,6 +219,7 @@ export default function ChallengeCompilationPage(params) {
             <Table
                 columns={columns} 
                 dataSource={data} 
+                onChange={handleChange}
                 // rowClassName={(record) => record.top && "toTop"}
                 pagination={{
                     current: pageConfig.page, 

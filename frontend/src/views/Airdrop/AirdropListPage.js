@@ -22,6 +22,7 @@ export default function AirdropList(params) {
         if (pageSize !== pageConfig.pageSize) {
             pageConfig.pageSize = pageSize;
             setPageConfig({...pageConfig});
+            getList();
         }
     };
 

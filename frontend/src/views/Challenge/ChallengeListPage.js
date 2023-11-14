@@ -78,6 +78,15 @@ export default function ChallengeListPage(params) {
       manual: true,
     });
 
+    const handleChange = (pagination, filters, sorter) => {
+      const { pageSize } = pagination
+      if (pageSize !== pageConfig.pageSize) {
+          pageConfig.pageSize = pageSize;
+          setPageConfig({...pageConfig});
+          getList();
+        }
+    };
+
     const columns = [
         {
           title: '权重',
@@ -543,6 +552,7 @@ export default function ChallengeListPage(params) {
                   // rowSelection={rowSelection} 
                   columns={columns} 
                   dataSource={data} 
+                  onChange={handleChange}
                   rowClassName={(record) => record.top && "toTop"}
                   pagination={{
                       current: pageConfig.page, 
