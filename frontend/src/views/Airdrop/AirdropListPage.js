@@ -6,7 +6,7 @@ import "./index.scss";
 export default function AirdropList(params) {
     
     let [data, setData] = useState([]);
-    let [status, setStatus] = useState(null);
+    let [status, setStatus] = useState(3);
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
     });
@@ -46,7 +46,16 @@ export default function AirdropList(params) {
             dataIndex: 'params',
             key: 'params',
             render: ({params}) => (
-                <p>{params.receiver.substring(0,5) + "..." + params.receiver.substring(38,42)}</p>
+                <a 
+                    href={
+                        process.env.REACT_APP_IS_DEV ? 
+                        `https://mumbai.polygonscan.com/address/${params.receiver}`
+                        :
+                        `https://polygonscan.com/address/${params.receiver}`
+                    } 
+                    target="_blank" >
+                    {params.receiver.substring(0,5) + "..." + params.receiver.substring(38,42)}
+                </a>
             )
         },
         {
@@ -54,7 +63,16 @@ export default function AirdropList(params) {
             dataIndex: 'airdrop_hash',
             key: 'airdrop_hash',
             render: (airdrop_hash) => (
-                airdrop_hash.substring(0,5) + "..." + airdrop_hash.substring(61,66)
+                <a 
+                    href={
+                        process.env.REACT_APP_IS_DEV ? 
+                        `https://mumbai.polygonscan.com/tx/${airdrop_hash}`
+                        :
+                        `https://polygonscan.com/tx/${airdrop_hash}`
+                    } 
+                    target="_blank" >
+                    {airdrop_hash.substring(0,5) + "..." + airdrop_hash.substring(61,66)}
+                </a>
             )
         },
         {
