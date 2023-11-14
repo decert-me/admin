@@ -59,6 +59,7 @@ export default function AirdropList(params) {
             dataIndex: 'airdrop_hash',
             key: 'airdrop_hash',
             render: (airdrop_hash) => (
+                airdrop_hash &&
                 <a 
                     href={
                         process.env.REACT_APP_IS_DEV ? 
