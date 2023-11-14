@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
-    GithubOutlined
+    GithubOutlined,
+    CopyOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Button, theme } from 'antd';
+import { Layout, Menu, Button, theme, Dropdown, Space, message } from 'antd';
 import "./index.scss";
 import { menu } from "./menu";
 import { useDisconnect } from "wagmi";
 const { Header, Sider, Content } = Layout;
+
 
 export const ProtectedLayout = () => {
 
@@ -26,6 +28,32 @@ export const ProtectedLayout = () => {
   if (!user) {
     return <Navigate to="/" />;
   }
+
+  const dropdownMenu = [
+    {
+      key: '1',
+      label: (
+        <Space onClick={copy}>
+          {user.address.substring(0,5) + "..." + user.address.substring(38,42)}
+          <CopyOutlined />
+        </Space>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <p style={{textAlign: "center"}} onClick={() => navigateTo(`/dashboard/personnel/edit?id=${user.id}`)}>编辑资料</p>
+      )
+    },
+    {
+      key: '3',
+      label: (
+        <p style={{color: "#ff4d55", textAlign: "center"}} onClick={goDisconnect}>
+          断开连接
+        </p>
+      ),
+    }
+  ]
 //   自动生成侧边栏
   // function menu() {
     // const arr = []
@@ -66,9 +94,21 @@ export const ProtectedLayout = () => {
     }
   }
 
+  // 断开连接
   function goDisconnect() {
     disconnect();
     logout();
+  }
+
+  // 复制地址
+  function copy(params) {
+    navigator.clipboard.writeText(user.address)
+    .then(() => {
+      message.success("复制成功!")
+    })
+    .catch(err => {
+      message.error("复制失败!")
+    });
   }
   
   return (
@@ -113,9 +153,22 @@ export const ProtectedLayout = () => {
           <div className="operate">
             {!!user && (
               // TODO: user展示 ===>
-                <Button key={"logout"} danger type="primary" onClick={goDisconnect}>
-                  Disconnect
-                </Button>
+              <div className="user">
+                <Dropdown
+                  menu={{
+                    items: dropdownMenu,
+                  }}
+                >
+                  {
+                    user.headerImg ? 
+                      <div className="avatar">
+                          <img src={process.env.REACT_APP_BASE_URL+"/"+user.headerImg} alt="" />
+                      </div>
+                      :
+                      <div className="avatar">{user.username[0].toUpperCase()}</div>
+                  }
+                </Dropdown>
+              </div>
             )}
           </div>
         </Header>
