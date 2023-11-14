@@ -26,13 +26,18 @@ export const AuthProvider = ({ children }) => {
     navigate("/", { replace: true });
   };
 
+  const onChangeUser = (data) => {
+    setUser(data)
+  }
+
   const value = useMemo(
     () => ({
       user,
       auth,
       token,
       login,
-      logout
+      logout,
+      onChangeUser
     }),
     [user]
   );

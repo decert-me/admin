@@ -32,7 +32,7 @@ const beforeUpload = (file) => {
 export default function PersonelEditPage(params) {
     
     const { type } = useParams();
-    const { user } = useAuth();
+    const { user, onChangeUser } = useAuth();
     const [form] = Form.useForm();
     const location = useLocation();
     const navigator = useNavigate();
@@ -62,27 +62,38 @@ export default function PersonelEditPage(params) {
     }
 
     // 更新成员信息
-    function updateUser(params) {
+    async function updateUser(params) {
         const id = queryParams.get("id");
         const { userName } = form.getFieldsValue();
         // 判断当前身份 => 是否是超级管理员?
         if (user.authority.authorityId === "888") {
-            updateOtherInfo({
+            await updateOtherInfo({
                 id, userName, headerimg: userAvatar
             })
             .then(res => {
                 message.success(res.msg)
-                navigator("/dashboard/personnel/list");
             })
         }else{
-            updatePersonalInfo({
+            await updatePersonalInfo({
                 userName, headerimg: userAvatar
             })
             .then(res => {
                 message.success(res.msg)
-                navigator("/dashboard/personnel/list");
             })
         }
+
+        if (id == user.id) {            
+            // 更新当前相关信息
+            await getUserInfo({id: user.id})
+            .then(res => {
+                if (res.code === 0) {                        
+                    onChangeUser(res.data.user)
+                }
+            })
+        }
+        setTimeout(() => {
+            navigator("/dashboard/personnel/list");
+        }, 100);
     }
 
     // 添加成员信息
