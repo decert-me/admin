@@ -12,11 +12,16 @@ export default function AirdropList(params) {
     });
 
     const handleChange = (pagination, filters, sorter) => {
+        const { pageSize } = pagination
         const newStatus = Array.isArray(filters.status) ? filters.status[0] : null;
         if (status !== newStatus) {
             status = newStatus;
             setStatus(newStatus);
             getList(1);
+        }
+        if (pageSize !== pageConfig.pageSize) {
+            pageConfig.pageSize = pageSize;
+            setPageConfig({...pageConfig});
         }
     };
 
@@ -180,7 +185,6 @@ export default function AirdropList(params) {
                 dataSource={data} 
                 onChange={handleChange}
                 pagination={{
-                    simple: true,
                     current: pageConfig.page, 
                     total: pageConfig.total, 
                     pageSize: pageConfig.pageSize, 
