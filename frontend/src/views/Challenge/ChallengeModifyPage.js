@@ -25,7 +25,7 @@ export default function ChallengeModifyPage(params) {
             difficulty, 
             estimate_time: estimateTime && estimateTime !== 0 ? estimateTime * 60 : null,
             sort,
-            collection_id: type === "default" ? [] : [collection_id],
+            collection_id: collection_id ? [collection_id] : [],
             description
         })
         .then(res => {
