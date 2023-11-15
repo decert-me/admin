@@ -183,7 +183,7 @@ export default function ChallengeListPage(params) {
             )
         },
         {
-            title: 'Action',
+            title: '操作',
             key: 'action',
             render: (_, quest) => (
               <Space size="middle">

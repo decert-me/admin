@@ -5,6 +5,7 @@ import "./index.scss";
 
 export default function AirdropList(params) {
     
+    const isDev = process.env.REACT_APP_IS_DEV;
     let [data, setData] = useState([]);
     let [status, setStatus] = useState(3);
     let [pageConfig, setPageConfig] = useState({
@@ -25,6 +26,26 @@ export default function AirdropList(params) {
             getList();
         }
     };
+
+    const addressHref = (addr, {app}) => {
+        if (app === "decert") {
+            const prefix = isDev ? "https://mumbai.polygonscan.com" : "https://polygonscan.com"
+            return prefix + "/address/" + addr
+        }else if (app === "decert_solana") {
+            const suffix = isDev ? "?cluster=devnet" : "";
+            return `https://solscan.io/account/${addr}${suffix}`
+        }
+    }
+
+    const txhashHref = (hash, {app}) => {
+        if (app === "decert") {
+            const prefix = isDev ? "https://mumbai.polygonscan.com" : "https://polygonscan.com"
+            return prefix + "/tx/" + hash
+        }else if (app === "decert_solana") {
+            const suffix = isDev ? "?cluster=devnet" : "";
+            return `https://solscan.io/tx/${hash}${suffix}`
+        }
+    }
 
     const columns = [
         {
@@ -47,14 +68,9 @@ export default function AirdropList(params) {
             title: '地址',
             dataIndex: 'params',
             key: 'params',
-            render: ({params}) => (
+            render: ({params}, record) => (
                 <a 
-                    href={
-                        process.env.REACT_APP_IS_DEV ? 
-                        `https://mumbai.polygonscan.com/address/${params.receiver}`
-                        :
-                        `https://polygonscan.com/address/${params.receiver}`
-                    } 
+                    href={addressHref(params.receiver, record)} 
                     target="_blank" >
                     {params.receiver.substring(0,5) + "..." + params.receiver.substring(38,42)}
                 </a>
@@ -64,14 +80,15 @@ export default function AirdropList(params) {
             title: '交易哈希',
             dataIndex: 'airdrop_hash',
             key: 'airdrop_hash',
-            render: (airdrop_hash) => (
+            render: (airdrop_hash, record) => (
                 airdrop_hash &&
                 <a 
                     href={
-                        process.env.REACT_APP_IS_DEV ? 
-                        `https://mumbai.polygonscan.com/tx/${airdrop_hash}`
-                        :
-                        `https://polygonscan.com/tx/${airdrop_hash}`
+                        txhashHref(airdrop_hash, record)
+                        // process.env.REACT_APP_IS_DEV ? 
+                        // `https://mumbai.polygonscan.com/tx/${airdrop_hash}`
+                        // :
+                        // `https://polygonscan.com/tx/${airdrop_hash}`
                     } 
                     target="_blank" >
                     {airdrop_hash.substring(0,5) + "..." + airdrop_hash.substring(61,66)}

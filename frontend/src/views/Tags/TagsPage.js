@@ -53,7 +53,7 @@ export default function TagsPage(params) {
             )
         },
         {
-          title: 'Action',
+          title: '操作',
           key: 'action',
           render: (_, tags) => (
             <Space size="middle">

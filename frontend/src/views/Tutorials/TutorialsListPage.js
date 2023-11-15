@@ -194,7 +194,7 @@ export default function TutorialsListPage(params) {
             )
         },
         {
-          title: 'Action',
+          title: '操作',
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
