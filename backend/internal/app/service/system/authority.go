@@ -6,7 +6,9 @@ import (
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
 	"errors"
+	"fmt"
 	_ "fmt"
+	"github.com/spf13/cast"
 	"strings"
 
 	"gorm.io/gorm"
@@ -253,13 +255,22 @@ func UpdateUserInfo(userID uint, q request.UpdateUserInfo) error {
 
 func UpdateSelfInfo(userID uint, req request.UpdateSelfInfo) error {
 	var user model.User
-
+	fmt.Println("id", req.ID)
 	user.Username = req.UserName
 	user.Address = req.Address
 	user.HeaderImg = req.HeaderImg
-
+	if req.ID != "" {
+		if err := global.DB.Model(&model.User{}).
+			Where("id = ? AND authority_id='888'", userID).
+			First(&model.User{}).Error; err != nil {
+			return errors.New("权限不足")
+		}
+		user.ID = cast.ToUint(req.ID)
+	} else {
+		user.ID = userID
+	}
 	err := global.DB.Model(&model.User{}).
-		Where("id = ?", userID).
+		Where("id = ?", user.ID).
 		Updates(&user).Error
 	if errors.Is(err, gorm.ErrDuplicatedKey) {
 		return errors.New("地址或用户名重复")

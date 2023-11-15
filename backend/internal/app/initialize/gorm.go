@@ -3,7 +3,6 @@ package initialize
 import (
 	"backend/internal/app/global"
 	"backend/internal/app/model"
-	uuid "github.com/satori/go.uuid"
 	"os"
 
 	"go.uber.org/zap"
@@ -69,10 +68,7 @@ func InitUser(db *gorm.DB) {
 	}
 	// 创建默认用户
 	user := model.User{
-		UUID:        uuid.NewV4(),
 		Username:    "root",
-		Password:    "$2a$10$7iTyC7BlYSofctYy6.6bq.sL12FfybC/hZQ5K/5lqhuINjAAGSSw2",
-		Nickname:    "root",
 		AuthorityId: "888",
 		Address:     "0xd2AEc55186F9f713128d48087f0e2EF5F453ca79",
 	}

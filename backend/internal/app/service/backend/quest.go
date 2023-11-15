@@ -126,7 +126,9 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 			return errors.New("链上已存在数据，无法修改")
 		}
 	}
-	data["description"] = *req.Description
+	if req.Description != nil {
+		data["description"] = *req.Description
+	}
 	// 查询原有关系
 	var collectionIDList []uint
 	err = tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", req.ID).Pluck("collection_id", &collectionIDList).Error
