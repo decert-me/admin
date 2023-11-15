@@ -5,24 +5,47 @@ import "./index.scss";
 
 export default function AirdropList(params) {
     
+    const isDev = process.env.REACT_APP_IS_DEV;
     let [data, setData] = useState([]);
-    let [status, setStatus] = useState(null);
+    let [status, setStatus] = useState(3);
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
     });
 
     const handleChange = (pagination, filters, sorter) => {
+        const { pageSize } = pagination
         const newStatus = Array.isArray(filters.status) ? filters.status[0] : null;
         if (status !== newStatus) {
             status = newStatus;
-            setStatus(status);
-            pageConfig = {
-                page: 1, pageSize: 10, total: 0
-            };
+            setStatus(newStatus);
+            getList(1);
+        }
+        if (pageSize !== pageConfig.pageSize) {
+            pageConfig.pageSize = pageSize;
             setPageConfig({...pageConfig});
             getList();
         }
     };
+
+    const addressHref = (addr, {app}) => {
+        if (app === "decert") {
+            const prefix = isDev ? "https://mumbai.polygonscan.com" : "https://polygonscan.com"
+            return prefix + "/address/" + addr
+        }else if (app === "decert_solana") {
+            const suffix = isDev ? "?cluster=devnet" : "";
+            return `https://solscan.io/account/${addr}${suffix}`
+        }
+    }
+
+    const txhashHref = (hash, {app}) => {
+        if (app === "decert") {
+            const prefix = isDev ? "https://mumbai.polygonscan.com" : "https://polygonscan.com"
+            return prefix + "/tx/" + hash
+        }else if (app === "decert_solana") {
+            const suffix = isDev ? "?cluster=devnet" : "";
+            return `https://solscan.io/tx/${hash}${suffix}`
+        }
+    }
 
     const columns = [
         {
@@ -45,16 +68,31 @@ export default function AirdropList(params) {
             title: '地址',
             dataIndex: 'params',
             key: 'params',
-            render: ({params}) => (
-                <p>{params.receiver.substring(0,5) + "..." + params.receiver.substring(38,42)}</p>
+            render: ({params}, record) => (
+                <a 
+                    href={addressHref(params.receiver, record)} 
+                    target="_blank" >
+                    {params.receiver.substring(0,5) + "..." + params.receiver.substring(38,42)}
+                </a>
             )
         },
         {
             title: '交易哈希',
             dataIndex: 'airdrop_hash',
             key: 'airdrop_hash',
-            render: (airdrop_hash) => (
-                airdrop_hash.substring(0,5) + "..." + airdrop_hash.substring(61,66)
+            render: (airdrop_hash, record) => (
+                airdrop_hash &&
+                <a 
+                    href={
+                        txhashHref(airdrop_hash, record)
+                        // process.env.REACT_APP_IS_DEV ? 
+                        // `https://mumbai.polygonscan.com/tx/${airdrop_hash}`
+                        // :
+                        // `https://polygonscan.com/tx/${airdrop_hash}`
+                    } 
+                    target="_blank" >
+                    {airdrop_hash.substring(0,5) + "..." + airdrop_hash.substring(61,66)}
+                </a>
             )
         },
         {
@@ -88,7 +126,7 @@ export default function AirdropList(params) {
             key: 'msg'
         },
         {
-            title: '状态',
+            title: `状态:${status === 1 ? "待空投" : status === 2 ? "已空投" : status === 3 ? "空投失败" : "全部"}`,
             dataIndex: 'status',
             key: 'status',
             filters: [
@@ -97,6 +135,7 @@ export default function AirdropList(params) {
                 { text: '空投失败', value: 3 },
             ],
             filterMultiple: false,
+            filteredValue: [status],
             render: (status) => (
                 <p style={{
                     color: status === 2 ? "#09CD92" : status === 3 ? "#FF0000" : "000"
@@ -167,7 +206,9 @@ export default function AirdropList(params) {
                     current: pageConfig.page, 
                     total: pageConfig.total, 
                     pageSize: pageConfig.pageSize, 
-                    onChange: (page) => getList(page)
+                    onChange: (page) => {
+                        page !== pageConfig.page && getList(page)
+                    }
                 }} 
             />
         </div>

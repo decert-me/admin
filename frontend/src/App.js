@@ -9,6 +9,8 @@ import { WalletConnectLegacyConnector } from 'wagmi/connectors/walletConnectLega
 
 import { infuraProvider } from 'wagmi/providers/infura';
 import { publicProvider } from 'wagmi/providers/public';
+import { ConfigProvider } from 'antd';
+import zhCN from 'antd/locale/zh_CN';
 
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
@@ -41,7 +43,9 @@ function App() {
 
   return (
     <WagmiConfig config={config}>
+      <ConfigProvider locale={zhCN}>
         <BeforeRouterEnter />
+      </ConfigProvider>
     </WagmiConfig>
   );
 }

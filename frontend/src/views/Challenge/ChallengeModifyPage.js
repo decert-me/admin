@@ -25,7 +25,7 @@ export default function ChallengeModifyPage(params) {
             difficulty, 
             estimate_time: estimateTime && estimateTime !== 0 ? estimateTime * 60 : null,
             sort,
-            collection_id: type === "default" ? [] : collection_id,
+            collection_id: collection_id ? [collection_id] : [],
             description
         })
         .then(res => {
@@ -67,7 +67,7 @@ export default function ChallengeModifyPage(params) {
                     {name: ["estimateTime"], value: data.quest_data.estimateTime / 60},
                     {name: ["sort"], value: Number(data.sort)},
                     {name: ["type"], value: data.collection_id.length === 0 ? "default" : "compilation"},
-                    {name: ["collection_id"], value: data.collection_id},
+                    {name: ["collection_id"], value: data.collection_id[0]},
                     {name: ["description"], value: data.description}
                 ];
                 setFields([...fields]);

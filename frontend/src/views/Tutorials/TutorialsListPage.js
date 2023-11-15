@@ -27,6 +27,14 @@ export default function TutorialsListPage(params) {
     const isSelect = (record) => record.key === selectKey;
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const handleChange = (pagination, filters, sorter) => {
+      const { pageSize } = pagination
+      if (pageSize !== pageConfig.pageSize) {
+          pageConfig.pageSize = pageSize;
+          setPageConfig({...pageConfig});
+          getList();
+        }
+    };
 
     // 教程上下架
     const handleChangeStatus = ({id, checked}, key) => {
@@ -186,7 +194,7 @@ export default function TutorialsListPage(params) {
             )
         },
         {
-          title: 'Action',
+          title: '操作',
           key: 'action',
           render: (_, tutorial) => (
             <Space size="middle">
@@ -303,6 +311,7 @@ export default function TutorialsListPage(params) {
               columns={columns} 
               dataSource={data} 
               rowClassName={(record) => record.top && "toTop"}
+              onChange={handleChange}
               pagination={{
                 current: pageConfig.page, 
                 total: pageConfig.total, 

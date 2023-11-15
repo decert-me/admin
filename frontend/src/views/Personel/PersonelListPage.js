@@ -123,13 +123,16 @@ export default function PersonelListPage(params) {
     
     return (
         <div className="personel">
-            <div className="personel-btn">
-                <Button
-                    type="primary"
-                    onClick={() => navigator("/dashboard/personnel/add")}
-                    icon={<PlusOutlined />}
-                >添加</Button>  
-            </div>
+            {
+                user.authority.authorityId === "888" &&
+                <div className="personel-btn">
+                    <Button
+                        type="primary"
+                        onClick={() => navigator("/dashboard/personnel/add")}
+                        icon={<PlusOutlined />}
+                    >添加</Button>  
+                </div>
+            }
             
             <Table
                 columns={columns} 
