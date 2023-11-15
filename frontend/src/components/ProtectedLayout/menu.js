@@ -7,7 +7,8 @@ import {
     ProfileOutlined,
     PartitionOutlined,
     GiftOutlined,
-    TeamOutlined
+    TeamOutlined,
+    AuditOutlined
   } from '@ant-design/icons';
 
 export const menu = [
@@ -40,6 +41,11 @@ export const menu = [
                 label: "挑战合辑",
                 key: "challenge/compilation",
                 icon: <PartitionOutlined />,
+            },
+            {
+                label: "开放题审核",
+                key: "challenge/openquest",
+                icon: <AuditOutlined />,
             }
         ]
     },
