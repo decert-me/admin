@@ -54,7 +54,7 @@ func Register(c *gin.Context) {
 		global.LOG.Error("添加失败!", zap.Error(err))
 		response.FailWithDetailed(response.UserResponse{User: userReturn}, err.Error(), c)
 	} else {
-		response.OkWithDetailed(response.UserResponse{User: userReturn}, "注册成功", c)
+		response.OkWithDetailed(response.UserResponse{User: userReturn}, "添加成功", c)
 	}
 }
 
