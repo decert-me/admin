@@ -41,6 +41,7 @@ type UpdateUserInfo struct {
 }
 
 type UpdateSelfInfo struct {
+	ID        string `json:"id"`
 	UserName  string `json:"userName"`
 	Address   string `json:"address"`
 	HeaderImg string `json:"headerImg"`

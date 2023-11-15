@@ -40,88 +40,11 @@ func Register(userID uint, u model.User) (userInter model.User, err error) {
 		return userInter, errors.New("角色不存在")
 	}
 
-	// 设置资源权限
-	if len(u.AuthoritySourceIds) != 0 {
-		// 判断是否超出权限范围
-		var authorityRelates []model.AuthorityRelate
-		global.DB.Where(map[string]interface{}{"authority_id": u.AuthorityId}).Find(&authorityRelates)
-
-		isIn := true
-		for _, v := range u.AuthoritySourceIds {
-			innerIsIn := false
-			for _, value := range authorityRelates {
-				if v == value.AuthoritySourceID {
-					innerIsIn = true
-					continue
-				}
-			}
-
-			if !innerIsIn {
-				isIn = false
-				break
-			}
-		}
-		if !isIn {
-			return userInter, errors.New("超出角色权限范围")
-		}
-
-		err := SetUserAuthority(u.UUID.String(), u.AuthoritySourceIds)
-		if err != nil {
-			return u, err
-		}
-	}
-
-	u.Password = utils.BcryptHash(u.Password)
-	u.UUID = uuid.NewV4()
 	err = global.DB.Create(&u).Error
 
 	u.Authority = authority
 
 	return u, err
-}
-
-// Login @function: Login
-// @description: 用户登录
-// @param: u *model.User
-// @return: userInter *model.User, err error
-func Login(u *model.User) (userInter *model.User, err error) {
-	var user model.User
-	err = global.DB.Where("username = ?", u.Username).Preload("Authority").First(&user).Error
-	if err != nil {
-		return nil, errors.New("用户名或密码错误")
-	}
-	if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
-		return nil, errors.New("用户名或密码错误")
-	}
-
-	// 返回资源ID
-	var authoritySourceIds []uint
-	// 先查用户资源，再查角色资源
-	_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.Username).Find(&authoritySourceIds).Error
-	if len(authoritySourceIds) == 0 {
-		_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.AuthorityId).Find(&authoritySourceIds).Error
-	}
-	user.AuthoritySourceIds = authoritySourceIds
-
-	return &user, err
-}
-
-// @function: ChangePassword
-// @description: 修改用户密码
-// @param: u *model.User, newPassword string
-// @return: userInter *model.User, err error
-func ChangePassword(u *model.User, newPassword string) (userInter *model.User, err error) {
-	var user model.User
-	err = global.DB.Where("username = ?", u.Username).First(&user).Error
-	if err != nil {
-		return nil, errors.New("找不到该用户")
-	}
-	if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
-		return nil, errors.New("原密码错误")
-	}
-	user.Password = utils.BcryptHash(newPassword)
-	err = global.DB.Save(&user).Error
-	return &user, err
 }
 
 // @function: GetUserInfoList
@@ -139,20 +62,6 @@ func GetUserInfoList(info request.PageInfo) (list interface{}, total int64, err 
 	}
 
 	err = db.Limit(int(limit)).Offset(int(offset)).Preload("Authority").Order("id desc").Find(&userList).Error
-
-	if err == nil {
-		for i, v := range userList {
-			// 返回资源ID
-			var authoritySourceIds []uint
-
-			// 先查用户资源，再查角色资源
-			_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", v.Username).Find(&authoritySourceIds).Error
-			if len(authoritySourceIds) == 0 {
-				_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", v.AuthorityId).Find(&authoritySourceIds).Error
-			}
-			userList[i].AuthoritySourceIds = authoritySourceIds
-		}
-	}
 
 	return userList, total, err
 }
@@ -199,16 +108,6 @@ func GetUserInfo(ID uint) (userInfo model.User, err error) {
 	if err != nil {
 		return user, errors.New("找不到该用户")
 	}
-
-	// 返回资源ID
-	//var authoritySourceIds []uint
-	//// 先查用户资源，再查角色资源
-	//_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.Username).Find(&authoritySourceIds).Error
-	//if len(authoritySourceIds) == 0 {
-	//	_ = global.DB.Model(&model.AuthorityRelate{}).Select("authority_source_id").Where("authority_id = ?", user.AuthorityId).Find(&authoritySourceIds).Error
-	//}
-	//user.AuthoritySourceIds = authoritySourceIds
-
 	return user, err
 }
 
