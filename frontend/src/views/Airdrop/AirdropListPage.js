@@ -117,7 +117,10 @@ export default function AirdropList(params) {
             dataIndex: 'airdrop_time',
             key: 'airdrop_time',
             render: (airdrop_time) => (
+                airdrop_time.indexOf("0001-01-01T") === -1 ?
                 <p>{airdrop_time.replace("T", " ").split(".")[0]}</p>
+                :
+                "-"
             )
         },
         {
