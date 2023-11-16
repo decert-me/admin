@@ -12,6 +12,7 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
     let [openQuest, setOpenQuest] = useState([]);
     let [selectOpenQs, setSelectOpenQs] = useState({});
     let [page, setPage] = useState(0);
+    let [checked, setChecked] = useState();
 
     function confirm(params) {
         // 判断是否已经处理过
@@ -43,6 +44,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
     }
 
     function changePass(event) {
+        checked = event.target.value;
+        setChecked(checked);
         openQuest[page].isPass = event.target.value;
         setOpenQuest([...openQuest]);
     }
@@ -67,14 +70,32 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                     annex: selectQuest.answer[i].annex,
                     index: i,
                     isPass: null,
-                    correct: selectQuest.answer[i].correct
+                    correct: selectQuest.answer[i]?.correct
                 })
             }
         })
+
         openQuest = arr;
         setOpenQuest([...openQuest]);
         selectOpenQs = openQuest[page];
         setSelectOpenQs({...selectOpenQs});
+        // 查看模式赋值
+        if (selectQuest.open_quest_review_status === 2) {
+            checked = openQuest[0].correct;
+            setChecked(checked);
+        }
+    }
+
+    function changePage(newPage) {
+        page = newPage;
+        setPage(page);
+        checked = null;
+        setChecked(checked);
+        // 查看模式赋值
+        if (selectQuest.open_quest_review_status === 2) {
+            checked = openQuest[page].correct;
+            setChecked(checked);
+        }
     }
 
     useEffect(() => {
@@ -118,7 +139,7 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                         <Radio.Group 
                             onChange={changePass}
                             className="isPass"
-                            defaultValue={selectOpenQs.correct}
+                            value={checked}
                             disabled={selectQuest.open_quest_review_status === 2}
                         >
                             <Radio value={true}>通过</Radio>
@@ -127,9 +148,9 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                     </div>
                 </div>
             <div className="pagination">
-                <Button disabled={page === 0} onClick={() => setPage(page - 1)}>上一题</Button>
+                <Button disabled={page === 0} onClick={() => changePage(page - 1)}>上一题</Button>
                 <p>{page + 1}/<span style={{color: "#8B8D97"}}>{openQuest.length}</span></p>
-                <Button disabled={page+1 === openQuest.length} onClick={() => setPage(page + 1)}>下一题</Button>
+                <Button disabled={page+1 === openQuest.length} onClick={() => changePage(page + 1)}>下一题</Button>
             </div>
         </div>
     )
