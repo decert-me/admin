@@ -1,13 +1,15 @@
-import { Button, Table } from "antd"
-import { useEffect, useState } from "react";
+import { Button, Modal, Table } from "antd"
+import { useEffect, useRef, useState } from "react";
 import { getUserOpenQuestList } from "../../request/api/judgment";
-import { useNavigate } from "react-router-dom";
-
+import ChallengeJudgPage from "./ChallengeJudgPage";
+import "./judg.scss";
 
 
 export default function ChallengeJudgListPage(params) {
 
-    const navigateTo = useNavigate();
+    const judgRef = useRef(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    let [selectQuest, setSelectQuest] = useState();
     let [status, setStatus] = useState(1);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
@@ -67,7 +69,7 @@ export default function ChallengeJudgListPage(params) {
             )
         },
         {
-            title: `状态:${status === 1 ? "待处理" : status === 2 ? "已处理" : status === 3 ? "空投失败" : "全部"}`,
+            title: `状态:${status === 1 ? "待处理" : "已处理"}`,
             dataIndex: 'open_quest_review_status',
             key: 'status',
             filters: [
@@ -79,7 +81,7 @@ export default function ChallengeJudgListPage(params) {
             render: (status) => (
                 <p style={{
                     color: status === 2 ? "#35D6A6" : "000"
-                }}>{status === 2 ? "空投失败" : "待处理"}</p>
+                }}>{status === 2 ? "已处理" : "待处理"}</p>
             )
         },
         {
@@ -96,14 +98,23 @@ export default function ChallengeJudgListPage(params) {
             title: '操作',
             key: 'action',
             render: (_, quest) => (
+                
                 <Button
                   type="link" 
-                  onClick={() => navigateTo(`/dashboard/challenge/openquest/judg/${quest.ID}`)}
-                >编辑</Button>
+                  onClick={() => OpenJudgModal(quest)}
+                >{quest.open_quest_review_status === 1 ? "编辑" : "查看"}</Button>
             ),
         }
     ];
+
+    // 判题弹窗
+    function OpenJudgModal(quest) {
+        selectQuest = quest;
+        setSelectQuest({...selectQuest});
+        setIsModalOpen(true);
+    }
     
+    // 获取列表
     function getList(page) {
         if (page) {
             pageConfig.page = page;
@@ -126,6 +137,15 @@ export default function ChallengeJudgListPage(params) {
         })
     }
 
+    function handleOk() {
+        judgRef.current.confirm();
+    }
+
+    function onFinish() {
+        setIsModalOpen(false)
+        getList()
+    }
+
     function init() {
         pageConfig.page += 1;
         setPageConfig({...pageConfig});
@@ -138,6 +158,15 @@ export default function ChallengeJudgListPage(params) {
 
     return (
         <div className="judg">
+            <Modal
+                width={1177}
+                open={isModalOpen}
+                className="judg-modal"
+                onCancel={() => {setIsModalOpen(false)}}
+                onOk={handleOk}
+            >
+                <ChallengeJudgPage ref={judgRef} selectQuest={selectQuest} onFinish={onFinish} />
+            </Modal>
             <Table
                 columns={columns} 
                 dataSource={data} 

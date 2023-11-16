@@ -10,3 +10,13 @@ import serviceAxios from "../index";
             data
         })
     }
+
+    // 开放题打分
+    export const reviewOpenQuest = (data) => {
+        return serviceAxios({
+            url: `/challenge/reviewOpenQuest`,
+            method: "post",
+            data
+        })
+    }
+    
