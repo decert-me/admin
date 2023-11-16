@@ -3,6 +3,7 @@ import { getQuest } from "../../request/api/quest";
 import { Button, Radio, message } from "antd";
 import { download } from "../../utils/file/download";
 import { reviewOpenQuest } from "../../request/api/judgment";
+import ReactMarkdown from 'react-markdown';
 
 
 function ChallengeJudgPage({selectQuest, onFinish}, ref) {
@@ -65,7 +66,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                     value: selectQuest.answer[i].value,
                     annex: selectQuest.answer[i].annex,
                     index: i,
-                    isPass: null
+                    isPass: null,
+                    correct: selectQuest.answer[i].correct
                 })
             }
         })
@@ -90,7 +92,9 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                 <div className="judg-info">
                     <div className="item">
                         <p className="item-title">题目:</p>
-                        <p className="item-content">{selectOpenQs.title}</p>
+                        <p className="item-content">
+                            <ReactMarkdown>{selectOpenQs.title}</ReactMarkdown>
+                        </p>
                     </div>
 
                     <div className="item">
@@ -114,6 +118,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                         <Radio.Group 
                             onChange={changePass}
                             className="isPass"
+                            defaultValue={selectOpenQs.correct}
+                            disabled={selectQuest.open_quest_review_status === 2}
                         >
                             <Radio value={true}>通过</Radio>
                             <Radio value={false}>不通过</Radio>
