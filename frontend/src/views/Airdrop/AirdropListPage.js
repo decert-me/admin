@@ -200,7 +200,6 @@ export default function AirdropList(params) {
                 >立即空投</Button>  
             </div>
             
-            <h2></h2>
             <Table 
                 columns={columns} 
                 dataSource={data} 

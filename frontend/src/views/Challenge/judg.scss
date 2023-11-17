@@ -1,0 +1,95 @@
+
+
+
+.judg-modal{
+    .ant-modal-content{
+        padding: 29px 24px;
+        padding-right: 47px;
+        position: relative;
+    }
+    .ant-modal-footer{
+        margin-top: 40px;
+        height: 58px;
+        button{
+            width: 180px;
+            height: 58px;
+            border-radius: 12px;
+            font-size: 20px;
+        }
+        .ant-btn-default{
+            border-color: #5570F1;
+            color: #5570F1;
+        }
+        .ant-btn-primary{
+            background-color: #5570F1;
+            &:hover{
+                background-color: #4562ef;
+            }
+        }
+    }
+    .judg-content{
+        h1{
+            margin: 0;
+            margin-bottom: 40px;
+            font-size: 20px;
+            font-weight: 500;
+            color: #2B2F32;
+        }
+        .judg-info{
+            .item{
+                margin-top: 24px;
+                .item-title{
+                    margin-bottom: 24px;
+                    color: #8B8D97;
+                    line-height: 17px;
+                }
+                .item-content{
+                    color: #2B2F32;
+                }
+                .box{
+                    width: 100%;
+                    min-height: 100px;
+                    padding: 11px 17px;
+                    box-sizing: border-box;
+                    border-radius: 10px;
+                    background-color: #F2F4F6;
+                }
+                .isPass{
+                    width: 460px;
+                    display: flex;
+                    justify-content: space-between;
+                    label{
+                        .ant-radio{
+                            margin-right: 13px;
+                        }
+                        span{
+                            padding: 0;
+                        }
+                    }
+                }
+            }
+        }
+        .pagination{
+            position: absolute;
+            bottom: 29px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 20px;
+            color: #5570F1;
+            button{
+                width: 120px;
+                height: 58px;
+                border-radius: 12px;
+                font-size: 20px;
+                border-color: #5570F1;
+                color: #5570F1;
+                background-color: #fff;
+                &:disabled{
+                    border-color: #d9d9d9;
+                    color: #d9d9d9;
+                }
+            }
+        }
+    }
+}

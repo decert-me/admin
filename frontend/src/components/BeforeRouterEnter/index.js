@@ -24,7 +24,9 @@ import {
     ChallengeCompilationPage, 
     ChallengeListPage, 
     ChallengeModifyPage,
-    ChallengeCompilationModifyPage
+    ChallengeCompilationModifyPage,
+    ChallengeJudgPage,
+    ChallengeJudgListPage
 } from '../../views/Challenge';
 import { PersonelEditPage, PersonelListPage } from '../../views/Personel';
 
@@ -121,6 +123,15 @@ export default function BeforeRouterEnter(params) {
                 path="challenge/add" 
                 element={<ChallengeAddPage />} 
                 />
+                <Route 
+                path="challenge/openquest" 
+                element={<ChallengeJudgListPage />} 
+                />
+                <Route 
+                path="challenge/openquest/judg/:id" 
+                element={<ChallengeJudgPage />} 
+                />
+
 
                 {/* 空投 */}
                 <Route 
