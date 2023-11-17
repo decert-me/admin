@@ -20,14 +20,18 @@ export default function ChallengeModifyPage(params) {
     const [loading, setLoading] = useState(false);
     
     function onFinish({difficulty, estimateTime, collection_id, type, sort, description}) {
-        updateQuest({
+        const obj = {
             id: Number(id), 
             difficulty, 
             estimate_time: estimateTime && estimateTime !== 0 ? estimateTime * 60 : null,
             sort,
             collection_id: collection_id ? [collection_id] : [],
             description
-        })
+        }
+        if (data.metadata.description) {
+            delete obj.description
+        }
+        updateQuest(obj)
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
