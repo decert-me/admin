@@ -60,3 +60,7 @@ airdrop:
 # local configuration
 local:
   path: 'uploads/file'
+
+# quest configuration
+quest:
+  encrypt-key: "eb5a5bb2-ebbd-45cc-9d37-77a9377f2aca"
