@@ -115,9 +115,9 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                 <div className="judg-info">
                     <div className="item">
                         <p className="item-title">题目:</p>
-                        <p className="item-content">
+                        <div className="item-content">
                             <ReactMarkdown>{selectOpenQs.title}</ReactMarkdown>
-                        </p>
+                        </div>
                     </div>
 
                     <div className="item">
