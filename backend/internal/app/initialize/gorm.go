@@ -16,6 +16,7 @@ func InitCommonDB() {
 		global.DB = db
 		RegisterTables(db) // 初始化表
 		InitUser(db)       // 初始化默认用户
+		InitSetting(db)    // 初始化系统设置
 	}
 }
 
@@ -37,6 +38,7 @@ func RegisterTables(db *gorm.DB) {
 		model.Collection{},
 		model.CollectionRelate{},
 		model.Upload{},
+		model.SystemSetting{},
 	)
 	if err != nil {
 		global.LOG.Error("register table failed", zap.Error(err))
@@ -74,6 +76,26 @@ func InitUser(db *gorm.DB) {
 	}
 	if err := db.Create(&user).Error; err != nil {
 		global.LOG.Error("create init user failed", zap.Error(err))
+		os.Exit(0)
+	}
+}
+
+func InitSetting(db *gorm.DB) {
+	// 判断是否存在设置
+	var count int64
+	if err := db.Model(&model.SystemSetting{}).Count(&count).Error; err != nil {
+		global.LOG.Error("init system setting failed", zap.Error(err))
+		os.Exit(0)
+	}
+	if count > 0 {
+		return
+	}
+	systemSetting := model.SystemSetting{
+		Key:   "beta",
+		Value: "true",
+	}
+	if err := db.Create(&systemSetting).Error; err != nil {
+		global.LOG.Error("create init system setting failed", zap.Error(err))
 		os.Exit(0)
 	}
 }

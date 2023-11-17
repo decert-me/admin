@@ -12,4 +12,5 @@ type Server struct {
 	Pack    Pack    `mapstructure:"pack" json:"pack" yaml:"pack"`
 	Airdrop Airdrop `mapstructure:"airdrop" json:"airdrop" yaml:"airdrop"`
 	Local   Local   `mapstructure:"local" json:"local" yaml:"local"`
+	Quest   *Quest  `mapstructure:"quest" json:"quest" yaml:"quest"`
 }

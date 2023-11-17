@@ -123,7 +123,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		// 判断链上是否有数据
 		if gjson.Get(string(quest.MetaData), "description").String() != "" {
 			tx.Rollback()
-			return errors.New("链上已存在数据，无法修改")
+			return errors.New("链上已存在数据，无法修改描述")
 		}
 	}
 	if req.Description != nil {
