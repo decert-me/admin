@@ -27,7 +27,9 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                 message.warning(`请为第${i+1}道开放题打分!`)
                 return
             }
-            answer[quest.index].correct = quest.isPass;
+            if (answer[quest.index]) {
+                answer[quest.index].correct = quest.isPass;
+            }
         }
         reviewOpenQuest({
             id: selectQuest.ID,
@@ -66,8 +68,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
             if (quest.type === "open_quest") {
                 arr.push({
                     title: quest.title,
-                    value: selectQuest.answer[i].value,
-                    annex: selectQuest.answer[i].annex,
+                    value: selectQuest.answer[i]?.value,
+                    annex: selectQuest.answer[i]?.annex,
                     index: i,
                     isPass: null,
                     correct: selectQuest.answer[i]?.correct
