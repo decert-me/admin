@@ -52,10 +52,10 @@ export default function ChallengeJudgListPage(params) {
         },
         {
             title: '提交时间',
-            dataIndex: 'CreatedAt',
-            key: 'CreatedAt',
-            render: (CreatedAt) => (
-                CreatedAt.replace("T", " ").split(".")[0]
+            dataIndex: 'UpdatedAt',
+            key: 'UpdatedAt',
+            render: (UpdatedAt) => (
+                UpdatedAt.replace("T", " ").split(".")[0]
             )
         },
         {
