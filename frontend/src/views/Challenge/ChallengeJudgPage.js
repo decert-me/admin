@@ -85,6 +85,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
         if (selectQuest.open_quest_review_status === 2) {
             checked = openQuest[0].correct;
             setChecked(checked);
+        }else{
+            setChecked(null);
         }
     }
 
