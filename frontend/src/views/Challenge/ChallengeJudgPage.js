@@ -98,8 +98,10 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
         // 查看模式赋值
         if (selectQuest.open_quest_review_status === 2) {
             checked = openQuest[page].correct;
-            setChecked(checked);
+        }else{
+            checked = openQuest[page].isPass;
         }
+        setChecked(checked);
     }
 
     useEffect(() => {
