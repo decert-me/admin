@@ -102,6 +102,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
             checked = openQuest[page].isPass;
         }
         setChecked(checked);
+        selectOpenQs = openQuest[page];
+        setSelectOpenQs({...selectOpenQs});
     }
 
     useEffect(() => {
