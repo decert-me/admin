@@ -53,6 +53,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
     }
 
     async function init() {
+        page = 0;
+        setPage(page);
         // 获取quest详情
         await getQuest({id: selectQuest.token_id})
         .then(res => {
@@ -120,6 +122,10 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
             <h1>{detail?.title}</h1>
                 <div className="judg-info">
                     <div className="item">
+                        <p className="item-title">本题分数: <span style={{color: "#2B2F32"}}>{detail.quest_data.questions[page].score}分</span></p>
+                    </div>
+
+                    <div className="item">
                         <p className="item-title">题目:</p>
                         <div className="item-content">
                             <ReactMarkdown>{selectOpenQs.title}</ReactMarkdown>
@@ -143,7 +149,7 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                     </div>
 
                     <div className="item">
-                        <p className="item-title">判定结果:</p>
+                        <p className="item-title">判定结果:&nbsp;<span style={{color: "#2B2F32"}}>{checked ? detail.quest_data.questions[page].score : 0}分</span></p>
                         <Radio.Group 
                             onChange={changePass}
                             className="isPass"

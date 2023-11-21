@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { getUserOpenQuestList } from "../../request/api/judgment";
 import ChallengeJudgPage from "./ChallengeJudgPage";
 import "./judg.scss";
+import { copyToClipboard } from "../../utils/text/copyToClipboard";
 
+const location = window.location.host;
+const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
+const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
 
 export default function ChallengeJudgListPage(params) {
 
@@ -42,13 +46,16 @@ export default function ChallengeJudgListPage(params) {
             dataIndex: 'address',
             key: 'address',
             render: (address) => (
-              <p>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
+              <p onClick={() => copyToClipboard(address)} style={{cursor: "pointer", textDecoration: "underline"}}>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
             )
         },
         {
-            title: '挑战ID',
+            title: '挑战编号',
             dataIndex: 'token_id',
             key: 'token_id',
+            render: (tokenId) => (
+                <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
+            )
         },
         {
             title: '提交时间',
@@ -85,16 +92,6 @@ export default function ChallengeJudgListPage(params) {
             )
         },
         {
-            title: '分数',
-            dataIndex: 'open_quest_score',
-            key: 'open_quest_score',
-            render: (open_quest_score, record) => (
-                record.open_quest_review_status === 1 ? 
-                "-"
-                : open_quest_score + "分"
-            )
-        },
-        {
             title: '操作',
             key: 'action',
             render: (_, quest) => (
@@ -102,7 +99,7 @@ export default function ChallengeJudgListPage(params) {
                 <Button
                   type="link" 
                   onClick={() => OpenJudgModal(quest)}
-                >{quest.open_quest_review_status === 1 ? "编辑" : "查看"}</Button>
+                >{quest.open_quest_review_status === 1 ? "评分" : "查看"}</Button>
             ),
         }
     ];
