@@ -2,7 +2,11 @@ import { message } from "antd";
 
 
 export function copyToClipboard(textToCopy) {
-    navigator.clipboard.writeText(textToCopy)
-    .then(() => message.success('Copied!'))
-    .catch((err) => message.error('Failed to copy:', err));
+    const tempInput = document.createElement('textarea');
+    tempInput.value = textToCopy;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    message.success('Copied!')
 }
