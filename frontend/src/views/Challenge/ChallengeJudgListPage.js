@@ -50,6 +50,11 @@ export default function ChallengeJudgListPage(params) {
             )
         },
         {
+            title: '挑战标题',
+            dataIndex: 'title',
+            key: 'title',
+        },
+        {
             title: '挑战编号',
             dataIndex: 'token_id',
             key: 'token_id',
