@@ -33,7 +33,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
         }
         reviewOpenQuest({
             id: selectQuest.ID,
-            answer
+            answer,
+            updated_at: selectQuest.UpdatedAt
         })
         .then(res => {
             if (res.code === 0) {
@@ -42,6 +43,9 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                 message.error("操作失败!");
             }
             onFinish();
+        })
+        .catch(err => {
+
         })
     }
 
@@ -128,20 +132,20 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                     <div className="item">
                         <p className="item-title">题目:</p>
                         <div className="item-content">
-                            <ReactMarkdown>{selectOpenQs.title}</ReactMarkdown>
+                            <ReactMarkdown>{selectOpenQs?.title}</ReactMarkdown>
                         </div>
                     </div>
 
                     <div className="item">
                         <p className="item-title">开放题答案:</p>
-                        <p className="item-content box">{selectOpenQs.value}</p>
+                        <p className="item-content box">{selectOpenQs?.value}</p>
                     </div>
 
                     <div className="item">
                         <p className="item-title">附件:</p>
                         <div className="item-content">
                             {
-                                selectOpenQs.annex.map(e => (
+                                selectOpenQs?.annex && selectOpenQs?.annex.map(e => (
                                     <Button type="link" key={e.name} onClick={() => download(e.hash, e.name)}>{e.name}</Button>
                                 ))
                             }

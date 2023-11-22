@@ -42,7 +42,7 @@ export default function ChallengeJudgListPage(params) {
             key: 'ID'
         },
         {
-            title: '地址',
+            title: '挑战者地址',
             dataIndex: 'address',
             key: 'address',
             render: (address) => (
