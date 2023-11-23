@@ -1,6 +1,9 @@
 package request
 
-import "gorm.io/datatypes"
+import (
+	"gorm.io/datatypes"
+	"time"
+)
 
 type GetUserOpenQuestListRequest struct {
 	PageInfo
@@ -12,7 +15,8 @@ type GetUserOpenQuestRequest struct {
 }
 
 type ReviewOpenQuestRequest struct {
-	ID     uint           `json:"id" binding:"required"`
-	Answer datatypes.JSON `json:"answer" binding:"required"`
-	Score  int64          `json:"score"`
+	ID        uint           `json:"id" binding:"required"`
+	Answer    datatypes.JSON `json:"answer" binding:"required"`
+	Score     int64          `json:"score"`
+	UpdatedAt *time.Time     `json:"updated_at"`
 }
