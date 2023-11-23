@@ -293,13 +293,15 @@ func AddQuestToCollection(r request.AddQuestToCollectionRequest) error {
 // UpdateQuestCollectionStatus 更新Quest是否在合辑状态
 func UpdateQuestCollectionStatus(tx *gorm.DB, id uint) {
 	var count int64
-	tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", id).Where("status = 1").Count(&count)
-	// 合辑
-	if count == 1 {
-		tx.Model(&model.Quest{}).Where("id = ?", id).Update("collection_status", 2)
+	err := tx.Model(&model.CollectionRelate{}).Where("quest_id = ?", id).Where("status = 1").Count(&count).Error
+	if err != nil {
+		return
 	}
-	// 独立
 	if count == 0 {
+		// 独立
 		tx.Model(&model.Quest{}).Where("id = ?", id).Update("collection_status", 1)
+	} else {
+		// 合辑
+		tx.Model(&model.Quest{}).Where("id = ?", id).Update("collection_status", 2)
 	}
 }
