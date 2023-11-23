@@ -33,7 +33,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
         }
         reviewOpenQuest({
             id: selectQuest.ID,
-            answer
+            answer,
+            updated_at: selectQuest.UpdatedAt
         })
         .then(res => {
             if (res.code === 0) {
@@ -42,6 +43,9 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                 message.error("操作失败!");
             }
             onFinish();
+        })
+        .catch(err => {
+
         })
     }
 
@@ -53,6 +57,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
     }
 
     async function init() {
+        page = 0;
+        setPage(page);
         // 获取quest详情
         await getQuest({id: selectQuest.token_id})
         .then(res => {
@@ -85,6 +91,8 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
         if (selectQuest.open_quest_review_status === 2) {
             checked = openQuest[0].correct;
             setChecked(checked);
+        }else{
+            setChecked(null);
         }
     }
 
@@ -96,8 +104,12 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
         // 查看模式赋值
         if (selectQuest.open_quest_review_status === 2) {
             checked = openQuest[page].correct;
-            setChecked(checked);
+        }else{
+            checked = openQuest[page].isPass;
         }
+        setChecked(checked);
+        selectOpenQs = openQuest[page];
+        setSelectOpenQs({...selectOpenQs});
     }
 
     useEffect(() => {
@@ -114,22 +126,26 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
             <h1>{detail?.title}</h1>
                 <div className="judg-info">
                     <div className="item">
+                        <p className="item-title">本题分数: <span style={{color: "#2B2F32"}}>{detail.quest_data.questions[page].score}分</span></p>
+                    </div>
+
+                    <div className="item">
                         <p className="item-title">题目:</p>
                         <div className="item-content">
-                            <ReactMarkdown>{selectOpenQs.title}</ReactMarkdown>
+                            <ReactMarkdown>{selectOpenQs?.title}</ReactMarkdown>
                         </div>
                     </div>
 
                     <div className="item">
                         <p className="item-title">开放题答案:</p>
-                        <p className="item-content box">{selectOpenQs.value}</p>
+                        <p className="item-content box">{selectOpenQs?.value}</p>
                     </div>
 
                     <div className="item">
                         <p className="item-title">附件:</p>
                         <div className="item-content">
                             {
-                                selectOpenQs.annex.map(e => (
+                                selectOpenQs?.annex && selectOpenQs?.annex.map(e => (
                                     <Button type="link" key={e.name} onClick={() => download(e.hash, e.name)}>{e.name}</Button>
                                 ))
                             }
@@ -137,7 +153,7 @@ function ChallengeJudgPage({selectQuest, onFinish}, ref) {
                     </div>
 
                     <div className="item">
-                        <p className="item-title">判定结果:</p>
+                        <p className="item-title">判定结果:&nbsp;<span style={{color: "#2B2F32"}}>{checked ? detail.quest_data.questions[page].score : 0}分</span></p>
                         <Radio.Group 
                             onChange={changePass}
                             className="isPass"

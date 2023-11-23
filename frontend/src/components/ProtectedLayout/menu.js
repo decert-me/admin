@@ -43,7 +43,7 @@ export const menu = [
                 icon: <PartitionOutlined />,
             },
             {
-                label: "开放题审核",
+                label: "开放题评分",
                 key: "challenge/openquest",
                 icon: <AuditOutlined />,
             }
