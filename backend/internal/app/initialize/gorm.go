@@ -34,8 +34,6 @@ func RegisterTables(db *gorm.DB) {
 		model.DocType{},
 		model.Language{},
 		model.Theme{},
-		model.Collection{},
-		model.CollectionRelate{},
 		model.Upload{},
 		model.SystemSetting{},
 	)

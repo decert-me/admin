@@ -17,6 +17,7 @@ func GetUserOpenQuestList(r request.GetUserOpenQuestListRequest) (list []respons
 	if r.OpenQuestReviewStatus != 0 {
 		db.Where("open_quest_review_status = ?", r.OpenQuestReviewStatus)
 	}
+	db.Where("quest.status = 1")
 	if err = db.Count(&total).Error; err != nil {
 		return
 	}
