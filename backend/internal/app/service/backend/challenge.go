@@ -36,7 +36,7 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 	// 获取UserOpenQuest
 	var userOpenQuest model.UserOpenQuest
 	if err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).First(&userOpenQuest).Error; err != nil {
-		return errors.New("获取答案失败")
+		return errors.New("该回答已经评分，请勿重复评分")
 	}
 	// 检查是否有变动
 	if r.UpdatedAt != nil && !userOpenQuest.UpdatedAt.Equal(*r.UpdatedAt) {
