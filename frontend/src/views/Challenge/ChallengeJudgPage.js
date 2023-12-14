@@ -1,11 +1,11 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
-import { getQuest } from "../../request/api/quest";
-import { Button, Radio, Rate, message } from "antd";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react"
+import { Button, Input, Rate } from "antd";
 import { download } from "../../utils/file/download";
 import { reviewOpenQuest } from "../../request/api/judgment";
 import ReactMarkdown from 'react-markdown';
 import CustomIcon from "../../components/CustomIcon";
 import { GetPercentScore } from "../../utils/int/bigInt";
+const { TextArea } = Input;
 
 
 function ChallengeJudgPage({data, isMobile, onFinish}, ref) {
@@ -136,7 +136,16 @@ function ChallengeJudgPage({data, isMobile, onFinish}, ref) {
 
                     <div className="item">
                         <p className="item-title">开放题答案:</p>
-                        <p className="item-content box">{selectOpenQs?.value}</p>
+                        <TextArea 
+                            className="item-content box"
+                            bordered={false} 
+                            maxLength={2000}
+                            autoSize={{
+                                minRows: 7,
+                            }}
+                            readOnly
+                            value={selectOpenQs?.value}
+                        />
                     </div>
 
                     <div className="item">
