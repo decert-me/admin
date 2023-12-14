@@ -5,6 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
+	"errors"
 	"github.com/spf13/cast"
 	"time"
 )
@@ -12,9 +13,11 @@ import (
 // GetUserOpenQuestList 获取用户开放题列表
 func GetUserOpenQuestList(r request.GetUserOpenQuestListRequest) (list []response.GetUserOpenQuestListResponse, total int64, err error) {
 	db := global.DB.Model(&model.UserOpenQuest{})
+	db.Select("user_open_quest.*, quest.title").Joins("left join quest on quest.token_id = user_open_quest.token_id")
 	if r.OpenQuestReviewStatus != 0 {
 		db.Where("open_quest_review_status = ?", r.OpenQuestReviewStatus)
 	}
+	db.Where("quest.status = 1")
 	if err = db.Count(&total).Error; err != nil {
 		return
 	}
@@ -33,12 +36,16 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 	// 获取UserOpenQuest
 	var userOpenQuest model.UserOpenQuest
 	if err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).First(&userOpenQuest).Error; err != nil {
-		return
+		return errors.New("该回答已经评分，请勿重复评分")
+	}
+	// 检查是否有变动
+	if r.UpdatedAt != nil && !userOpenQuest.UpdatedAt.Equal(*r.UpdatedAt) {
+		return errors.New("内容有变动，请重新评分")
 	}
 	// 获取题目
 	var quest model.Quest
 	if err = global.DB.Model(&model.Quest{}).Where("token_id = ?", userOpenQuest.TokenId).First(&quest).Error; err != nil {
-		return
+		return errors.New("获取题目失败")
 	}
 	// 获取分数
 	score, pass, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
@@ -46,8 +53,9 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 	err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).Updates(&model.UserOpenQuest{
 		OpenQuestReviewTime:   time.Now(),
 		OpenQuestReviewStatus: 2,
-		OpenQuestScore:        r.Score,
+		OpenQuestScore:        score,
 		Answer:                r.Answer,
+		Pass:                  pass,
 	}).Error
 	// 写入Message
 	var message model.UserMessage
