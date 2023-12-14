@@ -53,7 +53,7 @@ export default function ChallengeJudgListPage(params) {
             key: 'token_id',
             dataIndex: "token_id",
             render: (token_id) => (
-                <p className="pointer" onClick={() => window.open(`/quests/${token_id}`, "_blank")}>{token_id}</p>
+                <p className="pointer" onClick={() => window.open(`${host}/quests/${token_id}`, "_blank")}>{token_id}</p>
             )
         },
         {
@@ -61,7 +61,7 @@ export default function ChallengeJudgListPage(params) {
             key: 'address',
             dataIndex: "address",
             render: (address) => (
-                <p className="pointer" onClick={() => window.open(`/${address}`, "_blank")}>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
+                <p className="pointer" onClick={() => window.open(`${host}/${address}`, "_blank")}>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
             )
         },
         {
