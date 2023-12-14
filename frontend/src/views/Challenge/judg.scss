@@ -1,7 +1,37 @@
 
+.judg{
+    .of-h{
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .pointer{
+        cursor: pointer;
+        &:hover{
+            text-decoration: underline;
+        }
+    }
+}
 
 
 .judg-modal{
+    // 开始评分按钮
+    .flex{
+        display: flex;
+        align-items: center;
+        .item-title{
+            margin-bottom: 0 !important;
+        }
+        .btn-start{
+            width: 290px;
+            height: 50px;
+            margin: 34px auto 47px;
+            box-shadow: none;
+            border: none;
+            font-size: 16px;
+        }
+    }
     .ant-modal-content{
         padding: 29px 24px;
         padding-right: 47px;

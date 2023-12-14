@@ -8,12 +8,16 @@ import { copyToClipboard } from "../../utils/text/copyToClipboard";
 const location = window.location.host;
 const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
 const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
+const { confirm } = Modal;
 
 export default function ChallengeJudgListPage(params) {
 
     const judgRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    let [selectQuest, setSelectQuest] = useState();
+    const [detailOpen, setDetailOpen] = useState(false);
+    let [isLoading, setIsLoading] = useState();
+    let [tableLoad, setTableLoad] = useState();
+    let [detail, setDetail] = useState([]);
     let [status, setStatus] = useState(1);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
@@ -37,92 +41,89 @@ export default function ChallengeJudgListPage(params) {
 
     const columns = [
         {
-            title: 'ID',
-            dataIndex: 'ID',
-            key: 'ID'
-        },
-        {
-            title: '挑战者地址',
-            dataIndex: 'address',
-            key: 'address',
-            render: (address) => (
-              <p onClick={() => copyToClipboard(address)} style={{cursor: "pointer", textDecoration: "underline"}}>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
-            )
-        },
-        {
-            title: '挑战标题',
-            dataIndex: 'title',
+            title: "题目",
             key: 'title',
+            dataIndex: "title",
+            render: (title, quest) => (
+                <p className="of-h pointer" onClick={() => openDetail(quest)}>{title}</p>
+            )
         },
         {
-            title: '挑战编号',
-            dataIndex: 'token_id',
+            title: "挑战编号",
             key: 'token_id',
-            render: (tokenId) => (
-                <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
+            dataIndex: "token_id",
+            render: (token_id) => (
+                <p className="pointer" onClick={() => window.open(`/quests/${token_id}`, "_blank")}>{token_id}</p>
             )
         },
         {
-            title: '提交时间',
-            dataIndex: 'UpdatedAt',
-            key: 'UpdatedAt',
-            render: (UpdatedAt) => (
-                UpdatedAt.replace("T", " ").split(".")[0]
+            title: "挑战者地址",
+            key: 'address',
+            dataIndex: "address",
+            render: (address) => (
+                <p className="pointer" onClick={() => window.open(`/${address}`, "_blank")}>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
             )
         },
         {
-            title: '处理时间',
-            dataIndex: 'open_quest_review_time',
-            key: 'open_quest_review_time',
-            render: (open_quest_review_time) => (
-                open_quest_review_time.indexOf("0001-01-01T") === -1 ?
-                <p>{open_quest_review_time.replace("T", " ").split(".")[0]}</p>
-                :"-"
-            )
-        },
-        {
-            title: `状态:${status === 1 ? "待处理" : "已处理"}`,
-            dataIndex: 'open_quest_review_status',
+            title: "状态",
             key: 'status',
+            dataIndex: "open_quest_review_status",
             filters: [
-                { text: '待处理', value: 1 },
-                { text: '已处理', value: 2 }
+                { text: "全部", value: null },
+                { text: "待评分", value: 1 },
+                { text: "已评分", value: 2 },
             ],
             filterMultiple: false,
             filteredValue: [status],
             render: (status) => (
                 <p style={{
-                    color: status === 2 ? "#35D6A6" : "000"
-                }}>{status === 2 ? "已处理" : "待处理"}</p>
+                    color: status === 2 ? "#35D6A6" : "#9A9A9A",
+                    fontWeight: 600
+                }}>{status === 2 ? "已评分" : status === 1 ? "待评分" : "全部"}</p>
             )
         },
         {
-            title: '操作',
-            key: 'action',
-            render: (_, quest) => (
-                
-                <Button
-                  type="link" 
-                  onClick={() => OpenJudgModal(quest)}
-                >{quest.open_quest_review_status === 1 ? "评分" : "查看"}</Button>
-            ),
+            title: "提交时间",
+            key: 'updated_at',
+            dataIndex: "updated_at",
+            render: (time) => (
+                time.indexOf("0001-01-01T") === -1 ?
+                time.replace("T", " ").split(".")[0]
+                :"-"
+            )
+        },
+        {
+            title: "处理时间",
+            key: 'open_quest_review_time',
+            dataIndex: "open_quest_review_time",
+            render: (time) => (
+                time.indexOf("0001-01-01T") === -1 ?
+                time.replace("T", " ").split(".")[0]
+                :"-"
+            )
         }
     ];
 
+    // 展示该题详情
+    function openDetail(quest) {
+        detail = [quest];
+        setDetail([...detail]);
+        setDetailOpen(true);
+    }
+
     // 判题弹窗
-    function OpenJudgModal(quest) {
-        selectQuest = quest;
-        setSelectQuest({...selectQuest});
+    function OpenJudgModal() {
         setIsModalOpen(true);
     }
     
     // 获取列表
-    function getList(page) {
+    async function getList(page) {
+        setTableLoad(true);
         if (page) {
             pageConfig.page = page;
             setPageConfig({...pageConfig});
         }
-        getUserOpenQuestList({
+        await getUserOpenQuestList({
             open_quest_review_status: status,
             ...pageConfig
         })
@@ -130,17 +131,36 @@ export default function ChallengeJudgListPage(params) {
             const list = res.data.list;
             data = list ? list : [];
             // 添加key
-            data.forEach(ele => {
-                ele.key = ele.ID
+            data.forEach((ele, index) => {
+                ele.key = ele.updated_at + ele.index + index
             })
             setData([...data]);
             pageConfig.total = res.data.total;
             setPageConfig({...pageConfig});
         })
+        setTableLoad(false);
+    }
+
+    // 提交批改内容
+    async function submitReview(params) {
+        setIsLoading(true);
+        await judgRef.current.confirm();
+        setIsLoading(false);
     }
 
     function handleOk() {
-        judgRef.current.confirm();
+        // 是否批改完
+        const {flag, remain} = judgRef.current.isOver();
+        if (flag) { 
+            submitReview()
+        }else{
+            confirm({
+                title: `还有${remain}道未评分，仍然提交？`,
+                onOk() {
+                    submitReview()
+                },
+            });
+        }
     }
 
     function onFinish() {
@@ -166,12 +186,26 @@ export default function ChallengeJudgListPage(params) {
                 className="judg-modal"
                 onCancel={() => {setIsModalOpen(false)}}
                 onOk={handleOk}
+                okButtonProps={{
+                    loading: isLoading
+                }}
             >
-                <ChallengeJudgPage ref={judgRef} selectQuest={selectQuest} onFinish={onFinish} />
+                <ChallengeJudgPage ref={judgRef} data={data} onFinish={onFinish} />
+            </Modal>
+
+            <Modal
+                width={1177}
+                className="judg-modal"
+                open={detailOpen}
+                footer={null}
+                onCancel={() => {setDetailOpen(false)}}
+            >
+                <ChallengeJudgPage data={detail} />
             </Modal>
             <Table
                 columns={columns} 
                 dataSource={data} 
+                loading={tableLoad}
                 onChange={handleChange}
                 pagination={{
                     current: pageConfig.page, 
@@ -182,6 +216,12 @@ export default function ChallengeJudgListPage(params) {
                     }
                 }} 
             />
+            {
+                data?.findIndex((e) => e.open_quest_review_status === 1) !== -1 &&
+                <div className="flex">
+                    <Button id="hover-btn-full" className="btn-start" onClick={() => OpenJudgModal()}>开始打分</Button>
+                </div>
+            }
         </div>
     )
 }
