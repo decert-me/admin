@@ -20,3 +20,10 @@ type ReviewOpenQuestRequest struct {
 	Score     int64          `json:"score"`
 	UpdatedAt *time.Time     `json:"updated_at"`
 }
+
+type ReviewOpenQuestRequestV2 struct {
+	ID        uint           `json:"id" binding:"required"`
+	Answer    datatypes.JSON `json:"answer" binding:"required"`
+	Index     int            `json:"index" binding:"required"`
+	UpdatedAt *time.Time     `json:"updated_at" binding:"required"`
+}
