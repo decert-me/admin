@@ -13,6 +13,7 @@
     "ahooks": "^3.7.8",
     "antd": "^5.8.2",
     "axios": "^1.4.0",
+    "big.js": "^6.2.1",
     "echarts": "^5.4.3",
     "phantom-wagmi-connector": "^1.0.7",
     "react": "^18.2.0",

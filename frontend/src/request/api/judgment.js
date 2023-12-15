@@ -5,7 +5,7 @@ import serviceAxios from "../index";
     // 获取开放题列表
     export const getUserOpenQuestList = (data) => {
         return serviceAxios({
-            url: `/challenge/getUserOpenQuestList`,
+            url: `/challenge/getUserOpenQuestListV2`,
             method: "post",
             data
         })
@@ -14,7 +14,7 @@ import serviceAxios from "../index";
     // 开放题打分
     export const reviewOpenQuest = (data) => {
         return serviceAxios({
-            url: `/challenge/reviewOpenQuest`,
+            url: `/challenge/reviewOpenQuestV2`,
             method: "post",
             data
         })
