@@ -15,6 +15,7 @@ export default function ChallengeJudgListPage(params) {
     const judgRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [detailOpen, setDetailOpen] = useState(false);
+    const [rateNum, setRateNum] = useState(0);
     let [isLoading, setIsLoading] = useState();
     let [tableLoad, setTableLoad] = useState();
     let [detail, setDetail] = useState([]);
@@ -168,10 +169,11 @@ export default function ChallengeJudgListPage(params) {
         getList()
     }
 
-    function init() {
+    async function init() {
         pageConfig.page += 1;
         setPageConfig({...pageConfig});
-        getList();
+        await getList();
+        setRateNum(pageConfig.total);
     }
 
     useEffect(() => {
@@ -180,6 +182,13 @@ export default function ChallengeJudgListPage(params) {
 
     return (
         <div className="judg">
+            <div className="tabel-title">
+                <h2 style={{fontSize: 20}}>评分列表<span style={{fontSize: 14, fontWeight: 400, color: "#999999"}}>（待评分 {rateNum}）</span></h2>
+                {
+                    data?.findIndex((e) => e.open_quest_review_status === 1) !== -1 &&
+                    <Button id="hover-btn-full" className="btn-start" onClick={() => OpenJudgModal()}>开始评分</Button>
+                }
+            </div>
             <Modal
                 width={1177}
                 open={isModalOpen}
@@ -216,12 +225,6 @@ export default function ChallengeJudgListPage(params) {
                     }
                 }} 
             />
-            {
-                data?.findIndex((e) => e.open_quest_review_status === 1) !== -1 &&
-                <div className="flex">
-                    <Button id="hover-btn-full" className="btn-start" onClick={() => OpenJudgModal()}>开始打分</Button>
-                </div>
-            }
         </div>
     )
 }
