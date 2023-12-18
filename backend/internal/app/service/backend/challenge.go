@@ -11,7 +11,6 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"gorm.io/datatypes"
-	"math/big"
 	"time"
 )
 
@@ -263,16 +262,14 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 				return errors.New("服务器错误")
 			}
 		}
-		userReturnScoreFloat := big.NewFloat(float64(userReturnScore))
-		scoreFloat := new(big.Float).Quo(userReturnScoreFloat, big.NewFloat(100))
-		score := fmt.Sprintf("%.0f", scoreFloat)
+		score := fmt.Sprintf("%d", userReturnScore)
 		// 写入审核结果
 		err = db.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).Updates(&model.UserOpenQuest{
 			OpenQuestReviewTime:   openQuestReviewTime,
 			OpenQuestReviewStatus: openQuestReviewStatus,
-			//OpenQuestScore:        score,
-			Answer: datatypes.JSON(answerRes),
-			Pass:   pass,
+			OpenQuestScore:        userReturnScore,
+			Answer:                datatypes.JSON(answerRes),
+			Pass:                  pass,
 		}).Error
 		if err != nil {
 			db.Rollback()

@@ -80,7 +80,9 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 			}
 		}
 		if questType == "open_quest" {
-			if gjson.Get(v.String(), "correct").Bool() == true {
+			if gjson.Get(v.String(), "score").Int() != 0 {
+				score += gjson.Get(v.String(), "score").Int()
+			} else if gjson.Get(v.String(), "correct").Bool() == true {
 				score += scoreList[i].Int()
 			}
 		}
