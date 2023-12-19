@@ -137,6 +137,9 @@ export default function ChallengeJudgListPage(params) {
             })
             setData([...data]);
             pageConfig.total = res.data.total;
+            if (status === 1) {
+                setRateNum(pageConfig.total);
+            }
             setPageConfig({...pageConfig});
         })
         setTableLoad(false);
@@ -173,7 +176,6 @@ export default function ChallengeJudgListPage(params) {
         pageConfig.page += 1;
         setPageConfig({...pageConfig});
         await getList();
-        setRateNum(pageConfig.total);
     }
 
     useEffect(() => {
@@ -199,7 +201,7 @@ export default function ChallengeJudgListPage(params) {
                     loading: isLoading
                 }}
             >
-                <ChallengeJudgPage ref={judgRef} data={data} onFinish={onFinish} />
+                <ChallengeJudgPage ref={judgRef} rateNum={rateNum} status={status} pageNum={pageConfig.page} data={data} onFinish={onFinish} />
             </Modal>
 
             <Modal
