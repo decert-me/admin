@@ -154,11 +154,10 @@ func handleTranslateContent(contentEN string, contentTr string) (content string,
 	answerRes = utils.AnswerDecode(global.CONFIG.Quest.EncryptKey, gjson.Get(contentEN, "answers").String())
 	// 解密答案
 	for index, question := range questions {
-		fmt.Println("index", index)
-		fmt.Println("question", question)
+		//fmt.Println("index", index)
+		//fmt.Println("question", question)
 		// title
 		titleContent := gjson.Get(question.String(), "title").String()
-		fmt.Println("titleContent", titleContent)
 		content, err = sjson.Set(content, "questions."+cast.ToString(index)+".title", titleContent)
 		if err != nil {
 			return "", "", err
@@ -184,7 +183,7 @@ func handleTranslateContent(contentEN string, contentTr string) (content string,
 	}
 	// 加密答案
 	answerRes = utils.AnswerEncode(global.CONFIG.Quest.EncryptKey, answerRes)
-	return "", "", nil
+	return content, answerRes, nil
 }
 
 // handleTranslateMetaData
