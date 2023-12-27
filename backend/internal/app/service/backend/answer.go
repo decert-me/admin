@@ -26,7 +26,24 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 	for _, s := range scoreList {
 		totalScore += s.Int()
 	}
+	// 获取多语言答案列表
+	answers, err := GetQuestAnswersByTokenId(quest.TokenId)
+	if err != nil {
+		global.LOG.Error("GetQuestAnswersByTokenId error", zap.Error(err))
+		return userReturnScore, false, err
+	}
+	// 解密答案
+	var answersList [][]gjson.Result
+	for _, v := range answers {
+		temp := gjson.Get(utils.AnswerDecode(key, v), "@this").Array()
+		answersList = append(answersList, temp) // 标准答案
+		if len(answerU) != len(temp) {
+			global.LOG.Error("答案数量不相等")
+			return userReturnScore, false, errors.New("unexpect error")
+		}
+	}
 	if len(answerU) != len(answerS) || len(scoreList) != len(answerS) {
+		global.LOG.Error("答案数量不相等")
 		return userReturnScore, false, errors.New("unexpect error")
 	}
 	var score int64
@@ -45,9 +62,19 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 			continue
 		}
 		// 单选题
-		if questType == "multiple_choice" || questType == "fill_blank" {
+		if questType == "multiple_choice" {
 			if questValue == answerU[i].String() {
 				score += scoreList[i].Int()
+			}
+			continue
+		}
+		// 填空题
+		if questType == "fill_blank" {
+			for _, item := range answersList {
+				if questValue == item[i].String() {
+					score += scoreList[i].Int()
+					break
+				}
 			}
 			continue
 		}
@@ -104,4 +131,15 @@ func IsOpenQuest(answerUser string) bool {
 		}
 	}
 	return false
+}
+
+// GetQuestAnswersByTokenId 获取题目答案
+func GetQuestAnswersByTokenId(tokenId int64) (answers []string, err error) {
+	err = global.DB.Raw(`SELECT answer AS answers
+		FROM (
+		SELECT  quest_data->>'answers' AS answer FROM quest WHERE token_id = ?
+		UNION
+		SELECT answer FROM quest_translated WHERE token_id = ?) AS combined_data
+		`, tokenId, tokenId).Scan(&answers).Error
+	return
 }
