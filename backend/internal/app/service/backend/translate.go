@@ -104,7 +104,7 @@ func handleTranslate(tokenID int64, content string) (questTranslate model.QuestT
 	questTranslate.Title = gjson.Get(content, "title").String()
 	questTranslate.Description = gjson.Get(content, "description").String()
 	// 处理翻译内容
-	questRes, err := handleTranslateContent(string(quest.QuestData), content)
+	questRes, answerRes, err := handleTranslateContent(string(quest.QuestData), content)
 	if err != nil {
 		return questTranslate, err
 	}
@@ -115,6 +115,7 @@ func handleTranslate(tokenID int64, content string) (questTranslate model.QuestT
 	}
 	questTranslate.QuestData = []byte(questRes)
 	questTranslate.MetaData = []byte(metaDataRes)
+	questTranslate.Answer = answerRes
 	return questTranslate, nil
 }
 
@@ -181,6 +182,8 @@ func handleTranslateContent(contentEN string, contentTr string) (content string,
 			}
 		}
 	}
+	// 加密答案
+	answerRes = utils.AnswerEncode(global.CONFIG.Quest.EncryptKey, answerRes)
 	return "", "", nil
 }
 
