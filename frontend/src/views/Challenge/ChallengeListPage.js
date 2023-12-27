@@ -20,6 +20,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { useRequest } from 'ahooks';
 import InfiniteScroll from "../../components/InfiniteScroll";
 import CustomLoading from "../../components/InfiniteScroll/CustomLoading";
+import { Encryption } from "../../utils/encryption";
+import { exportJsonFile } from "../../utils/file/export";
 
 const location = window.location.host;
 const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
@@ -57,6 +59,7 @@ export default function ChallengeListPage(params) {
     const location = useLocation();
     const { id } = useParams();
     const scrollRef = useRef(null);
+    const { decode } = Encryption();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOk, setIsOk] = useState(false);
@@ -204,6 +207,11 @@ export default function ChallengeListPage(params) {
                   </Popconfirm>
                   :
                   <>
+                  <Button 
+                      type="link" 
+                      className="p0"
+                      onClick={() => exportChallenge(quest)}
+                    >导出</Button>
                     <Button 
                       type="link" 
                       className="p0"
@@ -246,6 +254,22 @@ export default function ChallengeListPage(params) {
           message.error(err);
       })
       getList()
+    }
+
+    // 导出挑战
+    function exportChallenge(challenge) {
+      const questions = challenge.quest_data.questions;
+      questions.forEach(quest => {
+        if (quest.type === "coding") {
+          const { code_snippets } = quest;
+          try {
+            quest.code_snippets[0].correctAnswer = eval(decode(code_snippets[0].correctAnswer));
+          } catch (error) {
+            console.log(error);            
+          }
+        }
+      })
+      exportJsonFile(JSON.stringify(questions), challenge.title)
     }
 
     // 上下架
