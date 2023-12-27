@@ -74,6 +74,7 @@ func Routers() *gin.Engine {
 		router.InitUploadRouter(v1Group)
 		router.InitChallengeRouter(v1Group)
 		router.InitOpenQuestRouter(v1Group)
+		router.InitTranslateRouter(v1Group)
 	}
 	global.LOG.Info("router register success")
 	return Router
