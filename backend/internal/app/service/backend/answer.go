@@ -139,7 +139,7 @@ func GetQuestAnswersByTokenId(tokenId int64) (answers []string, err error) {
 		FROM (
 		SELECT  quest_data->>'answers' AS answer FROM quest WHERE token_id = ?
 		UNION
-		SELECT answer FROM quest_translated WHERE token_id = ?) AS combined_data
+		SELECT answer FROM quest_translated WHERE token_id = ? AND answer IS NOT NULL) AS combined_data
 		`, tokenId, tokenId).Scan(&answers).Error
 	return
 }
