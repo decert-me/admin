@@ -67,5 +67,5 @@ quest:
 
 # translate configuration
 translate:
-  github-repo: "https://github.com/decert-me/Translate"
+  github-repo: "https://github.com/decert-me/document"
   github-branch: "main"
