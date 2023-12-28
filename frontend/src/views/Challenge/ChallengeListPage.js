@@ -259,7 +259,9 @@ export default function ChallengeListPage(params) {
     // 导出挑战
     function exportChallenge(challenge) {
       const questions = challenge.quest_data.questions;
-      questions.forEach(quest => {
+      const answers = eval(decode(challenge.quest_data.answers));
+      questions.forEach((quest, i) => {
+        quest.answers = answers[i]
         if (quest.type === "coding") {
           const { code_snippets } = quest;
           try {
