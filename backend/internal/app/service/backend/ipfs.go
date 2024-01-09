@@ -145,3 +145,42 @@ func IPFSUploadFile(header *multipart.FileHeader) (err error, hash string) {
 	}
 	return err, resJson.Hash
 }
+
+// IPFSUploadJSON
+// @description: 上传JSON
+// @param: header *multipart.FileHeader
+// @return: err error, list interface{}, total int64
+func IPFSUploadJSON(uploadJSON interface{}) (err error, hash string) {
+	data, err := json.Marshal(uploadJSON)
+	if err != nil {
+		return err, hash
+	}
+	// 组成请求体
+	jsonReq := make(map[string]interface{})
+	jsonReq["body"] = string(data)
+	// 发送请求
+	url := fmt.Sprintf("%s/upload/json", GetIPFSUploadAPI())
+	client := req.C().SetTimeout(120 * time.Second)
+	res, err := client.R().SetBody(jsonReq).Post(url)
+	if err != nil {
+		go BalanceIPFS()
+		return err, hash
+	}
+
+	// 解析返回结果
+	type Response struct {
+		Status  string `json:"status"`
+		Message string `json:"message"`
+		Hash    string `gorm:"column:hash" json:"hash" form:"hash"`
+	}
+	var resJson Response
+	err = json.Unmarshal(res.Bytes(), &resJson)
+	if err != nil {
+		return err, hash
+	}
+	if resJson.Status != "1" {
+		go BalanceIPFS()
+		return err, hash
+	}
+	return err, resJson.Hash
+}
