@@ -134,7 +134,7 @@ func IsOpenQuest(answerUser string) bool {
 }
 
 // GetQuestAnswersByTokenId 获取题目答案
-func GetQuestAnswersByTokenId(tokenId int64) (answers []string, err error) {
+func GetQuestAnswersByTokenId(tokenId string) (answers []string, err error) {
 	err = global.DB.Raw(`SELECT answer AS answers
 		FROM (
 		SELECT  quest_data->>'answers' AS answer FROM quest WHERE token_id = ?

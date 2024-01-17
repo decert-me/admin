@@ -202,7 +202,7 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 	// 用户开放题
 	userOpenQuestTimeMap := make(map[uint]time.Time)
 	// 题目
-	questMap := make(map[int64]model.Quest)
+	questMap := make(map[string]model.Quest)
 	for _, r := range req {
 		var userOpenQuest model.UserOpenQuest
 		if err = db.Model(&model.UserOpenQuest{}).Select("*,COALESCE(user_open_quest.commit_time,user_open_quest.updated_at) as updated_at").Where("id = ? AND open_quest_review_status = 1", r.ID).First(&userOpenQuest).Error; err != nil {
