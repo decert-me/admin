@@ -61,7 +61,7 @@ export default function ChallengeModifyPage(params) {
                 setCollection([...collection]);
             }
         })
-        getQuest({id: Number(tokenId)})
+        getQuest({id: tokenId})
         .then(res => {
             if (res.code === 0) {
                 data = res.data;

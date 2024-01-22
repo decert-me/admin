@@ -100,14 +100,14 @@ export default function ChallengeListPage(params) {
         },
         {
           title: '挑战编号',
-          dataIndex: 'tokenId',
-          render: (tokenId, quest) => (
+          dataIndex: 'uuid',
+          render: (uuid, quest) => (
             id ?
             <Tooltip title="点此管理挑战">
-              <a className="underline" href={`/dashboard/challenge/list?tokenId=${quest.tokenId}`} target="">{tokenId}</a>
+              <a className="underline" href={`/dashboard/challenge/list?tokenId=${quest.tokenId}`} target="">{quest.tokenId}</a>
             </Tooltip>
             :
-            <a className="underline" href={`${host}/quests/${tokenId}`} target="_blank">{tokenId}</a>
+            <a className="underline" href={`${host}/quests/${uuid}`} target="_blank">{uuid}</a>
           )
         },
         {
@@ -127,7 +127,7 @@ export default function ChallengeListPage(params) {
           dataIndex: 'title',
           render: (title, quest) => (
             <Tooltip title="查看挑战网页效果">
-              <a className="underline" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+              <a className="underline text-w-300" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
             </Tooltip>
           )
         },

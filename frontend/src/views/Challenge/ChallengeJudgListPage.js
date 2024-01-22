@@ -54,7 +54,7 @@ export default function ChallengeJudgListPage(params) {
             key: 'token_id',
             dataIndex: "token_id",
             render: (token_id) => (
-                <p className="pointer" onClick={() => window.open(`${host}/quests/${token_id}`, "_blank")}>{token_id}</p>
+                <p className="pointer text-w-300" onClick={() => window.open(`${host}/quests/${token_id}`, "_blank")}>{token_id}</p>
             )
         },
         {
