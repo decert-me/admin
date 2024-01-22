@@ -161,7 +161,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 			return err
 		}
 		// 判断合辑是否存在NFT
-		if collection.TokenId != 0 {
+		if collection.TokenId != "" {
 			tx.Rollback()
 			return errors.New("合辑已生成NFT，无法修改、删除")
 		}
@@ -183,7 +183,7 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 			return errors.New("集合不存在")
 		}
 		// 判断合辑是否存在NFT
-		if collection.TokenId != 0 {
+		if collection.TokenId != "" {
 			tx.Rollback()
 			return errors.New("合辑已生成NFT，无法修改、删除")
 		}

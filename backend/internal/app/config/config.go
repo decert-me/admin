@@ -14,4 +14,6 @@ type Server struct {
 	Local     Local     `mapstructure:"local" json:"local" yaml:"local"`
 	Quest     *Quest    `mapstructure:"quest" json:"quest" yaml:"quest"`
 	Translate Translate `mapstructure:"translate" json:"translate" yaml:"translate"`
+	ZCloak    *ZCloak   `mapstructure:"zcloak" json:"zcloak" yaml:"zcloak"`
+	NFT       NFT       `mapstructure:"nft" json:"nft" yaml:"nft"`
 }

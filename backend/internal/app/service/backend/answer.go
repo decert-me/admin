@@ -134,12 +134,12 @@ func IsOpenQuest(answerUser string) bool {
 }
 
 // GetQuestAnswersByTokenId 获取题目答案
-func GetQuestAnswersByTokenId(tokenId int64) (answers []string, err error) {
+func GetQuestAnswersByTokenId(tokenId string) (answers []string, err error) {
 	err = global.DB.Raw(`SELECT answer AS answers
 		FROM (
 		SELECT  quest_data->>'answers' AS answer FROM quest WHERE token_id = ?
 		UNION
-		SELECT answer FROM quest_translated WHERE token_id = ?) AS combined_data
+		SELECT answer FROM quest_translated WHERE token_id = ? AND answer IS NOT NULL) AS combined_data
 		`, tokenId, tokenId).Scan(&answers).Error
 	return
 }

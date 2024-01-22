@@ -62,10 +62,7 @@ func SubmitTranslate(req request.SubmitTranslateRequest) (err error) {
 		return err
 	}
 	// 挑战处理
-	tokenID, err := cast.ToInt64E(filename)
-	if err != nil {
-		return err
-	}
+	tokenID := filename
 	// 处理翻译文件
 	questTranslate, err := handleTranslate(tokenID, contentEn)
 	if err != nil {
@@ -92,7 +89,7 @@ func SubmitTranslate(req request.SubmitTranslateRequest) (err error) {
 }
 
 // 处理翻译文件
-func handleTranslate(tokenID int64, content string) (questTranslate model.QuestTranslated, err error) {
+func handleTranslate(tokenID string, content string) (questTranslate model.QuestTranslated, err error) {
 	// 获取数据库Quest数据
 	db := global.DB
 	var quest model.Quest
@@ -222,7 +219,7 @@ func getGithubTranslateFile(filePath string) (content string, err error) {
 }
 
 // saveTranslateResult 保存翻译结果
-func saveTranslateResult(tokenID int64, questTranslate model.QuestTranslated) (err error) {
+func saveTranslateResult(tokenID string, questTranslate model.QuestTranslated) (err error) {
 	db := global.DB
 	// 已存在则更新
 	var count int64

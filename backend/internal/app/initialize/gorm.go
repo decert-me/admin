@@ -79,6 +79,7 @@ func InitUser(db *gorm.DB) {
 	}
 }
 
+// InitSetting 初始化系统设置
 func InitSetting(db *gorm.DB) {
 	// 判断是否存在设置
 	var count int64
