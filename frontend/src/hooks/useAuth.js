@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     setUser(data);
     setToken(token);
     // setAuth(auth)
-    navigate("/dashboard/tutorials/list", { replace: true });
+    navigate("/dashboard/challenge/list", { replace: true });
   };
 
   const logout = () => {
