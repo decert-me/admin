@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"reflect"
 )
 
@@ -53,4 +54,10 @@ func DiffStructs(s1, s2 interface{}) []string {
 	}
 
 	return diff
+}
+
+// IsUUID 判断是否UUID
+func IsUUID(uuidStr string) bool {
+	_, err := uuid.Parse(uuidStr)
+	return err == nil
 }
