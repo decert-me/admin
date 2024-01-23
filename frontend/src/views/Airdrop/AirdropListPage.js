@@ -2,6 +2,7 @@ import { Button, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import { getAirdropList, runAirdrop } from "../../request/api/airdrop";
 import "./index.scss";
+import { CHAINS } from "../../config/CHAINS";
 
 export default function AirdropList(params) {
     
@@ -47,6 +48,19 @@ export default function AirdropList(params) {
         }
     }
 
+    const chain = (app, info) => {
+        if (app === "decert_solana") {
+            return "Solana"
+        }
+        if (app === "decert") {
+            return "Polygon"
+        }
+        if (app === "decert_v2") {
+            const chain = CHAINS.filter(e => e.chainID == info.params.params.chain_id);
+            return chain[0]?.name
+        }
+    }
+
     const columns = [
         {
             title: 'ID',
@@ -60,8 +74,8 @@ export default function AirdropList(params) {
             title: '链',
             dataIndex: 'app',
             key: 'app',
-            render: (app) => (
-              <p>{app === "decert" ? "Polygon" : "Solana"}</p>
+            render: (app, info) => (
+              <p>{chain(app, info)}</p>
             )
         },
         {
