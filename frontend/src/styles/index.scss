@@ -22,6 +22,13 @@
         color: #1677ff;
     }
 }
+.text-w-300{
+    max-width: 300px;
+    display: inline-block;
+    white-space: nowrap; /* 防止文本换行 */
+    overflow: hidden; /* 隐藏超出的内容 */
+    text-overflow: ellipsis; /* 当文本超出时显示省略号 */
+}
 
 // 置顶
 .toTop{
