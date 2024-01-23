@@ -38,13 +38,18 @@ export default function AirdropList(params) {
         }
     }
 
-    const txhashHref = (hash, {app}) => {
+    const txhashHref = (hash, {app, params}) => {
         if (app === "decert") {
             const prefix = isDev ? "https://mumbai.polygonscan.com" : "https://polygonscan.com"
             return prefix + "/tx/" + hash
-        }else if (app === "decert_solana") {
+        }
+        if (app === "decert_solana") {
             const suffix = isDev ? "?cluster=devnet" : "";
             return `https://solscan.io/tx/${hash}${suffix}`
+        }
+        if (app === "decert_v2") {
+            const chain = CHAINS.filter(e => e.chainID == params.params.chain_id);
+            return `${chain[0].url}${hash}`
         }
     }
 
