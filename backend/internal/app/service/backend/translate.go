@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"gorm.io/datatypes"
 	"path/filepath"
 	"strings"
 )
@@ -107,8 +108,14 @@ func handleTranslate(_id string, content string) (questTranslate model.QuestTran
 	if err != nil {
 		return questTranslate, err
 	}
+	// 上传IPFS获取cid
+	err, questHash := IPFSUploadJSON(datatypes.JSON(questRes))
+	if err != nil {
+		return questTranslate, err
+	}
+
 	// 处理MetaData
-	metaDataRes, err := handleTranslateMetaData(string(quest.MetaData), content)
+	metaDataRes, err := handleTranslateMetaData(string(quest.MetaData), content, questHash)
 	if err != nil {
 		return questTranslate, err
 	}
@@ -187,7 +194,7 @@ func handleTranslateContent(contentEN string, contentTr string) (content string,
 }
 
 // handleTranslateMetaData
-func handleTranslateMetaData(metaDataEN string, contentTr string) (metaData string, err error) {
+func handleTranslateMetaData(metaDataEN string, contentTr string, questHash string) (metaData string, err error) {
 	metaData = metaDataEN
 	// 处理翻译内容
 	// title
@@ -202,6 +209,8 @@ func handleTranslateMetaData(metaDataEN string, contentTr string) (metaData stri
 	}
 	// challenge_title
 	metaData, err = sjson.Set(metaData, "attributes.challenge_title", gjson.Get(contentTr, "title").String())
+	// challenge_title
+	metaData, err = sjson.Set(metaData, "attributes.challenge_ipfs_url", "ipfs://"+questHash)
 	return metaData, nil
 }
 
