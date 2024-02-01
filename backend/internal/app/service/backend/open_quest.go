@@ -5,6 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/model/request"
 	"errors"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -36,4 +37,30 @@ func AddOpenQuestPerm(r request.AddOpenQuestPermRequest) (err error) {
 func DeleteOpenQuestPerm(r request.DeleteOpenQuestPermRequest) (err error) {
 	err = global.DB.Delete(&model.OpenQuestPerm{}, "address ILIKE ?", r.Address).Error
 	return
+}
+
+// InitOpenQuestUserScore 初始化用户分数
+func InitOpenQuestUserScore() {
+	// 初始化用户分数
+	var userOpenQuests []model.UserOpenQuest
+	err := global.DB.Model(&model.UserOpenQuest{}).Where("user_score IS NULL").Find(&userOpenQuests).Error
+	if err != nil {
+		return
+	}
+	for _, userOpenQuest := range userOpenQuests {
+		// 获取题目
+		var quest model.Quest
+		if err = global.DB.Model(&model.Quest{}).Where("token_id = ?", userOpenQuest.TokenId).First(&quest).Error; err != nil {
+			continue
+		}
+		_, userScore, _, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(userOpenQuest.Answer), quest)
+		if err != nil {
+			continue
+		}
+		// 更新用户分数
+		err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ?", userOpenQuest.ID).Update("user_score", userScore).Error
+		if err != nil {
+			continue
+		}
+	}
 }

@@ -52,7 +52,7 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 		return errors.New("获取题目失败")
 	}
 	// 获取分数
-	score, pass, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
+	score, userScore, pass, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
 	// 写入审核结果
 	err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).Updates(&model.UserOpenQuest{
 		OpenQuestReviewTime:   time.Now(),
@@ -60,6 +60,7 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 		OpenQuestScore:        score,
 		Answer:                r.Answer,
 		Pass:                  pass,
+		UserScore:             userScore,
 	}).Error
 	// 写入Message
 	var message model.UserMessage
@@ -248,15 +249,15 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 				break
 			}
 		}
-		var openQuestReviewTime time.Time // 审核时间
-		var pass bool                     // 是否通过
-		var userReturnScore int64         // 分数
+		var openQuestReviewTime time.Time    // 审核时间
+		var pass bool                        // 是否通过
+		var userReturnScore, userScore int64 // 分数
 		if openQuestReviewStatus == 2 {
 			openQuestReviewTime = time.Now()
 		}
 		// 判断是否通过
 		if openQuestReviewStatus == 2 {
-			userReturnScore, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(answerRes), quest)
+			userReturnScore, userScore, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(answerRes), quest)
 			if err != nil {
 				db.Rollback()
 				return errors.New("服务器错误")
@@ -270,6 +271,7 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 			OpenQuestScore:        userReturnScore,
 			Answer:                datatypes.JSON(answerRes),
 			Pass:                  pass,
+			UserScore:             userScore,
 		}).Error
 		if err != nil {
 			db.Rollback()

@@ -4,6 +4,7 @@ import (
 	"backend/internal/app/core"
 	"backend/internal/app/global"
 	"backend/internal/app/initialize"
+	"backend/internal/app/service/backend"
 	"backend/internal/app/service/system"
 	"go.uber.org/zap"
 	"time"
@@ -25,6 +26,8 @@ func main() {
 	global.TokenCache = initialize.TokenCache()
 	// 初始化打包状态
 	initialize.InitTutorialPackStatus()
+	// 初始化 backend
+	backend.Init()
 	// 初始化casbin
 	system.CasbinInit()
 	core.RunWindowsServer()
