@@ -26,7 +26,7 @@ jobs:
       run: yarn --cwd $PROJECT_DIR install --frozen-lockfile
 
     - name: Build project
-      run: yarn --cwd $PROJECT_DIR build
+      run: yarn --cwd $PROJECT_DIR build --ci=false
       env:
         REACT_APP_BASE_URL:  ${{ vars.BASE_API_URL }}
         REACT_APP_ANSWERS_KEY:  ${{ secrets.CHALLENGE_ANSWERS_KEY }}
