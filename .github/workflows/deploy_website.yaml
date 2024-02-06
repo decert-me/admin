@@ -7,6 +7,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    env:
+      PROJECT_DIR: "frontend"
     
     steps:
     - name: Checkout code
@@ -16,28 +19,19 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-    
-    - name: Change directory
-      run: |
-        cd frontend
-        pwd
 
     - name: Install dependencies
-      run: |
-        pwd
-        yarn install
+      run: yarn --cwd $PROJECT_DIR install
 
     - name: Build project
-      run:  |
-        pwd
-        ls
-        yarn build
+      run: yarn --cwd $PROJECT_DIR build
       env:
         REACT_APP_BASE_URL:  ${{ vars.BASE_API_URL }}
         REACT_APP_ANSWERS_KEY:  ${{ secrets.CHALLENGE_ANSWERS_KEY }}
 
     - name: Archive Production Artifact
       run: |
+        cd $PROJECT_DIR
         # Create a filename with date-time suffix
         ZIP_FILENAME=build-$(date +'%Y%m%d-%H%M%S').zip
         echo "ZIP_FILENAME=$ZIP_FILENAME" >> $GITHUB_ENV
@@ -54,7 +48,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
         port: 22
-        source: "*.zip"
+        source: "$PROJECT_DIR/*.zip"
         target: ${{ vars.FILE_DIRECTORY }}
 
     - name: SSH remote commands
