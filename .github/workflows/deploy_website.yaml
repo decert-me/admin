@@ -64,7 +64,7 @@ jobs:
         passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
         port: 22
         script: |
-          cd ${{ vars.FILE_DIRECTORY }}
+          cd ${{ vars.FILE_DIRECTORY }}/$PROJECT_DIR
           rm -rf build
           unzip -o ${{ env.ZIP_FILENAME }}
           # List zip files, sort by date (oldest first), and delete all but the 3 most recent
