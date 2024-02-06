@@ -41,6 +41,7 @@ jobs:
         echo "Creating zip $ZIP_FILENAME"
         # Replace 'build/' with the directory of your build artifacts
         zip -r $ZIP_FILENAME build/
+        ls
       shell: bash
 
     - name: SCP to server
@@ -51,7 +52,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
         port: 22
-        source: "$PROJECT_DIR/*.zip"
+        source: $PROJECT_DIR/*.zip
         target: ${{ vars.FILE_DIRECTORY }}
 
     - name: SSH remote commands
