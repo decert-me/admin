@@ -22,7 +22,7 @@ jobs:
         cache: 'yarn'
 
     - name: Install dependencies
-      run: yarn --cwd $PROJECT_DIR install
+      run: yarn --cwd $PROJECT_DIR install --frozen-lockfile
 
     - name: Build project
       run: yarn --cwd $PROJECT_DIR build
