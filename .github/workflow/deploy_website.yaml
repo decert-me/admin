@@ -1,0 +1,63 @@
+name: Build and Deploy website
+
+on:
+  # Manually triggered event
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Build project
+      run: yarn build
+      env:
+        REACT_APP_BASE_URL:  ${{ vars.BASE_API_URL }}
+        REACT_APP_ANSWERS_KEY:  ${{ secrets.CHALLENGE_ANSWERS_KEY }}
+
+    - name: Archive Production Artifact
+      run: |
+        # Create a filename with date-time suffix
+        ZIP_FILENAME=build-$(date +'%Y%m%d-%H%M%S').zip
+        echo "ZIP_FILENAME=$ZIP_FILENAME" >> $GITHUB_ENV
+        echo "Creating zip $ZIP_FILENAME"
+        # Replace 'build/' with the directory of your build artifacts
+        zip -r $ZIP_FILENAME build/
+      shell: bash
+
+    - name: SCP to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ vars.SERVER_HOST }}
+        username: ${{ vars.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+        port: 22
+        source: "*.zip"
+        target: ${{ vars.FILE_DIRECTORY }}
+
+    - name: SSH remote commands
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ vars.SERVER_HOST }}
+        username: ${{ vars.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+        port: 22
+        script: |
+          cd ${{ vars.FILE_DIRECTORY }}
+          rm -rf build
+          unzip -o ${{ env.ZIP_FILENAME }}
+          # List zip files, sort by date (oldest first), and delete all but the 3 most recent
+          ls -tp *.zip | grep -v '/$' | tail -n +3 | xargs -I {} rm -- {}
