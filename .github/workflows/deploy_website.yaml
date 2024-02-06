@@ -18,13 +18,20 @@ jobs:
         node-version: '18'
     
     - name: Change directory
-      run: cd frontend
+      run: |
+        cd frontend
+        pwd
 
     - name: Install dependencies
-      run: yarn install
+      run: |
+        pwd
+        yarn install
 
     - name: Build project
-      run: yarn build
+      run:  |
+        pwd
+        ls
+        yarn build
       env:
         REACT_APP_BASE_URL:  ${{ vars.BASE_API_URL }}
         REACT_APP_ANSWERS_KEY:  ${{ secrets.CHALLENGE_ANSWERS_KEY }}
