@@ -52,7 +52,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
         port: 22
-        source: $PROJECT_DIR/*.zip
+        source: "frontend/*.zip"
         target: ${{ vars.FILE_DIRECTORY }}
 
     - name: SSH remote commands
