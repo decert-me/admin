@@ -28,13 +28,16 @@ export default function AirdropList(params) {
         }
     };
 
-    const addressHref = (addr, {app}) => {
+    const addressHref = (addr, {app, params}) => {
         if (app === "decert") {
             const prefix = isDev ? "https://mumbai.polygonscan.com" : "https://polygonscan.com"
             return prefix + "/address/" + addr
         }else if (app === "decert_solana") {
             const suffix = isDev ? "?cluster=devnet" : "";
             return `https://solscan.io/account/${addr}${suffix}`
+        }else if (app === "decert_v2") {
+            const chain = CHAINS.filter(e => e.chainID == params.params.chain_id);
+            return `${chain[0]?.url}${addr}`
         }
     }
 
@@ -49,7 +52,8 @@ export default function AirdropList(params) {
         }
         if (app === "decert_v2") {
             const chain = CHAINS.filter(e => e.chainID == params.params.chain_id);
-            return `${chain[0].url}${hash}`
+            const base = chain[0]?.url.replace("address", "tx")
+            return `${base}${hash}`
         }
     }
 
