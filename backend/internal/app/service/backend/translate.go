@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"gorm.io/datatypes"
 	"path/filepath"
 	"strings"
 )
@@ -62,38 +63,40 @@ func SubmitTranslate(req request.SubmitTranslateRequest) (err error) {
 		return err
 	}
 	// 挑战处理
-	tokenID := filename
+	_id := filename
 	// 处理翻译文件
-	questTranslate, err := handleTranslate(tokenID, contentEn)
+	questTranslate, err := handleTranslate(_id, contentEn)
 	if err != nil {
 		return
 	}
+	tokenID := questTranslate.TokenId
 	// 保存翻译结果
-	questTranslate.TokenId = tokenID
 	questTranslate.Language = "en-US"
 	err = saveTranslateResult(tokenID, questTranslate)
 	if err != nil {
 		return err
 	}
-
 	// 处理翻译文件
-	questTranslate, err = handleTranslate(tokenID, contentCn)
+	questTranslate, err = handleTranslate(_id, contentCn)
 	if err != nil {
 		return
 	}
 	// 保存翻译结果
-	questTranslate.TokenId = tokenID
 	questTranslate.Language = "zh-CN"
 	err = saveTranslateResult(tokenID, questTranslate)
 	return err
 }
 
 // 处理翻译文件
-func handleTranslate(tokenID string, content string) (questTranslate model.QuestTranslated, err error) {
+func handleTranslate(_id string, content string) (questTranslate model.QuestTranslated, err error) {
 	// 获取数据库Quest数据
 	db := global.DB
 	var quest model.Quest
-	err = db.Where("token_id = ?", tokenID).First(&quest).Error
+	if utils.IsUUID(_id) {
+		err = db.Where("uuid = ?", _id).First(&quest).Error
+	} else {
+		err = db.Where("token_id = ?", _id).First(&quest).Error
+	}
 	if err != nil {
 		return questTranslate, err
 	}
@@ -105,14 +108,21 @@ func handleTranslate(tokenID string, content string) (questTranslate model.Quest
 	if err != nil {
 		return questTranslate, err
 	}
+	// 上传IPFS获取cid
+	err, questHash := IPFSUploadJSON(datatypes.JSON(questRes))
+	if err != nil {
+		return questTranslate, err
+	}
+
 	// 处理MetaData
-	metaDataRes, err := handleTranslateMetaData(string(quest.MetaData), content)
+	metaDataRes, err := handleTranslateMetaData(string(quest.MetaData), content, questHash)
 	if err != nil {
 		return questTranslate, err
 	}
 	questTranslate.QuestData = []byte(questRes)
 	questTranslate.MetaData = []byte(metaDataRes)
 	questTranslate.Answer = answerRes
+	questTranslate.TokenId = quest.TokenId
 	return questTranslate, nil
 }
 
@@ -184,7 +194,7 @@ func handleTranslateContent(contentEN string, contentTr string) (content string,
 }
 
 // handleTranslateMetaData
-func handleTranslateMetaData(metaDataEN string, contentTr string) (metaData string, err error) {
+func handleTranslateMetaData(metaDataEN string, contentTr string, questHash string) (metaData string, err error) {
 	metaData = metaDataEN
 	// 处理翻译内容
 	// title
@@ -199,6 +209,8 @@ func handleTranslateMetaData(metaDataEN string, contentTr string) (metaData stri
 	}
 	// challenge_title
 	metaData, err = sjson.Set(metaData, "attributes.challenge_title", gjson.Get(contentTr, "title").String())
+	// challenge_title
+	metaData, err = sjson.Set(metaData, "attributes.challenge_ipfs_url", "ipfs://"+questHash)
 	return metaData, nil
 }
 

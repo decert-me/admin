@@ -29,11 +29,6 @@ type UpdateQuestRequest struct {
 	Description  *string `json:"description"`
 }
 
-type UpdateRecommendRequest struct {
-	TokenId   int64  `json:"token_id" binding:"required"`
-	Recommend string `json:"recommend"` // 推荐
-}
-
 type TopQuestRequest struct {
 	ID  []uint  `json:"id"`
 	Top []*bool `json:"top"`

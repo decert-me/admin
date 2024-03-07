@@ -35,7 +35,7 @@ func GetCollectionList(r request.GetCollectionListRequest) (list []response.GetC
 	err = db.Scopes(Paginate(r.Page, r.PageSize)).Order("sort desc,add_ts desc").Find(&list).Error
 	for i := 0; i < len(list); i++ {
 		// 合辑下的挑战
-		var TokenIDList []int64
+		var TokenIDList []string
 		err := global.DB.Model(&model.CollectionRelate{}).Select("token_id").Where("collection_id = ?", list[i].ID).Find(&TokenIDList).Error
 		if err != nil {
 			continue
