@@ -24,5 +24,10 @@ export const CHAINS = [
         chainID: 421614,
         name: "arbitrum-sepolia",
         url: "https://sepolia.arbiscan.io/address/"
-    }
+    },
+    {
+        chainID: 42161,
+        name: "arbitrum",
+        url: "https://arbiscan.io/address/"
+    },
 ]
