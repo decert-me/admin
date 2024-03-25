@@ -45,6 +45,16 @@
 │   └── index.js                # index.js
 ```
 
+### 配置参数
+
+将以下配置添加到`./env`文件中，将'xxx'替换为设定值。
+```
+REACT_APP_IS_DEV=true     #   是否是开发环境
+REACT_APP_BASE_URL="http://192.168.1.10:8107"   #  后台接口
+REACT_APP_INFURA_API_KEY=""     #  infura key
+REACT_APP_ANSWERS_KEY=""    #   答案解码
+```
+
 ### 使用方法
 
 ```npm
