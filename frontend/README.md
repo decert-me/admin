@@ -54,11 +54,7 @@ REACT_APP_ANSWERS_KEY=""    #   答案解码
 
 ### 使用方法
 
-```npm
-git clone https://github.com/Oaciqihz/react-dashboard.git
-
-cd react-dashboard
-
+```bash
 // 安装依赖
 yarn
 
