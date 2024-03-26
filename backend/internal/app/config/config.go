@@ -5,7 +5,6 @@ type Server struct {
 	Redis     Redis     `mapstructure:"redis" json:"redis" yaml:"redis"`
 	Casbin    Casbin    `mapstructure:"casbin" json:"casbin" yaml:"casbin"`
 	System    System    `mapstructure:"system" json:"system" yaml:"system"`
-	Captcha   Captcha   `mapstructure:"captcha" json:"captcha" yaml:"captcha"`
 	Pgsql     Pgsql     `mapstructure:"pgsql" json:"pgsql" yaml:"pgsql"`
 	JWT       JWT       `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 	IPFS      []IPFS    `mapstructure:"ipfs" json:"ipfs" yaml:"ipfs"`
