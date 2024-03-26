@@ -19,5 +19,15 @@ export const CHAINS = [
         chainID: 11155420,
         name: 'Optimism Sepolia',
         url: "https://optimism-sepolia.blockscout.com/address/"
-    }
+    },
+    {
+        chainID: 421614,
+        name: "arbitrum-sepolia",
+        url: "https://sepolia.arbiscan.io/address/"
+    },
+    {
+        chainID: 42161,
+        name: "arbitrum",
+        url: "https://arbiscan.io/address/"
+    },
 ]

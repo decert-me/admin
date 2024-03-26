@@ -3,10 +3,6 @@
 
 基于 `React` 生态系统搭建的后台管理系统模板
 
-如果觉得不错或者对你有些许的帮助，欢迎 `star`，或者你有更好的实现方式、有趣的 `idea`，也欢迎留言交流 
-
-以下为项目基本信息↓
-
 ### 技术栈
 
 `React@18.2.0 + React-Router@6.14.2 + Antd@5.8.2`
@@ -19,9 +15,10 @@
 
 ### 基本功能
 
-- [x] 登陆/注销功能
-- [x] axios 封装
-- [x] 简单权限管理
+- [x] 教程管理
+- [x] 挑战管理
+- [x] 集合管理
+- [x] 权限管理
 
 ### 项目结构
 
@@ -43,6 +40,16 @@
 │   ├── views                   # UI 页面
 │   ├── APP.js                  # App.js
 │   └── index.js                # index.js
+```
+
+### 配置参数
+
+将以下配置添加到`./env`文件中，将'xxx'替换为设定值。
+```
+REACT_APP_IS_DEV=true     #   是否是开发环境
+REACT_APP_BASE_URL="http://192.168.1.10:8107"   #  后台接口
+REACT_APP_INFURA_API_KEY=""     #  infura key
+REACT_APP_ANSWERS_KEY=""    #   答案解码
 ```
 
 ### 使用方法
