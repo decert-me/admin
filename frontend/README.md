@@ -49,7 +49,7 @@
 REACT_APP_IS_DEV=true     #   是否是开发环境
 REACT_APP_BASE_URL="http://192.168.1.10:8107"   #  后台接口
 REACT_APP_INFURA_API_KEY=""     #  infura key
-REACT_APP_ANSWERS_KEY=""    #   答案解码
+REACT_APP_ANSWERS_KEY=""    #   挑战答案解密key
 ```
 
 ### 使用方法
