@@ -2,8 +2,6 @@ package upload
 
 import (
 	"mime/multipart"
-
-	"backend/internal/app/global"
 )
 
 // OSS 对象存储接口
@@ -18,10 +16,5 @@ type OSS interface {
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [ccfish86](https://github.com/ccfish86)
 func NewOss() OSS {
-	switch global.CONFIG.System.OssType {
-	case "local":
-		return &Local{}
-	default:
-		return &Local{}
-	}
+	return &Local{}
 }

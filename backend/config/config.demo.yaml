@@ -2,7 +2,6 @@
 system:
   env: develop
   addr: 9092
-  use-captcha: true
 
 # pgsql configuration
 pgsql:
