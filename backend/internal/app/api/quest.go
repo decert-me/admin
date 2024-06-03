@@ -92,3 +92,12 @@ func DeleteQuest(c *gin.Context) {
 		response.OkWithMessage("删除成功", c)
 	}
 }
+
+// GetQuestStatistics 获取挑战结果详情列表
+func GetQuestStatistics(c *gin.Context) {
+	if list, err := backend.GetQuestStatistics(c.Param("id")); err != nil {
+		response.FailWithMessage("获取失败："+err.Error(), c)
+	} else {
+		response.OkWithData(list, c)
+	}
+}

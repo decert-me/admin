@@ -57,6 +57,8 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 		global.DB.Model(&model.UserChallenges{}).Where("token_id = ?", res[i].TokenId).Count(&res[i].ClaimNum)
 		// 统计挑战人次
 		global.DB.Model(&model.UserChallengeLog{}).Where("token_id = ?", res[i].TokenId).Count(&res[i].ChallengeNum)
+		// 统计挑战人数
+		global.DB.Model(&model.UserChallengeLog{}).Where("token_id = ?", res[i].TokenId).Group("address").Count(&res[i].ChallengeUserNum)
 		// 获取挑战合辑
 		global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", res[i].TokenId).Find(&res[i].CollectionID)
 	}
@@ -288,4 +290,84 @@ func GetQuestCollectionAddList(req request.GetQuestCollectionAddListRequest) (re
 		global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", res[i].TokenId).Find(&res[i].CollectionID)
 	}
 	return
+}
+
+// GetQuestStatistics 获取挑战结果详情列表
+func GetQuestStatistics(tokenId string) (res []response.GetQuestStatisticsRes, err error) {
+	// 查询挑战
+	var quest model.Quest
+	err = global.DB.Model(&model.Quest{}).Where("token_id", tokenId).First(&quest).Error
+	if err != nil {
+		return res, err
+	}
+	// 判断是否是开放题
+	if !IsOpenQuest(gjson.Get(string(quest.QuestData), "questions").String()) {
+		rankListSQL := `
+		WITH ranked AS (
+		 SELECT address,ucl.token_id, created_at,ROW_NUMBER() OVER (PARTITION BY address ORDER BY created_at ASC) as rn,
+		 (SELECT bool_or(pass) FROM user_challenge_log WHERE address = ucl.address AND token_id = ucl.token_id) as pass,
+		 (SELECT max(user_score) FROM user_challenge_log WHERE address = ucl.address AND token_id = ucl.token_id) as highest_score,
+		 (SELECT claimed FROM user_challenges WHERE address = ucl.address AND token_id = ucl.token_id) as claimed,
+		 EXISTS(SELECT 1 FROM zcloak_card WHERE address = ucl.address AND quest_id = quest.id) as has_did
+	     FROM user_challenge_log ucl
+			 LEFT JOIN quest ON quest.token_id=ucl.token_id
+	     WHERE ucl.token_id = ? AND address !='' AND 			deleted_at IS NULL
+		)
+		SELECT ROW_NUMBER() OVER (ORDER BY created_at ASC) as rank,ranked.address,pass,ranked.created_at as finish_time,highest_score,	COALESCE(claimed,false) as claimed,has_did
+		FROM ranked
+		LEFT JOIN users ON ranked.address=users.address
+		WHERE rn=1 ORDER BY created_at ASC;
+		`
+		err = global.DB.Raw(rankListSQL, tokenId).Scan(&res).Error
+		if err != nil {
+			return res, err
+		}
+		return res, err
+	}
+	// 开放题
+	rankListSQL := `
+		WITH all_open_quest AS(
+			SELECT address,token_id,created_at
+			FROM user_open_quest
+			WHERE token_id = ? AND pass=true
+			UNION
+			SELECT address,token_id,created_at
+			FROM user_challenge_log
+			WHERE token_id = ? AND pass=true AND is_open_quest=false
+		),ranked_open_quest AS (
+		 SELECT address,token_id,created_at,ROW_NUMBER() OVER (PARTITION BY address ORDER BY created_at ASC) as rn 
+		 FROM all_open_quest
+		 ),
+		ranked_with_rank AS (
+		 SELECT ROW_NUMBER() OVER (ORDER BY created_at ASC) as rank,address,token_id,created_at as finish_time 
+		 FROM ranked_open_quest 
+		 WHERE rn=1 
+		)
+		SELECT ranked_with_rank.*,
+		(SELECT bool_or(pass) FROM user_challenge_log WHERE address = ucl.address AND token_id = ucl.token_id) as pass,
+		(SELECT MAX(highest_score) 
+		FROM (
+			(SELECT max(user_score) as highest_score 
+			 FROM user_challenge_log 
+			 WHERE address = ucl.address 
+				 AND token_id = ucl.token_id) 
+			UNION ALL 
+			(SELECT max(user_score) as highest_score 
+			 FROM user_open_quest 
+			 WHERE address = ucl.address 
+				 AND token_id = ucl.token_id)
+		) AS combined_scores) as highest_score,
+		 COALESCE((SELECT claimed FROM user_challenges WHERE address = ucl.address AND token_id = ucl.token_id),false) as claimed,
+		 EXISTS(SELECT 1 FROM zcloak_card WHERE address = ucl.address AND quest_id = quest.id) as has_did
+		FROM ranked_with_rank
+		LEFT JOIN user_challenge_log ucl ON ucl.token_id=ranked_with_rank.token_id
+		LEFT JOIN quest ON quest.token_id=ucl.token_id
+		ORDER BY rank ASC 
+		LIMIT 10;
+	`
+	err = global.DB.Raw(rankListSQL, tokenId, tokenId).Scan(&res).Error
+	if err != nil {
+		return res, err
+	}
+	return res, err
 }

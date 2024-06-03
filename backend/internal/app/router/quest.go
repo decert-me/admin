@@ -16,5 +16,6 @@ func InitQuestRouter(Router *gin.RouterGroup) {
 		routersWithAuth.POST("update", api.UpdateQuest)                                  // 更新挑战
 		routersWithAuth.POST("delete", api.DeleteQuest)                                  // 删除挑战
 		routersWithAuth.POST("getQuestCollectionAddList", api.GetQuestCollectionAddList) // 获取待添加到合辑挑战列表
+		routersWithAuth.GET("/statistics/:id", api.GetQuestStatistics)                   // 获取挑战结果详情列表
 	}
 }
