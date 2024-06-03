@@ -58,7 +58,7 @@ export default function UserTagsPage(params) {
           <Button
             type="link"
             className="p0"
-            //   onClick={() => exportChallenge(quest)}
+              onClick={() => navigateTo(`/dashboard/user/tag/adduser/${tag.id}`)}
           >
             添加
           </Button>

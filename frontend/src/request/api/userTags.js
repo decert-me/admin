@@ -58,3 +58,21 @@ import serviceAxios from "../index";
         })
     }
 
+    // 动态搜索地址
+    export const getUsersList = (data) => {
+        return serviceAxios({
+            url: `/users/getUsersList`,
+            method: "post",
+            data
+        })
+    }
+
+    // /v1/tag/tagUserUpdate
+    export const tagUserUpdate = (data) => {
+        return serviceAxios({
+            url: `/tag/tagUserUpdate`,
+            method: "post",
+            data
+        })
+    }
+
