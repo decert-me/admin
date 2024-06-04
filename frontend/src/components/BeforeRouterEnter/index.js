@@ -35,6 +35,7 @@ import UserListPage from '../../views/User/UserListPage';
 import UserTagInfoPage from '../../views/User/UserTagInfoPage';
 import UserTagAddPage from '../../views/User/UserTagAddPage';
 import UserTagModify from '../../views/User/UserTagModify';
+import ChallengerListPage from '../../views/Challenge/ChallengerListPage';
 
 
 
@@ -140,6 +141,10 @@ export default function BeforeRouterEnter(params) {
                 <Route 
                 path="challenge/openquest/judg/:id" 
                 element={<ChallengeJudgPage />} 
+                />
+                <Route 
+                path="challenge/challenge/list" 
+                element={<ChallengerListPage />} 
                 />
 
 

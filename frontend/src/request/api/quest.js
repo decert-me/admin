@@ -67,6 +67,15 @@ import serviceAxios from "../index";
         })
     }
 
+    //     获取挑战者列表
+    export const getChallengeUserStatistics = (data) => {
+        return serviceAxios({
+            url: `/statistics/getChallengeUserStatistics`,
+            method: "post",
+            data
+        })
+    }
+
     // 更改挑战上架状态
     export const updateQuestStatus = (data) => {
         return serviceAxios({

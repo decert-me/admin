@@ -2,7 +2,7 @@ import {
     MenuOutlined,
     BookOutlined,
     FolderOutlined,
-    HomeOutlined,
+    LineChartOutlined,
     UserOutlined,
     TagsOutlined,
     ProfileOutlined,
@@ -47,6 +47,11 @@ export const menu = [
                 label: "开放题评分",
                 key: "challenge/openquest",
                 icon: <AuditOutlined />,
+            },
+            {
+                label: "挑战者统计",
+                key: "challenge/challenge/list",
+                icon: <LineChartOutlined />,
             }
         ]
     },

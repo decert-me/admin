@@ -17,7 +17,7 @@ export default function ChallengeAnswerListPage() {
   const columns = [
     {
       title: "挑战名称",
-      // dataIndex: "user_id",
+      dataIndex: "title",
     },
     {
       title: "挑战者地址",
@@ -35,18 +35,22 @@ export default function ChallengeAnswerListPage() {
     {
       title: "领取NFT",
       dataIndex: "claimed",
+      render: (claimed) => (
+        claimed ? "是" : "否"
+      )
     },
     {
       title: "得分/及格分",
-      dataIndex: "pass",
+      dataIndex: "score_detail",
     },
     {
       title: "批注",
-      dataIndex: "tags",
+      dataIndex: "annotation",
+      ellipsis: true
     },
     {
         title: "挑战时间",
-        dataIndex: "created_at",
+        dataIndex: "challenge_time",
         render: (time) => (
           time.indexOf("0001-01-01T") === -1 ?
           time.replace("T", " ").split(".")[0].split("+")[0]
@@ -143,12 +147,12 @@ export default function ChallengeAnswerListPage() {
       <Table
         columns={columns} 
         dataSource={data}         
-        // pagination={{
-        //     current: pageConfig.page, 
-        //     total: pageConfig.total, 
-        //     pageSize: pageConfig.pageSize, 
-        //     onChange: (page) => getList(page)
-        // }} 
+        pagination={{
+            current: pageConfig.page, 
+            total: pageConfig.total, 
+            pageSize: pageConfig.pageSize, 
+            onChange: (page) => getList(page)
+        }} 
       />
     </div>
   );
