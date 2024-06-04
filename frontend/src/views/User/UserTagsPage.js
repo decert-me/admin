@@ -1,17 +1,16 @@
 import { Button, Form, Input, Space, Table, message } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import "./index.scss";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getTagList, tagDeleteBatch } from "../../request/api/userTags";
+import "./index.scss";
 
 export default function UserTagsPage(params) {
 
   const navigateTo = useNavigate();
-  const location = useLocation();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [data, setData] = useState([]);
-  let [search_key, setSearch_key] = useState(""); //  搜索
+  const [form, setForm] = useState({}); //  搜索
   let [pageConfig, setPageConfig] = useState({
     page: 0, pageSize: 10, total: 0
 });
@@ -90,13 +89,17 @@ export default function UserTagsPage(params) {
     })
   }
 
+  function onFinish(params) {
+    setForm({...params});
+  }
+
   async function getList(page) {
     if (page) {
       pageConfig.page = page;
       setPageConfig({ ...pageConfig });
     }
     // 获取教程列表
-    let res = await getTagList({ ...pageConfig, search_key });
+    let res = await getTagList({ ...pageConfig, search_val: form.tag });
 
     if (res.code === 0) {
       const list = res.data.list || [];
@@ -125,13 +128,8 @@ export default function UserTagsPage(params) {
       total: 0,
     };
     setPageConfig({ ...pageConfig });
-    // if (location.search) {
-    //   let serch = new URLSearchParams(location.search);
-    //   search_key = serch.get("tokenId");
-    //   setSearch_key(search_key);
-    // }
     init();
-  }, [location]);
+  }, [form]);
 
   return (
     <div>
@@ -150,7 +148,7 @@ export default function UserTagsPage(params) {
           <Form
             name="horizontal_login"
             layout="inline"
-            //   onFinish={onFinish}
+              onFinish={onFinish}
           >
             <Form.Item label="标签" name="tag">
               <Input />

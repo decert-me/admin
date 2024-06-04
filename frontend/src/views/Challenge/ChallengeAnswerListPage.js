@@ -2,16 +2,19 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Button, Form, Input, Table, message } from "antd";
 import { getQuestAnswerList } from "../../request/api/quest";
+import { useUpdateEffect } from "ahooks";
 
 export default function ChallengeAnswerListPage() {
-
   const location = useLocation();
   const navigateTo = useNavigate();
+  const [formProps] = Form.useForm();
   const { tokenId } = useParams();
   const [data, setData] = useState([]);
-  const [search_key, setSearch_key] = useState(""); //  搜索
+  const [form, setForm] = useState({tokenId: tokenId}); //  搜索
   let [pageConfig, setPageConfig] = useState({
-      page: 0, pageSize: 10, total: 0
+    page: 0,
+    pageSize: 10,
+    total: 0,
   });
 
   const columns = [
@@ -25,19 +28,17 @@ export default function ChallengeAnswerListPage() {
     },
     {
       title: "昵称",
-      dataIndex: "nickname"
+      dataIndex: "nickname",
     },
     {
       title: "标签",
       dataIndex: "tags",
-      ellipsis: true
+      ellipsis: true,
     },
     {
       title: "领取NFT",
       dataIndex: "claimed",
-      render: (claimed) => (
-        claimed ? "是" : "否"
-      )
+      render: (claimed) => (claimed ? "是" : "否"),
     },
     {
       title: "得分/及格分",
@@ -46,25 +47,28 @@ export default function ChallengeAnswerListPage() {
     {
       title: "批注",
       dataIndex: "annotation",
-      ellipsis: true
+      ellipsis: true,
     },
     {
-        title: "挑战时间",
-        dataIndex: "challenge_time",
-        render: (time) => (
-          time.indexOf("0001-01-01T") === -1 ?
-          time.replace("T", " ").split(".")[0].split("+")[0]
-          :"-"
-      )
+      title: "挑战时间",
+      dataIndex: "challenge_time",
+      render: (time) =>
+        time.indexOf("0001-01-01T") === -1
+          ? time.replace("T", " ").split(".")[0].split("+")[0]
+          : "-",
     },
   ];
 
-  function init() {
-    getQuestAnswerList({ id: tokenId }).then((res) => {
-      const list = res.data || [];
-      // setData([...list]);
-      console.log(list);
-    });
+  // function init() {
+  //   getQuestAnswerList({ id: tokenId }).then((res) => {
+  //     const list = res.data || [];
+  //     // setData([...list]);
+  //     console.log(list);
+  //   });
+  // }
+
+  function onFinish(params) {
+    setForm({ ...params });
   }
 
   async function getList(page) {
@@ -73,11 +77,11 @@ export default function ChallengeAnswerListPage() {
       setPageConfig({ ...pageConfig });
     }
     // 获取教程列表
-    let res = await getQuestAnswerList({ 
-      ...pageConfig, 
-      "search_quest": tokenId,
-      "search_tag": "",
-      "search_address": "",
+    let res = await getQuestAnswerList({
+      ...pageConfig,
+      search_quest: form?.tokenId,
+      search_tag: form?.tag,
+      search_address: form?.addr,
       // "pass": true,
       // "claimed": false
     });
@@ -109,13 +113,18 @@ export default function ChallengeAnswerListPage() {
       total: 0,
     };
     setPageConfig({ ...pageConfig });
-    // if (location.search) {
-    //   let serch = new URLSearchParams(location.search);
-    //   search_key = serch.get("tokenId");
-    //   setSearch_key(search_key);
-    // }
     init();
-}, [location]);
+  }, [form]);
+
+  useEffect(() => {
+    formProps.setFieldValue("tokenId", tokenId);
+  }, []);
+
+  useUpdateEffect(() => {
+    const obj = { tokenId: tokenId || "" };
+    formProps.setFieldValue("tokenId", tokenId);
+    setForm({ ...obj });
+  }, [tokenId]);
 
   return (
     <div className="challenge" key={location.pathname}>
@@ -125,15 +134,16 @@ export default function ChallengeAnswerListPage() {
       <Form
         name="horizontal_login"
         layout="inline"
-        //   onFinish={onFinish}
+        form={formProps}
+        onFinish={onFinish}
       >
-        <Form.Item label="挑战" name="password">
+        <Form.Item label="挑战" name="tokenId">
           <Input />
         </Form.Item>
-        <Form.Item label="标签" name="username">
+        <Form.Item label="标签" name="tag">
           <Input />
         </Form.Item>
-        <Form.Item label="挑战者地址" name="password">
+        <Form.Item label="挑战者地址" name="addr">
           <Input />
         </Form.Item>
         <Form.Item shouldUpdate>
@@ -145,14 +155,14 @@ export default function ChallengeAnswerListPage() {
         </Form.Item>
       </Form>
       <Table
-        columns={columns} 
-        dataSource={data}         
+        columns={columns}
+        dataSource={data}
         pagination={{
-            current: pageConfig.page, 
-            total: pageConfig.total, 
-            pageSize: pageConfig.pageSize, 
-            onChange: (page) => getList(page)
-        }} 
+          current: pageConfig.page,
+          total: pageConfig.total,
+          pageSize: pageConfig.pageSize,
+          onChange: (page) => getList(page),
+        }}
       />
     </div>
   );

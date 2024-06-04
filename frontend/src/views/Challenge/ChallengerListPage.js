@@ -1,15 +1,12 @@
 import { Button, Form, Input, Modal, Table, message } from "antd";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { getChallengeUserStatistics } from "../../request/api/quest";
 import ChallengerModal from "./ChallengerModal";
 
 export default function ChallengerListPage() {
 
-    const navigateTo = useNavigate();
-    const location = useLocation();
     const [data, setData] = useState([]);
-    const [search_key, setSearch_key] = useState(""); //  搜索
+    const [form, setForm] = useState({}); //  搜索
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
     });
@@ -60,13 +57,17 @@ export default function ChallengerListPage() {
         });
     };
 
+    function onFinish(params) {
+        setForm({...params});
+    }
+
     async function getList(page) {
         if (page) {
           pageConfig.page = page;
           setPageConfig({ ...pageConfig });
         }
         // 获取教程列表
-        let res = await getChallengeUserStatistics({ ...pageConfig, search_address: "", search_tag: "" });
+        let res = await getChallengeUserStatistics({ ...pageConfig, search_address: form?.challenger, search_tag: form?.tag });
     
         if (res.code === 0) {
           const list = res.data.list || [];
@@ -88,7 +89,6 @@ export default function ChallengerListPage() {
         getList();
     }
 
-    // getTagUserList
     useEffect(() => {
         pageConfig = {
           page: 0,
@@ -96,14 +96,8 @@ export default function ChallengerListPage() {
           total: 0,
         };
         setPageConfig({ ...pageConfig });
-        // if (location.search) {
-        //   let serch = new URLSearchParams(location.search);
-        //   search_key = serch.get("tokenId");
-        //   setSearch_key(search_key);
-        // }
         init();
-    }, [location]);
-
+    }, [form]);
     
     return (
         <div>
@@ -115,12 +109,12 @@ export default function ChallengerListPage() {
                     <Form
                         name="horizontal_login"
                         layout="inline"
-                        //   onFinish={onFinish}
+                        onFinish={onFinish}
                     >
                         <Form.Item label="标签" name="tag">
                             <Input />
                         </Form.Item>
-                        <Form.Item label="挑战者" name="tag">
+                        <Form.Item label="挑战者" name="challenger">
                             <Input />
                         </Form.Item>
                         <Form.Item shouldUpdate>

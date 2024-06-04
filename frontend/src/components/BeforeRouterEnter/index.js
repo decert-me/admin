@@ -123,6 +123,10 @@ export default function BeforeRouterEnter(params) {
                 element={<ChallengeAnswerListPage />} 
                 />
                 <Route 
+                path="challenge/answer/list" 
+                element={<ChallengeAnswerListPage />} 
+                />
+                <Route 
                 path="challenge/compilation"
                 element={<ChallengeCompilationPage />} 
                 />
@@ -167,6 +171,10 @@ export default function BeforeRouterEnter(params) {
                 {/* 用户管理 */}
                 <Route 
                 path="user/list/:tagid" 
+                element={<UserListPage />} 
+                />
+                <Route 
+                path="user/list" 
                 element={<UserListPage />} 
                 />
                 <Route 

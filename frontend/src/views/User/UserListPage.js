@@ -2,6 +2,7 @@ import { Button, Form, Input, Space, Table, message } from "antd";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { getUsersList } from "../../request/api/userTags";
+import { useUpdateEffect } from "ahooks";
 
 
 
@@ -10,8 +11,10 @@ export default function UserListPage(params) {
     const {tagid} = useParams();
     const navigateTo = useNavigate();
     const location = useLocation();
+    const [formProps] = Form.useForm();
     const [data, setData] = useState([]);
     const [search_key, setSearch_key] = useState(""); //  搜索
+    const [form, setForm] = useState({tag: tagid}); //  搜索
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
     });
@@ -60,13 +63,17 @@ export default function UserListPage(params) {
         },
     ];
 
+    function onFinish(params) {
+        setForm({...params});
+    }
+
     async function getList(page) {
         if (page) {
           pageConfig.page = page;
           setPageConfig({ ...pageConfig });
         }
         // 获取教程列表
-        let res = await getUsersList({ ...pageConfig, search_address: search_key, search_tag: tagid });
+        let res = await getUsersList({ ...pageConfig, search_address: form?.challenger, search_tag: form?.tag });
     
         if (res.code === 0) {
           const list = res.data.list || [];
@@ -96,13 +103,18 @@ export default function UserListPage(params) {
           total: 0,
         };
         setPageConfig({ ...pageConfig });
-        // if (location.search) {
-        //   let serch = new URLSearchParams(location.search);
-        //   search_key = serch.get("tokenId");
-        //   setSearch_key(search_key);
-        // }
         init();
-    }, [location]);
+    }, [form]);
+
+    useEffect(() => {
+        formProps.setFieldValue("tag", tagid);
+    },[])
+
+    useUpdateEffect(() => {
+        const obj = {tag: tagid||""};
+        formProps.setFieldValue("tag", tagid);
+        setForm({...obj})
+    },[tagid])
 
     return (
         <div>
@@ -114,12 +126,13 @@ export default function UserListPage(params) {
                     <Form
                         name="horizontal_login"
                         layout="inline"
-                        //   onFinish={onFinish}
+                        form={formProps}
+                        onFinish={onFinish}
                     >
                         <Form.Item label="标签" name="tag">
                             <Input />
                         </Form.Item>
-                        <Form.Item label="挑战者" name="tag">
+                        <Form.Item label="挑战者" name="challenger">
                             <Input />
                         </Form.Item>
                         <Form.Item shouldUpdate>
