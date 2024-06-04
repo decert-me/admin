@@ -29,6 +29,7 @@ export default function UserTagsPage(params) {
     {
       title: "标签名",
       dataIndex: "name",
+      ellipsis: {showTitle: false}
     },
     {
       title: "用户数量",
@@ -51,7 +52,7 @@ export default function UserTagsPage(params) {
           <Button
             type="link"
             className="p0"
-            //   onClick={() => downloadChallenge(quest)}
+              onClick={() => navigateTo(`/dashboard/user/list/${tag.name}`)}
           >
             查看
           </Button>
@@ -164,7 +165,17 @@ export default function UserTagsPage(params) {
           </Form>
         </div>
       </div>
-      <Table rowSelection={rowSelection} columns={columns} dataSource={data} />
+      <Table 
+        rowSelection={rowSelection} 
+        columns={columns} 
+        dataSource={data} 
+        pagination={{
+            current: pageConfig.page, 
+            total: pageConfig.total, 
+            pageSize: pageConfig.pageSize, 
+            onChange: (page) => getList(page)
+        }} 
+      />
     </div>
   );
 }

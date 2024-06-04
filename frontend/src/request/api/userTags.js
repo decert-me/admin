@@ -49,6 +49,15 @@ import serviceAxios from "../index";
         })
     }
 
+    // 批量更新用户标签
+    export const updateUsersInfo = (data) => {
+        return serviceAxios({
+            url: `/users/updateUsersInfo`,
+            method: "post",
+            data
+        })
+    }
+
     // 删除用户标签
     export const tagDeleteBatch = (data) => {
         return serviceAxios({
@@ -67,7 +76,7 @@ import serviceAxios from "../index";
         })
     }
 
-    // /v1/tag/tagUserUpdate
+    // 用户添加标签
     export const tagUserUpdate = (data) => {
         return serviceAxios({
             url: `/tag/tagUserUpdate`,
@@ -76,3 +85,11 @@ import serviceAxios from "../index";
         })
     }
 
+    // 获取用户所有标签
+    export const getUsersInfo = (data) => {
+        return serviceAxios({
+            url: `/users/getUsersInfo`,
+            method: "post",
+            data
+        })
+    }
