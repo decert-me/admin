@@ -18,7 +18,7 @@ export default function UserTagModify() {
         setLoading(true);
         updateUsersInfo({
             "user_id": 1,
-            "nickname": nickname, 
+            "name": nickname, 
             "tag_ids": userTags
         })
         .then(res => {
@@ -78,7 +78,7 @@ export default function UserTagModify() {
             })
         ]).then(() => {
             setUserInfo({...res.data.list[0]});
-            setNickName(res.data.list[0]?.nickname || "")
+            setNickName(res.data.list[0]?.name || "")
         })
     }
 

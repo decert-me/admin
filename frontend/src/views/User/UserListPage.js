@@ -30,7 +30,7 @@ export default function UserListPage(params) {
         },
         {
           title: "昵称",
-          dataIndex: "nickname"
+          dataIndex: "name"
         },
         {
           title: "标签",

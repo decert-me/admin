@@ -29,7 +29,7 @@ export default function UserTagAddPage(params) {
         await tagUserUpdate({
             tag_id: Number(id),
             user_id: Number(searchItem.user_id),
-            nickname: formItem.name
+            name: formItem.name
         })
         .then(res => {
             message.success(res.msg);
@@ -83,7 +83,7 @@ export default function UserTagAddPage(params) {
     }
 
     useUpdateEffect(() => {
-        const {nickname} = searchItem;
+        const { name: nickname} = searchItem;
         const {addr, name} = formItem;
         const obj = {addr, name: nickname || name}
         setFormItem({...obj})
