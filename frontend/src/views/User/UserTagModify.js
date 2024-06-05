@@ -12,12 +12,13 @@ export default function UserTagModify() {
     const [userTags, setUserTags] = useState([]);
     const [userInfo, setUserInfo] = useState();
     const [nickname, setNickName] = useState("");
+    const [userid, setUserId] = useState("");
     const [loading, setLoading] = useState(false);
 
     function onFinish() {
         setLoading(true);
         updateUsersInfo({
-            "user_id": 1,
+            "user_id": userid,
             "name": nickname, 
             "tag_ids": userTags
         })
@@ -52,6 +53,7 @@ export default function UserTagModify() {
         if (res.code !== 0 || res.data.list.length === 0) {
             return
         }
+        setUserId(res.data.list[0].user_id);
         Promise.all([
             // 获取user tags
             getUsersInfo({user_id: res.data.list[0].user_id})
