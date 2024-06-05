@@ -26,7 +26,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 			quest.title,
 			users.address,
 			users.name,
-			string_agg ( DISTINCT tag.NAME, ',' ) AS tag,
+			string_agg ( DISTINCT tag.NAME, ',' ) AS tags,
 			CASE 
 			WHEN MAX(CAST(user_challenges.claimed AS integer))=1 THEN true
 			WHEN MAX(CAST(zcloak_card.id AS integer))>0 THEN true
@@ -248,6 +248,9 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 			results[i].SuccessNum += 1
 		}
 		results[i].NotClaimNum = results[i].SuccessNum - results[i].ClaimNum
+		if results[i].NotClaimNum < 0 {
+			results[i].NotClaimNum = 0
+		}
 	}
 	return results, total, nil
 }
