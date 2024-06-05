@@ -25,7 +25,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 			quest.ID AS quest_id,
 			quest.title,
 			users.address,
-			users.nickname,
+			users.name,
 			string_agg ( DISTINCT tag.NAME, ',' ) AS tag,
 			CASE 
 			WHEN MAX(CAST(user_challenges.claimed AS integer))=1 THEN true
@@ -66,7 +66,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 	if len(whereList) > 0 {
 		dataSQL += " AND " + strings.Join(whereList, " AND ")
 	}
-	dataSQL += " GROUP BY users.address,quest.ID,users.nickname) as tt"
+	dataSQL += " GROUP BY users.address,quest.ID,users.name) as tt"
 	// 分页SQL
 	paginateSQL := " LIMIT ? OFFSET ?"
 	// 过滤条件
@@ -167,7 +167,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []response.GetChallengeUserStatisticsRes, total int64, err error) {
 	var results []response.GetChallengeUserStatisticsRes
 	db := global.DB.Table("users").
-		Select("users.id as user_id, users.address, users.nickname,string_agg(tag.name, ',') as tags").
+		Select("users.id as user_id, users.address, users.name,string_agg(tag.name, ',') as tags").
 		Joins("LEFT JOIN users_tag ON users_tag.user_id = users.id").
 		Joins("LEFT JOIN tag ON tag.id = users_tag.tag_id").
 		Group("users.id")
