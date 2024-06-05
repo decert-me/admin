@@ -11,7 +11,7 @@ type GetUsersInfoReq struct {
 }
 
 type UpdateUsersInfoReq struct {
-	UserID   uint    `json:"user_id"`
-	NickName *string `gorm:"column:nickname;type:varchar(200);default:''" json:"nickname" form:"nickname"`
-	TagIds   []uint  `gorm:"-" json:"tag_ids"`
+	UserID uint    `json:"user_id"`
+	Name   *string `gorm:"column:name;type:varchar(200);comment:用户名称;default:''" json:"name" form:"name"`
+	TagIds []uint  `gorm:"-" json:"tag_ids"`
 }

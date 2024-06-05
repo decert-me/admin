@@ -95,7 +95,7 @@ func GetTagUserList(r request.GetTagUserListReq) (label []response.GetTagUserLis
 	if err != nil {
 		return
 	}
-	db = db.Select("users.id, to_timestamp(users.creation_timestamp) as created_at, users.nickname, users.address")
+	db = db.Select("users.id, to_timestamp(users.creation_timestamp) as created_at, users.name, users.address")
 
 	// 执行查询
 	err = db.Scopes(Paginate(r.Page, r.PageSize)).Find(&label).Error
@@ -139,8 +139,8 @@ func TagUserUpdate(r request.TagUserUpdateReq) error {
 	}
 
 	// Update user's nickname if provided
-	if r.NickName != nil {
-		if err := tx.Model(&model.Users{}).Where("id = ?", r.UserID).Update("nickname", *r.NickName).Error; err != nil {
+	if r.Name != nil {
+		if err := tx.Model(&model.Users{}).Where("id = ?", r.UserID).Update("name", *r.Name).Error; err != nil {
 			tx.Rollback()
 			return err
 		}

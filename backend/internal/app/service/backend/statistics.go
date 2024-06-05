@@ -51,8 +51,8 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 	var valueList []interface{}
 	// 应用搜索条件
 	if r.SearchQuest != "" {
-		whereList = append(whereList, fmt.Sprintf("quest.title LIKE ?"))
-		valueList = append(valueList, "%"+r.SearchQuest+"%")
+		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
 	}
 	if r.SearchTag != "" {
 		whereList = append(whereList, fmt.Sprintf("tag.name LIKE ?"))
@@ -62,8 +62,9 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		whereList = append(whereList, fmt.Sprintf("users.address LIKE ?"))
 		valueList = append(valueList, "%"+r.SearchAddress+"%")
 	}
+	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null"
 	if len(whereList) > 0 {
-		dataSQL += " WHERE quest.token_id is not null AND  users.address is not null AND " + strings.Join(whereList, " AND ")
+		dataSQL += " AND " + strings.Join(whereList, " AND ")
 	}
 	dataSQL += " GROUP BY users.address,quest.ID,users.nickname) as tt"
 	// 分页SQL

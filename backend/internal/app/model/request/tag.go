@@ -15,9 +15,9 @@ type GetTagUserListReq struct {
 }
 
 type TagUserUpdateReq struct {
-	TagID    uint    `form:"tag_id" json:"tag_id"  binding:"required"`
-	UserID   uint    `json:"user_id"  binding:"required"`
-	NickName *string `json:"nickname" form:"nickname"`
+	TagID  uint    `form:"tag_id" json:"tag_id"  binding:"required"`
+	UserID uint    `json:"user_id"  binding:"required"`
+	Name   *string `json:"name" form:"name"`
 }
 
 type TagDeleteBatchReq struct {

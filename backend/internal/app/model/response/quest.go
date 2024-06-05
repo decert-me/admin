@@ -47,9 +47,11 @@ type GetQuestStatisticsRes struct {
 	QuestID       int64     `gorm:"quest_id" json:"-"`
 	TokenID       string    `gorm:"token_id" json:"-"`
 	Pass          bool      `gorm:"pass" json:"pass"`
-	Claimed       bool      `gorm:"claimed" json:"claimed"`
-	ScoreDetail   string    `gorm:"column:score_detail" json:"score_detail"`
-	Annotation    string    `gorm:"column:annotation" json:"annotation"` // 批注
+	// 挑战结果状态
+
+	Claimed     bool   `gorm:"claimed" json:"claimed"`
+	ScoreDetail string `gorm:"column:score_detail" json:"score_detail"`
+	Annotation  string `gorm:"column:annotation" json:"annotation"` // 批注
 }
 
 type GetChallengeUserStatisticsRes struct {
