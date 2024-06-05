@@ -45,7 +45,7 @@ export default function ChallengerModal(props) {
         },
         {
           title: "名称",
-          dataIndex: "nickname"
+          dataIndex: "name"
         },
         {
           title: "标签",
