@@ -19,7 +19,7 @@ func GetUsersList(r request.GetUsersListReq) (label []response.GetUsersListRes, 
 
 	// 应用搜索条件
 	if r.SearchTag != "" {
-		db = db.Where("name LIKE ?", "%"+r.SearchTag+"%")
+		db = db.Where("tag.name LIKE ?", "%"+r.SearchTag+"%")
 	}
 	if r.SearchAddress != "" {
 		db = db.Where("users.address ILIKE ?", "%"+r.SearchAddress+"%")

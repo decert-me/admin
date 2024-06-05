@@ -173,11 +173,11 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 		Group("users.id")
 
 	if r.SearchTag != "" {
-		db = db.Where("tag.name = ?", r.SearchTag)
+		db = db.Where("tag.name like ?", "%"+r.SearchTag+"%")
 	}
 
 	if r.SearchAddress != "" {
-		db = db.Where("users.address = ?", r.SearchAddress)
+		db = db.Where("users.address ILIKE ?", "%"+r.SearchAddress+"%")
 	}
 	// 获取总数用于分页
 	err = db.Count(&total).Error
