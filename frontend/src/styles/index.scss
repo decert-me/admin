@@ -9,6 +9,10 @@
         font-weight: 500;
     }
 }
+.left-side{
+    justify-content: flex-start;
+    gap: 10px;
+}
 .p0{
     padding: 0;
     button{
@@ -33,4 +37,23 @@
 // 置顶
 .toTop{
     background-color: #FAFAFA;
+}
+
+
+// inner form
+.form-inner{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    .inner-item{
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        .label{
+            font-weight: 600;
+        }
+    }
+    .inner-btns{
+        margin-top: 100px;
+    }
 }

@@ -52,7 +52,7 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 		return errors.New("获取题目失败")
 	}
 	// 获取分数
-	score, userScore, pass, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
+	_, _, score, userScore, pass, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
 	// 写入审核结果
 	err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).Updates(&model.UserOpenQuest{
 		OpenQuestReviewTime:   time.Now(),
@@ -257,7 +257,7 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 		}
 		// 判断是否通过
 		if openQuestReviewStatus == 2 {
-			userReturnScore, userScore, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(answerRes), quest)
+			_, _, userReturnScore, userScore, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(answerRes), quest)
 			if err != nil {
 				db.Rollback()
 				return errors.New("服务器错误")

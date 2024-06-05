@@ -10,7 +10,7 @@ import serviceAxios from "../index";
             method: "get"
         })
     }
-
+    
     // 获取挑战列表
     export const getQuestList = (data) => {
         return serviceAxios({
@@ -57,6 +57,24 @@ import serviceAxios from "../index";
     }
     
 // ============================ post ============================
+
+    //     获取挑战详情列表
+    export const getQuestAnswerList = (data) => {
+        return serviceAxios({
+            url: `/statistics/getChallengeStatistics`,
+            method: "post",
+            data
+        })
+    }
+
+    //     获取挑战者列表
+    export const getChallengeUserStatistics = (data) => {
+        return serviceAxios({
+            url: `/statistics/getChallengeUserStatistics`,
+            method: "post",
+            data
+        })
+    }
 
     // 更改挑战上架状态
     export const updateQuestStatus = (data) => {

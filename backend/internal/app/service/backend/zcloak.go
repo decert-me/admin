@@ -57,7 +57,7 @@ func GenerateCardInfo(address string, score int64, req request.GenerateCardInfoR
 	}
 	pass := true
 	if score == 0 {
-		_, score, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(req.Answer), quest)
+		_, _, _, score, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(req.Answer), quest)
 		if err != nil {
 			global.LOG.Error("AnswerCheck error", zap.Error(err))
 			return errors.New("UnexpectedError")

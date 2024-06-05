@@ -11,7 +11,7 @@ import (
 	"gorm.io/datatypes"
 )
 
-func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userReturnScore int64, userScore int64, pass bool, err error) {
+func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (totalScore, userReturnRawScore, userReturnScore, userScore int64, pass bool, err error) {
 	defer func() {
 		if err != nil {
 			global.LOG.Error("AnswerCheck error", zap.Error(err))
@@ -22,7 +22,6 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 	version := gjson.Get(res, "version").Float()
 
 	answerU, scoreList, answerS, passingScore := utils.GetAnswers(version, key, res, questData, string(answer))
-	var totalScore int64
 	for _, s := range scoreList {
 		totalScore += s.Int()
 	}
@@ -30,7 +29,7 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 	answers, err := GetQuestAnswersByTokenId(quest.TokenId)
 	if err != nil {
 		global.LOG.Error("GetQuestAnswersByTokenId error", zap.Error(err))
-		return userReturnScore, userScore, false, err
+		return totalScore, userReturnRawScore, userReturnScore, userScore, false, err
 	}
 	// 解密答案
 	var answersList [][]gjson.Result
@@ -39,12 +38,12 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 		answersList = append(answersList, temp) // 标准答案
 		if len(answerU) != len(temp) {
 			global.LOG.Error("答案数量不相等")
-			return userReturnScore, userScore, false, errors.New("unexpect error")
+			return totalScore, userReturnRawScore, userReturnScore, userScore, false, errors.New("unexpect error")
 		}
 	}
 	if len(answerU) != len(answerS) || len(scoreList) != len(answerS) {
 		global.LOG.Error("答案数量不相等")
-		return userReturnScore, userScore, false, errors.New("unexpect error")
+		return totalScore, userReturnRawScore, userReturnScore, userScore, false, errors.New("unexpect error")
 	}
 	var score int64
 	for i, v := range answerS {
@@ -115,9 +114,9 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (userRetu
 		}
 	}
 	if score >= passingScore {
-		return score * 100 / totalScore, score * 10000 / totalScore, true, nil
+		return totalScore, score, score * 100 / totalScore, score * 10000 / totalScore, true, nil
 	} else {
-		return score * 100 / totalScore, score * 10000 / totalScore, false, nil
+		return totalScore, score, score * 100 / totalScore, score * 10000 / totalScore, false, nil
 	}
 	return
 }

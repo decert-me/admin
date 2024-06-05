@@ -29,6 +29,13 @@ import {
     ChallengeJudgListPage
 } from '../../views/Challenge';
 import { PersonelEditPage, PersonelListPage } from '../../views/Personel';
+import ChallengeAnswerListPage from '../../views/Challenge/ChallengeAnswerListPage';
+import UserTagsPage from '../../views/User/UserTagsPage';
+import UserListPage from '../../views/User/UserListPage';
+import UserTagInfoPage from '../../views/User/UserTagInfoPage';
+import UserTagAddPage from '../../views/User/UserTagAddPage';
+import UserTagModify from '../../views/User/UserTagModify';
+import ChallengerListPage from '../../views/Challenge/ChallengerListPage';
 
 
 
@@ -112,6 +119,14 @@ export default function BeforeRouterEnter(params) {
                 element={<ChallengeModifyPage />} 
                 />
                 <Route 
+                path="challenge/answer/list/:tokenId" 
+                element={<ChallengeAnswerListPage />} 
+                />
+                <Route 
+                path="challenge/answer/list" 
+                element={<ChallengeAnswerListPage />} 
+                />
+                <Route 
                 path="challenge/compilation"
                 element={<ChallengeCompilationPage />} 
                 />
@@ -131,6 +146,10 @@ export default function BeforeRouterEnter(params) {
                 path="challenge/openquest/judg/:id" 
                 element={<ChallengeJudgPage />} 
                 />
+                <Route 
+                path="challenge/challenge/list" 
+                element={<ChallengerListPage />} 
+                />
 
 
                 {/* 空投 */}
@@ -147,6 +166,36 @@ export default function BeforeRouterEnter(params) {
                 <Route 
                 path="personnel/:type" 
                 element={<PersonelEditPage />} 
+                />
+
+                {/* 用户管理 */}
+                <Route 
+                path="user/list/:tagid" 
+                element={<UserListPage />} 
+                />
+                <Route 
+                path="user/list" 
+                element={<UserListPage />} 
+                />
+                <Route 
+                path="user/tag" 
+                element={<UserTagsPage />} 
+                />
+                <Route 
+                path="user/tag/add" 
+                element={<UserTagInfoPage />} 
+                />
+                <Route 
+                path="user/tag/modify/:id" 
+                element={<UserTagInfoPage />} 
+                />
+                <Route 
+                path="user/tag/adduser/:id" 
+                element={<UserTagAddPage />} 
+                />
+                <Route 
+                path="user/tag/modifyuser/:address" 
+                element={<UserTagModify />} 
                 />
             </Route>
         </Routes>

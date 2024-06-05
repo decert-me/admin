@@ -2,13 +2,15 @@ package response
 
 import (
 	"backend/internal/app/model"
+	"time"
 )
 
 type GetQuestListRes struct {
 	model.Quest
-	ClaimNum     int64  `gorm:"-" json:"claim_num"`     // 铸造数量
-	ChallengeNum int64  `gorm:"-" json:"challenge_num"` // 挑战人次
-	CollectionID []uint `gorm:"-" json:"collection_id"` // 合辑ID
+	ClaimNum         int64  `gorm:"-" json:"claim_num"`          // 铸造数量
+	ChallengeNum     int64  `gorm:"-" json:"challenge_num"`      // 挑战人次
+	ChallengeUserNum int64  `gorm:"-" json:"challenge_user_num"` // 挑战人数
+	CollectionID     []uint `gorm:"-" json:"collection_id"`      // 合辑ID
 }
 
 type ChallengeUsers struct {
@@ -33,4 +35,32 @@ type GetQuestRes struct {
 type GetQuestCollectionAddListRes struct {
 	model.Quest
 	CollectionID []uint `gorm:"-" json:"collection_id"` // 合辑ID
+}
+
+type GetQuestStatisticsRes struct {
+	UUID          string    `gorm:"uuid" json:"uuid"`
+	Title         string    `gorm:"title" json:"title"`
+	Address       string    `gorm:"column:address;type:varchar(44);UNIQUE;comment:钱包地址" json:"address" form:"address"`
+	Name          string    `gorm:"name" json:"name"`
+	Tags          string    `json:"tags"`
+	ChallengeTime time.Time `gorm:"challenge_time" json:"challenge_time"` // 挑战时间
+	QuestID       int64     `gorm:"quest_id" json:"-"`
+	TokenID       string    `gorm:"token_id" json:"-"`
+	Pass          bool      `gorm:"pass" json:"pass"`
+	// 挑战结果状态
+
+	Claimed     bool   `gorm:"claimed" json:"claimed"`
+	ScoreDetail string `gorm:"column:score_detail" json:"score_detail"`
+	Annotation  string `gorm:"column:annotation" json:"annotation"` // 批注
+}
+
+type GetChallengeUserStatisticsRes struct {
+	UserID      int64  `gorm:"user_id" json:"user_id"`
+	Address     string `gorm:"column:address;type:varchar(44);UNIQUE;comment:钱包地址" json:"address" form:"address"`
+	Name        string `gorm:"name" json:"name"`
+	Tags        string `json:"tags"`
+	SuccessNum  int64  `json:"success_num"`   // 挑战成功数量
+	FailNum     int64  `json:"fail_num"`      // 挑战失败数量
+	ClaimNum    int64  `json:"claim_num"`     // 领取NFT数量
+	NotClaimNum int64  `json:"not_claim_num"` // 未领取NFT数量
 }

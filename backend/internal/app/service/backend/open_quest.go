@@ -53,7 +53,7 @@ func InitOpenQuestUserScore() {
 		if err = global.DB.Model(&model.Quest{}).Where("token_id = ?", userOpenQuest.TokenId).First(&quest).Error; err != nil {
 			continue
 		}
-		_, userScore, _, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(userOpenQuest.Answer), quest)
+		_, _, _, userScore, _, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(userOpenQuest.Answer), quest)
 		if err != nil {
 			continue
 		}
