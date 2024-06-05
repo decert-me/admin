@@ -21,7 +21,7 @@ export default function ChallengerListPage() {
         },
         {
           title: "昵称",
-          dataIndex: "nickname"
+          dataIndex: "name"
         },
         {
           title: "标签",

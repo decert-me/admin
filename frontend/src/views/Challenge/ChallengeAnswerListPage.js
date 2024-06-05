@@ -28,7 +28,7 @@ export default function ChallengeAnswerListPage() {
     },
     {
       title: "昵称",
-      dataIndex: "nickname",
+      dataIndex: "name",
     },
     {
       title: "标签",
