@@ -100,7 +100,7 @@ export default function ChallengeCompilationPage(params) {
           )
         },
         {
-            title: '挑战人次',
+            title: '挑战人数',
             dataIndex: 'challenge_num',
             render: (challenge_num) => (
               <p>{challenge_num}次</p>

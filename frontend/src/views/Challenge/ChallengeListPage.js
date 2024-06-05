@@ -172,7 +172,7 @@ export default function ChallengeListPage(params) {
             )
         },
         {
-            title: '挑战人次',
+            title: '挑战人数',
             dataIndex: 'challenge_num',
             render: (challenge_num) => (
               <p>{challenge_num}次</p>
@@ -207,6 +207,11 @@ export default function ChallengeListPage(params) {
                   </Popconfirm>
                   :
                   <>
+                  <Button 
+                      type="link" 
+                      className="p0"
+                      onClick={() => downloadChallenge(quest)}
+                    >详情</Button>
                   <Button 
                       type="link" 
                       className="p0"
@@ -254,6 +259,12 @@ export default function ChallengeListPage(params) {
           message.error(err);
       })
       getList()
+    }
+
+    // 挑战详情 => 下载.csv格式挑战
+    function downloadChallenge(challenge) {
+      // TODO: 通过ID获取该挑战对应挑战者记录列表
+      navigateTo(`/dashboard/challenge/answer/list/${challenge.tokenId}`)
     }
 
     // 导出挑战
