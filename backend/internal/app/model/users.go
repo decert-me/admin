@@ -14,6 +14,7 @@ type Users struct {
 	CreationTimestamp int64          `gorm:"column:creation_timestamp;autoCreateTime" json:"creationTimestamp"`
 	Socials           datatypes.JSON `gorm:"column:socials" json:"socials"`
 	ResourceTime      time.Time      `gorm:"column:resource_time"`
+	ParticleUserinfo  datatypes.JSON `gorm:"column:particle_userinfo" json:"particle_userinfo"`
 	Name              *string        `gorm:"column:name;type:varchar(200);comment:用户名称;default:''" json:"name" form:"name"`
 }
 

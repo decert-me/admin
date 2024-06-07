@@ -51,8 +51,8 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 	var valueList []interface{}
 	// 应用搜索条件
 	if r.SearchQuest != "" {
-		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ?)"))
-		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
+		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ? OR quest.uuid LIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
 	}
 	if r.SearchTag != "" {
 		whereList = append(whereList, fmt.Sprintf("tag.name LIKE ?"))
@@ -253,4 +253,91 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 		}
 	}
 	return results, total, nil
+}
+
+// GetChallengeStatisticsSummary 挑战详情总计
+func GetChallengeStatisticsSummary(r request.GetChallengeStatisticsReq) (res response.GetQuestStatisticsSummaryRes, err error) {
+	selectSQL := `
+	SELECT  COUNT(DISTINCT token_id) AS challenge_num,
+    		COUNT(DISTINCT address) AS challenge_user_num,
+			SUM(CASE WHEN pass = true THEN 1 ELSE 0 END) AS success_num,
+    		SUM(CASE WHEN pass = false THEN 1 ELSE 0 END) AS fail_num,
+			SUM(CASE WHEN claimed = true THEN 1 ELSE 0 END) AS claim_num,
+			SUM(CASE WHEN claimed = false AND pass = true THEN 1 ELSE 0 END) AS not_claim_num
+		FROM (`
+	dataSQL := `
+		SELECT
+			quest.uuid,
+			quest.token_id,
+			quest.ID AS quest_id,
+			quest.title,
+			users.address,
+			users.name,
+			string_agg ( DISTINCT tag.NAME, ',' ) AS tags,
+			CASE 
+			WHEN MAX(CAST(user_challenges.claimed AS integer))=1 THEN true
+			WHEN MAX(CAST(zcloak_card.id AS integer))>0 THEN true
+			ELSE false
+			END AS claimed,
+			CASE 
+			WHEN MAX(CAST(user_challenge_log.pass AS integer))=1 THEN true
+			WHEN MAX(CAST(user_open_quest.pass AS integer))=1 THEN true
+			ELSE false
+			END AS pass
+			FROM "user_challenge_log"
+			LEFT JOIN quest ON quest.token_id = user_challenge_log.token_id
+			LEFT JOIN users ON user_challenge_log.address = users.address
+			LEFT JOIN users_tag ON users_tag.user_id = users.ID 
+			LEFT JOIN tag ON tag.ID = users_tag.tag_id 
+			LEFT JOIN user_open_quest ON user_open_quest.token_id = quest.token_id AND user_open_quest.address= users.address
+			LEFT JOIN user_challenges ON quest.token_id = user_challenges.token_id AND user_challenges.address= users.address
+			LEFT JOIN zcloak_card ON zcloak_card.quest_id = quest.id AND zcloak_card.address= users.address
+	`
+	var whereList []string
+	var valueList []interface{}
+	// 应用搜索条件
+	if r.SearchQuest != "" {
+		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ? OR quest.uuid LIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
+	}
+	if r.SearchTag != "" {
+		whereList = append(whereList, fmt.Sprintf("tag.name LIKE ?"))
+		valueList = append(valueList, "%"+r.SearchTag+"%")
+	}
+	if r.SearchAddress != "" {
+		whereList = append(whereList, fmt.Sprintf("users.address LIKE ?"))
+		valueList = append(valueList, "%"+r.SearchAddress+"%")
+	}
+	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null"
+	if len(whereList) > 0 {
+		dataSQL += " AND " + strings.Join(whereList, " AND ")
+	}
+	dataSQL += " GROUP BY users.address,quest.ID,users.name) as tt"
+	// 过滤条件
+	whereList = nil // 清空
+	if r.Pass != nil {
+		if *r.Pass {
+			whereList = append(whereList, "pass = true")
+		} else {
+			whereList = append(whereList, "pass =false")
+		}
+	}
+	if r.Claimed != nil {
+		if *r.Claimed {
+			whereList = append(whereList, "claimed = true")
+		} else {
+			whereList = append(whereList, "claimed =false")
+		}
+	}
+	if len(whereList) > 0 {
+		dataSQL += " WHERE " + strings.Join(whereList, " AND ")
+	}
+	// 执行查询
+	db := global.DB
+	// 执行查询
+	err = db.Raw(selectSQL+dataSQL, valueList...).Find(&res).Error
+	if err != nil {
+		return res, err
+	}
+	return
 }
