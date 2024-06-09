@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Input, Modal, Table, message } from "antd";
-import { getQuestAnswerList } from "../../request/api/quest";
+import { Button, Form, Input, Modal, Space, Table, message } from "antd";
+import { getChallengeStatisticsSummary, getQuestAnswerList } from "../../request/api/quest";
 import { useUpdateEffect } from "ahooks";
 const { TextArea } = Input;
 
@@ -12,6 +12,7 @@ export default function ChallengeAnswerListPage() {
   const { tokenId } = useParams();
   const [data, setData] = useState([]);
   const [form, setForm] = useState({tokenId: tokenId}); //  搜索
+  const [totalObj, setTotalObj] = useState({});
   let [pageConfig, setPageConfig] = useState({
     page: 0,
     pageSize: 10,
@@ -87,14 +88,6 @@ export default function ChallengeAnswerListPage() {
     });
 };
 
-  // function init() {
-  //   getQuestAnswerList({ id: tokenId }).then((res) => {
-  //     const list = res.data || [];
-  //     // setData([...list]);
-  //     console.log(list);
-  //   });
-  // }
-
   function onFinish(params) {
     setForm({ ...params });
   }
@@ -128,10 +121,26 @@ export default function ChallengeAnswerListPage() {
     }
   }
 
+  function getTotal() {
+    getChallengeStatisticsSummary({
+      "search_quest": "",
+      "search_tag": "",
+      "search_address": "",
+      "pass": true,
+      "claimed": false
+    })
+    .then(res => {
+      if (res.code === 0) {
+        setTotalObj(res.data);
+      }
+    })
+  }
+
   function init(params) {
     pageConfig.page += 1;
     setPageConfig({ ...pageConfig });
     getList();
+    getTotal();
   }
 
   useEffect(() => {
@@ -192,6 +201,17 @@ export default function ChallengeAnswerListPage() {
           onChange: (page) => getList(page),
         }}
       />
+      <div>
+        <p>总计：</p>
+        <br/>
+        <Space size={50}>
+          <p>挑战数量：{totalObj?.challenge_num}</p>
+          <p>挑战人数：{totalObj?.challenge_user_num}</p>
+          <p>成功/失败人数：{totalObj?.success_num}/{totalObj?.fail_num}</p>
+          <p>领取/未领取人数：{totalObj?.claim_num}/{totalObj?.not_claim_num}</p>
+        </Space>
+        <br/>
+      </div>
     </div>
   );
 }
