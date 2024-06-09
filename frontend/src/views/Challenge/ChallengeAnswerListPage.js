@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Button, Form, Input, Table, message } from "antd";
+import { Button, Form, Input, Modal, Table, message } from "antd";
 import { getQuestAnswerList } from "../../request/api/quest";
 import { useUpdateEffect } from "ahooks";
+const { TextArea } = Input;
 
 export default function ChallengeAnswerListPage() {
   const location = useLocation();
@@ -36,6 +37,11 @@ export default function ChallengeAnswerListPage() {
       ellipsis: true,
     },
     {
+      title: "挑战结果",
+      dataIndex: "pass",
+      render: (claimed) => (claimed ? "成功" : "失败"),
+    },
+    {
       title: "领取NFT",
       dataIndex: "claimed",
       render: (claimed) => (claimed ? "是" : "否"),
@@ -48,6 +54,9 @@ export default function ChallengeAnswerListPage() {
       title: "批注",
       dataIndex: "annotation",
       ellipsis: true,
+      render: (annotation) => (
+          <a onClick={() => info(annotation)}>{annotation}</a>
+      )
     },
     {
       title: "挑战时间",
@@ -58,6 +67,25 @@ export default function ChallengeAnswerListPage() {
           : "-",
     },
   ];
+
+  const info = (value) => {
+    Modal.info({
+        icon: <></>,
+        width: "1200px",
+        title: "批注",
+        content: (
+            <TextArea 
+                autoSize={{
+                    minRows: 5,
+                    maxRows: 15,
+                }}
+                readOnly
+                value={value}
+            />
+        ),
+        okText: "我知道了"
+    });
+};
 
   // function init() {
   //   getQuestAnswerList({ id: tokenId }).then((res) => {

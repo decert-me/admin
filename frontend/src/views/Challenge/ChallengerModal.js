@@ -95,7 +95,7 @@ export default function ChallengerModal(props) {
           setPageConfig({ ...pageConfig });
         }
         // 获取教程列表
-        let res = await getQuestAnswerList({ ...pageConfig, search_address: challenge });
+        let res = await getQuestAnswerList({ ...pageConfig, ...challenge });
     
         if (res.code === 0) {
           const list = res.data.list || [];

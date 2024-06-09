@@ -1,4 +1,4 @@
-import { Button, Form, Input, Space, Table, message } from "antd";
+import { Button, Form, Input, Popconfirm, Space, Table, message } from "antd";
 import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -143,7 +143,14 @@ export default function UserTagsPage(params) {
               icon={<PlusOutlined />}
               onClick={() => navigateTo(`/dashboard/user/tag/add`)}
             />
-            <Button icon={<DeleteOutlined />} onClick={() => deleteTags()} />
+              <Popconfirm
+                title="确认删除?"
+                onConfirm={deleteTags}
+                okText="确认"
+                cancelText="取消"
+              >
+                <Button icon={<DeleteOutlined />} />
+              </Popconfirm>
           </div>
           <Form
             name="horizontal_login"
