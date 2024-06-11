@@ -51,7 +51,7 @@ export default function UserTagsPage(params) {
           <Button
             type="link"
             className="p0"
-              onClick={() => navigateTo(`/dashboard/user/list/${tag.name}`)}
+              onClick={() => navigateTo(`/dashboard/user/list/${tag.id}`)}
           >
             查看
           </Button>

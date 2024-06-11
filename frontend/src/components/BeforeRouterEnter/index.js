@@ -36,6 +36,7 @@ import UserTagInfoPage from '../../views/User/UserTagInfoPage';
 import UserTagAddPage from '../../views/User/UserTagAddPage';
 import UserTagModify from '../../views/User/UserTagModify';
 import ChallengerListPage from '../../views/Challenge/ChallengerListPage';
+import UserTagUserPage from '../../views/User/UserTagUserPage';
 
 
 
@@ -171,7 +172,7 @@ export default function BeforeRouterEnter(params) {
                 {/* 用户管理 */}
                 <Route 
                 path="user/list/:tagid" 
-                element={<UserListPage />} 
+                element={<UserTagUserPage />} 
                 />
                 <Route 
                 path="user/list" 

@@ -1,27 +1,34 @@
-import { Button, Form, Input, Space, Table, message } from "antd";
+import { Button, Form, Input, Popconfirm, Space, Table, message } from "antd";
+import { PlusOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom"
-import { getUsersList } from "../../request/api/userTags";
+import { getTagInfo, getTagUserList, getUsersList, tagUserDeleteBatch } from "../../request/api/userTags";
 import { useUpdateEffect } from "ahooks";
 
 
 
-export default function UserListPage(params) {
+export default function UserTagUserPage(params) {
     
+    const {tagid} = useParams();
     const navigateTo = useNavigate();
-    const location = useLocation();
     const [formProps] = Form.useForm();
+    const [label, setLabel] = useState("");
     const [data, setData] = useState([]);
-    const [search_key, setSearch_key] = useState(""); //  搜索
-    const [form, setForm] = useState({tag: ""}); //  搜索
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    const [form, setForm] = useState({}); //  搜索
     let [pageConfig, setPageConfig] = useState({
         page: 0, pageSize: 10, total: 0
     });
 
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
     const columns = [
         {
           title: "ID",
-          dataIndex: "user_id",
+          dataIndex: "id",
         },
         {
           title: "用户地址",
@@ -29,16 +36,12 @@ export default function UserListPage(params) {
         },
         {
           title: "昵称",
-          dataIndex: "name"
-        },
-        {
-          title: "标签",
-          dataIndex: "tags",
+          dataIndex: "nickname",
           ellipsis: true
         },
         {
             title: "创建时间",
-            dataIndex: "created_at",
+            dataIndex: "createdAt",
             render: (time) => (
               time.indexOf("0001-01-01T") === -1 ?
               time.replace("T", " ").split(".")[0].split("+")[0]
@@ -66,13 +69,28 @@ export default function UserListPage(params) {
         setForm({...params});
     }
 
+    function onSelectChange(newSelectedRowKeys) {
+        setSelectedRowKeys(newSelectedRowKeys);
+    }
+
+    function deleteTags() {
+        tagUserDeleteBatch({user_ids: selectedRowKeys, tag_id: Number(tagid)})
+        .then(res => {
+            message.success(res.msg);
+            getList();
+        })
+        .catch(err => {
+            message.error(err?.msg);
+        })
+    }
+
     async function getList(page) {
         if (page) {
           pageConfig.page = page;
           setPageConfig({ ...pageConfig });
         }
         // 获取教程列表
-        let res = await getUsersList({ ...pageConfig, search_address: form?.challenger, search_tag: form?.tag });
+        let res = await getTagUserList({ ...pageConfig, search_val: form?.challenger, tag_id: Number(tagid) });
     
         if (res.code === 0) {
           const list = res.data.list || [];
@@ -88,10 +106,15 @@ export default function UserListPage(params) {
         }
     }
 
-    function init(params) {
+    async function init(params) {
         pageConfig.page += 1;
         setPageConfig({ ...pageConfig });
         getList();
+
+        const res = await getTagInfo({tag_id: Number(tagid)})
+        if (res.code === 0) {
+            setLabel(res.data.name);
+        }
     }
 
     // getTagUserList
@@ -105,22 +128,37 @@ export default function UserListPage(params) {
         init();
     }, [form]);
 
+    useUpdateEffect(() => {
+        navigateTo(0);
+    },[tagid])
+
     return (
         <div>
             <div className="tabel-title">
-                <h2>用户管理</h2>
+                <h2>用户管理/{label}</h2>
             </div>
             <div>
                 <div className="operat">
+                    <div className="btns">
+                        <Button
+                        icon={<PlusOutlined />}
+                        onClick={() => navigateTo(`/dashboard/user/tag/add`)}
+                        />
+                        <Popconfirm
+                            title="确认删除?"
+                            onConfirm={deleteTags}
+                            okText="确认"
+                            cancelText="取消"
+                        >
+                            <Button icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    </div>
                     <Form
                         name="horizontal_login"
                         layout="inline"
                         form={formProps}
                         onFinish={onFinish}
                     >
-                        <Form.Item label="标签" name="tag">
-                            <Input />
-                        </Form.Item>
                         <Form.Item label="挑战者" name="challenger">
                             <Input />
                         </Form.Item>
@@ -135,6 +173,7 @@ export default function UserListPage(params) {
                 </div>
             </div>
             <Table 
+                rowSelection={rowSelection} 
                 columns={columns} 
                 dataSource={data}         
                 pagination={{
