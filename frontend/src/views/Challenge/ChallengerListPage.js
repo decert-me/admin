@@ -16,7 +16,7 @@ export default function ChallengerListPage() {
           title: "挑战者地址",
           dataIndex: "address",
           render: (addr) => (
-            <a onClick={() => info({search_address: addr})}>{addr.substring(0,5) + "..." + addr.substring(38,42)}</a>
+            <a target="_blank" href={`https://decert.me/user/${addr}`}>{addr.substring(0,5) + "..." + addr.substring(38,42)}</a>
           )
         },
         {
@@ -27,6 +27,12 @@ export default function ChallengerListPage() {
           title: "标签",
           dataIndex: "tags",
           ellipsis: true
+        },
+        {
+          title: "全部挑战",
+          render: (_, user) => (
+            <a onClick={() => info({search_address: user.address})}>{user.success_num + user.fail_num}</a>
+          )
         },
         {
             title: "挑战成功",
@@ -46,14 +52,14 @@ export default function ChallengerListPage() {
             title: "领取NFT",
             dataIndex: "claim_num",
             render: (claim_num, user) => (
-              <a onClick={() => info({search_address: user.address, claimed: true})}>{claim_num}</a>
+              <a onClick={() => info({search_address: user.address, claimed: true, pass: true})}>{claim_num}</a>
             )
         },
         {
             title: "未领取NFT",
             dataIndex: "not_claim_num",
             render: (not_claim_num, user) => (
-              <a onClick={() => info({search_address: user.address, claimed: false})}>{not_claim_num}</a>
+              <a onClick={() => info({search_address: user.address, claimed: false, pass: true})}>{not_claim_num}</a>
             )
         }
     ];
