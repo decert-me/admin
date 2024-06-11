@@ -123,11 +123,11 @@ export default function ChallengeAnswerListPage() {
 
   function getTotal() {
     getChallengeStatisticsSummary({
-      "search_quest": "",
-      "search_tag": "",
-      "search_address": "",
-      "pass": true,
-      "claimed": false
+      "search_quest": form?.tokenId,
+      "search_tag": form?.tag,
+      "search_address": form?.addr,
+      // "pass": true,
+      // "claimed": false
     })
     .then(res => {
       if (res.code === 0) {
