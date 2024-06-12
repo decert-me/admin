@@ -75,7 +75,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		if *r.Pass {
 			whereList = append(whereList, "pass = true")
 		} else {
-			whereList = append(whereList, "pass =false")
+			whereList = append(whereList, "pass = false")
 		}
 	}
 	if r.Claimed != nil {
@@ -124,14 +124,27 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		// 获取及格分数
 		passingScore := gjson.Get(string(quest.QuestData), "passingScore").Int()
 		// 查询挑战记录
+		var userChallengeLog model.UserChallengeLog
+		userChallengeLogDB := global.DB
+		if results[i].Claimed {
+			userChallengeLogDB.Where("pass = true")
+		}
+		if err := userChallengeLogDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("pass desc,id desc").First(&userChallengeLog).Error; err == nil {
+			results[i].ChallengeTime = userChallengeLog.CreatedAt
+		}
+		_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userChallengeLog.Answer, quest)
+		results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
+		// 开放题
 		if isOpenQuest {
 			var userOpenQuest model.UserOpenQuest
 			userOpenQuestDB := global.DB
 			if results[i].Claimed {
-				userOpenQuestDB.Where("pass=true")
+				userOpenQuestDB.Where("pass = true")
 			}
-			if err := userOpenQuestDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("id desc").First(&userOpenQuest).Error; err == nil {
+			if err := userOpenQuestDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("pass desc,id desc").First(&userOpenQuest).Error; err == nil {
 				results[i].ChallengeTime = userOpenQuest.CreatedAt
+			} else {
+				continue
 			}
 			_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userOpenQuest.Answer, quest)
 			results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
@@ -145,19 +158,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 				}
 				results[i].Annotation += fmt.Sprintf("第 %d 题 %s \n %s \n", ii+1, title, annotation)
 			}
-		} else {
-			var userChallengeLog model.UserChallengeLog
-			userChallengeLogDB := global.DB
-			if results[i].Claimed {
-				userChallengeLogDB.Where("pass=true")
-			}
-			if err := userChallengeLogDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("id desc").First(&userChallengeLog).Error; err == nil {
-				results[i].ChallengeTime = userChallengeLog.CreatedAt
-			}
-			_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userChallengeLog.Answer, quest)
-			results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
 		}
-
 	}
 
 	return results, total, nil
@@ -199,9 +200,10 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 				quest.ID 
 			FROM
 				"user_challenges"
-				LEFT JOIN quest ON quest.token_id = user_challenges.token_id 
+			LEFT JOIN quest ON quest.token_id = user_challenges.token_id 
+			LEFT JOIN user_challenge_log ON user_challenge_log.token_id = user_challenges.token_id AND user_challenge_log.address = user_challenges.address
 			WHERE
-				address = ? 
+				user_challenges.address = ? AND quest.token_id IS NOT NULL AND user_challenge_log.token_id IS NOT NULL 
 			GROUP BY
 				quest.ID 
 			UNION
@@ -209,8 +211,10 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 				quest_id 
 			FROM
 				zcloak_card 
+			LEFT JOIN quest ON quest.id = zcloak_card.quest_id 
+						LEFT JOIN user_challenge_log ON user_challenge_log.token_id = quest.token_id AND user_challenge_log.address = zcloak_card.address
 			WHERE
-				address = ? 
+				zcloak_card.address = ? AND quest.token_id IS NOT NULL AND user_challenge_log.token_id IS NOT NULL 
 			GROUP BY
 			quest_id ) AS f`, v.Address, v.Address).Scan(&results[i].ClaimNum)
 		// 挑战成功/失败数量
@@ -226,15 +230,17 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 			sum(pass_count) as pass_count,
 			sum(not_pass_count) as not_pass_count
 		FROM (
-			(SELECT token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
+			(SELECT user_challenge_log.token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
 			 FROM user_challenge_log
-			 WHERE address = ?
-			 GROUP BY token_id)
+			 LEFT JOIN quest ON user_challenge_log.token_id=quest.token_id
+			 WHERE address = ? AND quest.token_id IS NOT NULL
+			 GROUP BY user_challenge_log.token_id)
 			UNION ALL
-			(SELECT token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
+			(SELECT user_open_quest.token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
 			 FROM user_open_quest
-			 WHERE address = ?
-			 GROUP BY token_id)
+			 LEFT JOIN quest ON user_open_quest.token_id=quest.token_id
+			 WHERE address = ? AND quest.token_id IS NOT NULL
+			 GROUP BY user_open_quest.token_id)
 		) as combined
 		GROUP BY token_id
 		`, v.Address, v.Address).Scan(&countResult).Error; err != nil {
