@@ -23,6 +23,9 @@ export default function ChallengeAnswerListPage() {
     {
       title: "挑战名称",
       dataIndex: "title",
+      render: (title, quest) => (
+        <a target="_blank" href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/quests/${quest.uuid}`}>{title}</a>
+      )
     },
     {
       title: "挑战者地址",
