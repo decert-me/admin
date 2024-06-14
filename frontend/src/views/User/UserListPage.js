@@ -26,6 +26,9 @@ export default function UserListPage(params) {
         {
           title: "用户地址",
           dataIndex: "address",
+          render: (address) => (
+            <a target="_blank" href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/user/${address}`}>{address}</a>
+          )
         },
         {
           title: "昵称",

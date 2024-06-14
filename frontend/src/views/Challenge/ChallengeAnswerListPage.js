@@ -30,6 +30,9 @@ export default function ChallengeAnswerListPage() {
     {
       title: "挑战者地址",
       dataIndex: "address",
+      render: (address) => (
+        <a target="_blank" href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/user/${address}`}>{address}</a>
+      )
     },
     {
       title: "昵称",
