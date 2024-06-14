@@ -142,7 +142,7 @@ export default function UserTagUserPage(params) {
                     <div className="btns">
                         <Button
                         icon={<PlusOutlined />}
-                        onClick={() => navigateTo(`/dashboard/user/tag/add`)}
+                        onClick={() => navigateTo(`/dashboard/user/tag/adduser/${tagid}`)}
                         />
                         <Popconfirm
                             title="确认删除?"
