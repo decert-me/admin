@@ -59,8 +59,8 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		valueList = append(valueList, "%"+r.SearchTag+"%")
 	}
 	if r.SearchAddress != "" {
-		whereList = append(whereList, fmt.Sprintf("users.address LIKE ?"))
-		valueList = append(valueList, "%"+r.SearchAddress+"%")
+		whereList = append(whereList, fmt.Sprintf("(users.address ILIKE ? OR users.name ILIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchAddress+"%", "%"+r.SearchAddress+"%")
 	}
 	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null"
 	if len(whereList) > 0 {
@@ -178,7 +178,7 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 	}
 
 	if r.SearchAddress != "" {
-		db = db.Where("users.address ILIKE ?", "%"+r.SearchAddress+"%")
+		db = db.Where("(users.address ILIKE ? OR users.name ILIKE ?)", "%"+r.SearchAddress+"%", "%"+r.SearchAddress+"%")
 	}
 	// 获取总数用于分页
 	err = db.Count(&total).Error
