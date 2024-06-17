@@ -40,7 +40,7 @@ export default function ChallengerModal(props) {
           title: "挑战者地址",
           dataIndex: "address",
           render: (addr) => (
-            <p>{addr.substring(0,5) + "..." + addr.substring(38,42)}</p>
+            <a target="_blank" href={`https://decert.me/user/${addr}`}>{addr.substring(0,5) + "..." + addr.substring(38,42)}</a>
           )
         },
         {
@@ -89,13 +89,19 @@ export default function ChallengerModal(props) {
         },
     ];
 
+    function changePageSize(props) {
+        pageConfig.pageSize = props.pageSize;
+        setPageConfig({...pageConfig});
+        getList();
+    }
+
     async function getList(page) {
         if (page) {
           pageConfig.page = page;
           setPageConfig({ ...pageConfig });
         }
         // 获取教程列表
-        let res = await getQuestAnswerList({ ...pageConfig, search_address: challenge });
+        let res = await getQuestAnswerList({ ...pageConfig, ...challenge });
     
         if (res.code === 0) {
           const list = res.data.list || [];
@@ -133,6 +139,7 @@ export default function ChallengerModal(props) {
         <Table
             columns={columns} 
             dataSource={data}         
+            onChange={(e) => changePageSize(e)}
             pagination={{
                 current: pageConfig.page, 
                 total: pageConfig.total, 

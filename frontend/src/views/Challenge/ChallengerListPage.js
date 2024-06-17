@@ -16,7 +16,7 @@ export default function ChallengerListPage() {
           title: "挑战者地址",
           dataIndex: "address",
           render: (addr) => (
-            <a onClick={() => info(addr)}>{addr.substring(0,5) + "..." + addr.substring(38,42)}</a>
+            <a target="_blank" href={`https://decert.me/user/${addr}`}>{addr.substring(0,5) + "..." + addr.substring(38,42)}</a>
           )
         },
         {
@@ -29,20 +29,38 @@ export default function ChallengerListPage() {
           ellipsis: true
         },
         {
+          title: "全部挑战",
+          render: (_, user) => (
+            <a onClick={() => info({search_address: user.address})}>{user.success_num + user.fail_num}</a>
+          )
+        },
+        {
             title: "挑战成功",
-            dataIndex: "success_num"
+            dataIndex: "success_num",
+            render: (success_num, user) => (
+              <a onClick={() => info({search_address: user.address, pass: true})}>{success_num}</a>
+            )
         },
         {
             title: "挑战失败",
-            dataIndex: "fail_num"
+            dataIndex: "fail_num",
+            render: (fail_num, user) => (
+              <a onClick={() => info({search_address: user.address, pass: false})}>{fail_num}</a>
+            )
         },
         {
             title: "领取NFT",
-            dataIndex: "claim_num"
+            dataIndex: "claim_num",
+            render: (claim_num, user) => (
+              <a onClick={() => info({search_address: user.address, claimed: true, pass: true})}>{claim_num}</a>
+            )
         },
         {
             title: "未领取NFT",
-            dataIndex: "not_claim_num"
+            dataIndex: "not_claim_num",
+            render: (not_claim_num, user) => (
+              <a onClick={() => info({search_address: user.address, claimed: false, pass: true})}>{not_claim_num}</a>
+            )
         }
     ];
 
