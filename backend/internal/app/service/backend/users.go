@@ -22,7 +22,7 @@ func GetUsersList(r request.GetUsersListReq) (label []response.GetUsersListRes, 
 		db = db.Where("tag.name LIKE ?", "%"+r.SearchTag+"%")
 	}
 	if r.SearchAddress != "" {
-		db = db.Where("users.address ILIKE ?", "%"+r.SearchAddress+"%")
+		db = db.Where("(users.address ILIKE ? OR users.name ILIKE ?)", "%"+r.SearchAddress+"%", "%"+r.SearchAddress+"%")
 	}
 	// 获取总数用于分页
 	err = db.Count(&total).Error

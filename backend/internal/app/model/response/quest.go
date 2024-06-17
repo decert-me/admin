@@ -47,11 +47,9 @@ type GetQuestStatisticsRes struct {
 	QuestID       int64     `gorm:"quest_id" json:"-"`
 	TokenID       string    `gorm:"token_id" json:"-"`
 	Pass          bool      `gorm:"pass" json:"pass"`
-	// 挑战结果状态
-
-	Claimed     bool   `gorm:"claimed" json:"claimed"`
-	ScoreDetail string `gorm:"column:score_detail" json:"score_detail"`
-	Annotation  string `gorm:"column:annotation" json:"annotation"` // 批注
+	Claimed       bool      `gorm:"claimed" json:"claimed"`
+	ScoreDetail   string    `gorm:"column:score_detail" json:"score_detail"`
+	Annotation    string    `gorm:"column:annotation" json:"annotation"` // 批注
 }
 
 type GetChallengeUserStatisticsRes struct {
@@ -63,4 +61,19 @@ type GetChallengeUserStatisticsRes struct {
 	FailNum     int64  `json:"fail_num"`      // 挑战失败数量
 	ClaimNum    int64  `json:"claim_num"`     // 领取NFT数量
 	NotClaimNum int64  `json:"not_claim_num"` // 未领取NFT数量
+}
+
+type GetQuestStatisticsSummaryRes struct {
+	// 挑战数量
+	ChallengeNum int64 `json:"challenge_num"`
+	// 挑战人数
+	ChallengeUserNum int64 `json:"challenge_user_num"`
+	// 挑战成功数量
+	SuccessNum int64 `json:"success_num"`
+	// 挑战失败数量
+	FailNum int64 `json:"fail_num"`
+	// 领取NFT数量
+	ClaimNum int64 `json:"claim_num"`
+	// 未领取NFT数量
+	NotClaimNum int64 `json:"not_claim_num"`
 }

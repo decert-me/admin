@@ -48,3 +48,18 @@ func GetChallengeUserStatistics(c *gin.Context) {
 		}, "获取成功", c)
 	}
 }
+
+// GetChallengeStatisticsSummary 挑战详情总计
+func GetChallengeStatisticsSummary(c *gin.Context) {
+	var r request.GetChallengeStatisticsReq
+	if err := c.ShouldBindJSON(&r); err != nil {
+		response.FailWithMessage(response.TranslateValidationErrors(err), c)
+		return
+	}
+	if data, err := backend.GetChallengeStatisticsSummary(r); err != nil {
+		global.LOG.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithDetailed(data, "获取成功", c)
+	}
+}

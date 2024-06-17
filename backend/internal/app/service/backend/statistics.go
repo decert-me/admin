@@ -51,16 +51,16 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 	var valueList []interface{}
 	// 应用搜索条件
 	if r.SearchQuest != "" {
-		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ?)"))
-		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
+		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ? OR quest.uuid LIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
 	}
 	if r.SearchTag != "" {
 		whereList = append(whereList, fmt.Sprintf("tag.name LIKE ?"))
 		valueList = append(valueList, "%"+r.SearchTag+"%")
 	}
 	if r.SearchAddress != "" {
-		whereList = append(whereList, fmt.Sprintf("users.address LIKE ?"))
-		valueList = append(valueList, "%"+r.SearchAddress+"%")
+		whereList = append(whereList, fmt.Sprintf("(users.address ILIKE ? OR users.name ILIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchAddress+"%", "%"+r.SearchAddress+"%")
 	}
 	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null"
 	if len(whereList) > 0 {
@@ -75,7 +75,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		if *r.Pass {
 			whereList = append(whereList, "pass = true")
 		} else {
-			whereList = append(whereList, "pass =false")
+			whereList = append(whereList, "pass = false")
 		}
 	}
 	if r.Claimed != nil {
@@ -124,14 +124,27 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		// 获取及格分数
 		passingScore := gjson.Get(string(quest.QuestData), "passingScore").Int()
 		// 查询挑战记录
+		var userChallengeLog model.UserChallengeLog
+		userChallengeLogDB := global.DB
+		if results[i].Claimed {
+			userChallengeLogDB.Where("pass = true")
+		}
+		if err := userChallengeLogDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("pass desc,id desc").First(&userChallengeLog).Error; err == nil {
+			results[i].ChallengeTime = userChallengeLog.CreatedAt
+		}
+		_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userChallengeLog.Answer, quest)
+		results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
+		// 开放题
 		if isOpenQuest {
 			var userOpenQuest model.UserOpenQuest
 			userOpenQuestDB := global.DB
 			if results[i].Claimed {
-				userOpenQuestDB.Where("pass=true")
+				userOpenQuestDB.Where("pass = true")
 			}
-			if err := userOpenQuestDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("id desc").First(&userOpenQuest).Error; err == nil {
+			if err := userOpenQuestDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("pass desc,id desc").First(&userOpenQuest).Error; err == nil {
 				results[i].ChallengeTime = userOpenQuest.CreatedAt
+			} else {
+				continue
 			}
 			_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userOpenQuest.Answer, quest)
 			results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
@@ -145,19 +158,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 				}
 				results[i].Annotation += fmt.Sprintf("第 %d 题 %s \n %s \n", ii+1, title, annotation)
 			}
-		} else {
-			var userChallengeLog model.UserChallengeLog
-			userChallengeLogDB := global.DB
-			if results[i].Claimed {
-				userChallengeLogDB.Where("pass=true")
-			}
-			if err := userChallengeLogDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("id desc").First(&userChallengeLog).Error; err == nil {
-				results[i].ChallengeTime = userChallengeLog.CreatedAt
-			}
-			_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userChallengeLog.Answer, quest)
-			results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
 		}
-
 	}
 
 	return results, total, nil
@@ -177,7 +178,7 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 	}
 
 	if r.SearchAddress != "" {
-		db = db.Where("users.address ILIKE ?", "%"+r.SearchAddress+"%")
+		db = db.Where("(users.address ILIKE ? OR users.name ILIKE ?)", "%"+r.SearchAddress+"%", "%"+r.SearchAddress+"%")
 	}
 	// 获取总数用于分页
 	err = db.Count(&total).Error
@@ -199,9 +200,10 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 				quest.ID 
 			FROM
 				"user_challenges"
-				LEFT JOIN quest ON quest.token_id = user_challenges.token_id 
+			LEFT JOIN quest ON quest.token_id = user_challenges.token_id 
+			LEFT JOIN user_challenge_log ON user_challenge_log.token_id = user_challenges.token_id AND user_challenge_log.address = user_challenges.address
 			WHERE
-				address = ? 
+				user_challenges.address = ? AND quest.token_id IS NOT NULL AND user_challenge_log.token_id IS NOT NULL 
 			GROUP BY
 				quest.ID 
 			UNION
@@ -209,8 +211,10 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 				quest_id 
 			FROM
 				zcloak_card 
+			LEFT JOIN quest ON quest.id = zcloak_card.quest_id 
+						LEFT JOIN user_challenge_log ON user_challenge_log.token_id = quest.token_id AND user_challenge_log.address = zcloak_card.address
 			WHERE
-				address = ? 
+				zcloak_card.address = ? AND quest.token_id IS NOT NULL AND user_challenge_log.token_id IS NOT NULL 
 			GROUP BY
 			quest_id ) AS f`, v.Address, v.Address).Scan(&results[i].ClaimNum)
 		// 挑战成功/失败数量
@@ -226,15 +230,17 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 			sum(pass_count) as pass_count,
 			sum(not_pass_count) as not_pass_count
 		FROM (
-			(SELECT token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
+			(SELECT user_challenge_log.token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
 			 FROM user_challenge_log
-			 WHERE address = ?
-			 GROUP BY token_id)
+			 LEFT JOIN quest ON user_challenge_log.token_id=quest.token_id
+			 WHERE address = ? AND quest.token_id IS NOT NULL
+			 GROUP BY user_challenge_log.token_id)
 			UNION ALL
-			(SELECT token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
+			(SELECT user_open_quest.token_id, sum(case when pass then 1 else 0 end) as pass_count, sum(case when not pass then 1 else 0 end) as not_pass_count 
 			 FROM user_open_quest
-			 WHERE address = ?
-			 GROUP BY token_id)
+			 LEFT JOIN quest ON user_open_quest.token_id=quest.token_id
+			 WHERE address = ? AND quest.token_id IS NOT NULL
+			 GROUP BY user_open_quest.token_id)
 		) as combined
 		GROUP BY token_id
 		`, v.Address, v.Address).Scan(&countResult).Error; err != nil {
@@ -253,4 +259,91 @@ func GetChallengeUserStatistics(r request.GetChallengeUserStatisticsReq) (res []
 		}
 	}
 	return results, total, nil
+}
+
+// GetChallengeStatisticsSummary 挑战详情总计
+func GetChallengeStatisticsSummary(r request.GetChallengeStatisticsReq) (res response.GetQuestStatisticsSummaryRes, err error) {
+	selectSQL := `
+	SELECT  COUNT(DISTINCT token_id) AS challenge_num,
+    		COUNT(DISTINCT address) AS challenge_user_num,
+			SUM(CASE WHEN pass = true THEN 1 ELSE 0 END) AS success_num,
+    		SUM(CASE WHEN pass = false THEN 1 ELSE 0 END) AS fail_num,
+			SUM(CASE WHEN claimed = true THEN 1 ELSE 0 END) AS claim_num,
+			SUM(CASE WHEN claimed = false AND pass = true THEN 1 ELSE 0 END) AS not_claim_num
+		FROM (`
+	dataSQL := `
+		SELECT
+			quest.uuid,
+			quest.token_id,
+			quest.ID AS quest_id,
+			quest.title,
+			users.address,
+			users.name,
+			string_agg ( DISTINCT tag.NAME, ',' ) AS tags,
+			CASE 
+			WHEN MAX(CAST(user_challenges.claimed AS integer))=1 THEN true
+			WHEN MAX(CAST(zcloak_card.id AS integer))>0 THEN true
+			ELSE false
+			END AS claimed,
+			CASE 
+			WHEN MAX(CAST(user_challenge_log.pass AS integer))=1 THEN true
+			WHEN MAX(CAST(user_open_quest.pass AS integer))=1 THEN true
+			ELSE false
+			END AS pass
+			FROM "user_challenge_log"
+			LEFT JOIN quest ON quest.token_id = user_challenge_log.token_id
+			LEFT JOIN users ON user_challenge_log.address = users.address
+			LEFT JOIN users_tag ON users_tag.user_id = users.ID 
+			LEFT JOIN tag ON tag.ID = users_tag.tag_id 
+			LEFT JOIN user_open_quest ON user_open_quest.token_id = quest.token_id AND user_open_quest.address= users.address
+			LEFT JOIN user_challenges ON quest.token_id = user_challenges.token_id AND user_challenges.address= users.address
+			LEFT JOIN zcloak_card ON zcloak_card.quest_id = quest.id AND zcloak_card.address= users.address
+	`
+	var whereList []string
+	var valueList []interface{}
+	// 应用搜索条件
+	if r.SearchQuest != "" {
+		whereList = append(whereList, fmt.Sprintf("(quest.title LIKE ? OR quest.token_id LIKE ? OR quest.uuid LIKE ?)"))
+		valueList = append(valueList, "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%", "%"+r.SearchQuest+"%")
+	}
+	if r.SearchTag != "" {
+		whereList = append(whereList, fmt.Sprintf("tag.name LIKE ?"))
+		valueList = append(valueList, "%"+r.SearchTag+"%")
+	}
+	if r.SearchAddress != "" {
+		whereList = append(whereList, fmt.Sprintf("users.address LIKE ?"))
+		valueList = append(valueList, "%"+r.SearchAddress+"%")
+	}
+	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null"
+	if len(whereList) > 0 {
+		dataSQL += " AND " + strings.Join(whereList, " AND ")
+	}
+	dataSQL += " GROUP BY users.address,quest.ID,users.name) as tt"
+	// 过滤条件
+	whereList = nil // 清空
+	if r.Pass != nil {
+		if *r.Pass {
+			whereList = append(whereList, "pass = true")
+		} else {
+			whereList = append(whereList, "pass =false")
+		}
+	}
+	if r.Claimed != nil {
+		if *r.Claimed {
+			whereList = append(whereList, "claimed = true")
+		} else {
+			whereList = append(whereList, "claimed =false")
+		}
+	}
+	if len(whereList) > 0 {
+		dataSQL += " WHERE " + strings.Join(whereList, " AND ")
+	}
+	// 执行查询
+	db := global.DB
+	// 执行查询
+	err = db.Raw(selectSQL+dataSQL, valueList...).Find(&res).Error
+	if err != nil {
+		return res, err
+	}
+	return
 }
