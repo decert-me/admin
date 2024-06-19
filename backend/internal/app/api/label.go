@@ -25,6 +25,8 @@ func CreateLabel(c *gin.Context) {
 		err = backend.LabelAddCategory(model.Category{Chinese: label.Chinese, English: label.English, Weight: label.Weight})
 	} else if label.Type == "theme" {
 		err = backend.LabelAddTheme(model.Theme{Chinese: label.Chinese, English: label.English, Weight: label.Weight})
+	} else if label.Type == "challenge" {
+		err = backend.LabelAddQuest(model.QuestCategory{Chinese: label.Chinese, English: label.English, Weight: label.Weight})
 	} else {
 		response.FailWithMessage("参数错误", c)
 		return
@@ -57,6 +59,10 @@ func DeleteLabel(c *gin.Context) {
 		err = backend.LabelRemoveTheme(model.Theme{
 			Model: gorm.Model{ID: label.ID},
 		})
+	} else if label.Type == "challenge" {
+		err = backend.LabelRemoveQuest(model.QuestCategory{
+			Model: gorm.Model{ID: label.ID},
+		})
 	} else {
 		response.FailWithMessage("参数错误", c)
 		return
@@ -84,6 +90,8 @@ func GetLabelList(c *gin.Context) {
 		data, err = backend.LabelCategoryList()
 	} else if label.Type == "theme" {
 		data, err = backend.LabelThemeList()
+	} else if label.Type == "challenge" {
+		data, err = backend.LabelQuestList()
 	} else {
 		response.FailWithMessage("参数错误", c)
 		return
@@ -114,6 +122,10 @@ func UpdateLabel(c *gin.Context) {
 			Chinese: label.Chinese, English: label.English, Weight: label.Weight})
 	} else if label.Type == "theme" {
 		err = backend.LabelUpdateTheme(model.Theme{
+			Model:   gorm.Model{ID: label.ID},
+			Chinese: label.Chinese, English: label.English, Weight: label.Weight})
+	} else if label.Type == "challenge" {
+		err = backend.LabelUpdateQuest(model.QuestCategory{
 			Model:   gorm.Model{ID: label.ID},
 			Chinese: label.Chinese, English: label.English, Weight: label.Weight})
 	} else {

@@ -89,9 +89,22 @@ func LabelThemeList() (theme []model.Theme, err error) {
 	return
 }
 
+// LabelQuestList 获取分类标签列表
+func LabelQuestList() (data []model.QuestCategory, err error) {
+	db := global.DB.Model(&model.QuestCategory{})
+	err = db.Order("weight desc,created_at desc").Find(&data).Error
+	return
+}
+
 // LabelAddTheme 添加主题标签
 func LabelAddTheme(data model.Theme) error {
 	db := global.DB.Model(&model.Theme{})
+	return db.Create(&data).Error
+}
+
+// LabelAddQuest 添加挑战标签
+func LabelAddQuest(data model.QuestCategory) error {
+	db := global.DB.Model(&model.QuestCategory{})
 	return db.Create(&data).Error
 }
 
@@ -105,8 +118,24 @@ func LabelRemoveTheme(data model.Theme) error {
 	return raw.Error
 }
 
+// LabelRemoveQuest 删除挑战标签
+func LabelRemoveQuest(data model.QuestCategory) error {
+	db := global.DB.Model(&model.QuestCategory{})
+	raw := db.Where("id = ?", data.ID).Delete(&model.QuestCategory{})
+	if raw.RowsAffected == 0 {
+		return errors.New("删除失败")
+	}
+	return raw.Error
+}
+
 // LabelUpdateTheme 修改主题标签
 func LabelUpdateTheme(data model.Theme) error {
 	db := global.DB.Model(&model.Theme{})
+	return db.Where("id = ?", data.ID).Updates(&data).Error
+}
+
+// LabelUpdateQuest 修改挑战标签
+func LabelUpdateQuest(data model.QuestCategory) error {
+	db := global.DB.Model(&model.QuestCategory{})
 	return db.Where("id = ?", data.ID).Updates(&data).Error
 }

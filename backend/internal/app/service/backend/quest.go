@@ -113,6 +113,9 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if req.Sort != nil {
 		data["sort"] = *req.Sort
 	}
+	if req.Category != nil {
+		data["category"] = *req.Category
+	}
 	tx := global.DB.Begin()
 	// 查询quest
 	var quest model.Quest
