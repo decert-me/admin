@@ -5,6 +5,7 @@ import {
 import { Button, Form, Input, InputNumber, Select, message } from "antd";
 import { useEffect, useState } from "react";
 import { getCollectionList, getQuest, updateQuest } from "../../request/api/quest";
+import { getLabelList } from "../../request/api/tags";
 const { TextArea } = Input;
 
 export default function ChallengeModifyPage(params) {
@@ -13,11 +14,13 @@ export default function ChallengeModifyPage(params) {
     const { id, tokenId } = useParams();
     const navigateTo = useNavigate();
 
-
+    
     let [data, setData] = useState();
     let [fields, setFields] = useState([]);
     let [collection, setCollection] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [categoryOption, setCategoryOption] = useState([]);
+    const [category, setCategory] = useState([]);
     
     function onFinish({difficulty, estimateTime, collection_id, type, sort, description}) {
         const obj = {
@@ -25,6 +28,7 @@ export default function ChallengeModifyPage(params) {
             difficulty, 
             estimate_time: estimateTime && estimateTime !== 0 ? estimateTime * 60 : null,
             sort,
+            category,
             collection_id: collection_id ? [collection_id] : [],
             description
         }
@@ -48,7 +52,32 @@ export default function ChallengeModifyPage(params) {
         })
     }
 
+    function changeCategory(value) {
+        if (value.length > 5) {
+            return
+        }
+        setCategory([...value]);
+    }
+
     function init(params) {
+        getLabelList({type: "category"})
+        .then(res => {
+            if (res.code === 0) {
+            const list = res.data;
+            const data = list ? list : [];
+            // 添加key
+            data.forEach(ele => {
+                ele.value = ele.ID
+                ele.label = ele.Chinese
+            })
+            setCategoryOption([...data]);
+            }else{
+                message.success(res.msg);
+            }
+        })
+        .catch(err => {
+            message.error(err)
+        })
         getCollectionList()
         .then(res => {
             if (res.code === 0) {
@@ -66,6 +95,7 @@ export default function ChallengeModifyPage(params) {
             if (res.code === 0) {
                 data = res.data;
                 setData({...data});
+                setCategory([...data.category||[]]);
                 fields = [
                     {name: ["difficulty"], value: data.metadata.attributes.difficulty},
                     {name: ["estimateTime"], value: data.quest_data.estimateTime / 60},
@@ -146,6 +176,23 @@ export default function ChallengeModifyPage(params) {
                             ]}
                         />
                     </Form.Item>
+                    {/* <Form.Item
+                        label="分类"
+                        name="category"
+                    > */}
+                    <div style={{display: "flex", alignItems: "center", gap: "8px", marginBottom: "24px"}}>
+                        <div style={{width: "190px", textAlign: "right"}}>
+                            <lable>分类:</lable>
+                        </div>
+                        <Select
+                            options={categoryOption}
+                            mode="tags"
+                            onChange={changeCategory}
+                            value={category}
+                            style={{width: "600px"}}
+                        />
+                    </div>
+                    {/* </Form.Item> */}
                     <Form.Item
                         label="权重"
                         name="sort"
