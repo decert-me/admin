@@ -21,6 +21,7 @@ func CreateCollection(r request.CreateCollectionRequest) error {
 		Style:       2,
 		Difficulty:  r.Difficulty,
 		Status:      2,
+		Category:    r.Category,
 	}
 	return global.DB.Model(&model.Collection{}).Create(&collection).Error
 }
@@ -70,9 +71,6 @@ func GetCollectionDetail(r request.GetCollectionDetailRequest) (detail model.Col
 
 // UpdateCollection 更新合辑
 func UpdateCollection(r request.UpdateCollectionRequest) error {
-	if r.Sort == nil {
-		return errors.New("排序sort不能为空")
-	}
 	collection := model.Collection{
 		Title:       r.Title,
 		Description: r.Description,
@@ -81,6 +79,7 @@ func UpdateCollection(r request.UpdateCollectionRequest) error {
 		Style:       2,
 		Sort:        r.Sort,
 		Difficulty:  r.Difficulty,
+		Category:    r.Category,
 	}
 	raw := global.DB.Model(&model.Collection{}).Where("id = ?", r.ID).Updates(&collection)
 	if raw.RowsAffected == 0 {

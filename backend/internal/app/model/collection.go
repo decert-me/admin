@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/datatypes"
+import (
+	"github.com/lib/pq"
+	"gorm.io/datatypes"
+)
 
 // Collection 合辑
 type Collection struct {
@@ -13,7 +16,7 @@ type Collection struct {
 	Dependencies     datatypes.JSON `gorm:"column:dependencies" json:"-"`
 	IsDraft          bool           `gorm:"column:is_draft" json:"-"`
 	AddTs            int64          `gorm:"column:add_ts;autoCreateTime" json:"addTs"`
-	TokenId          string         `gorm:"column:token_id;type:varchar(100)" json:"tokenId"`
+	TokenId          string         `gorm:"column:token_id;default:'';type:varchar(100)" json:"tokenId"`
 	Type             uint8          `gorm:"column:type" json:"type" form:"type"`                       // 0:问答;1:编程
 	Difficulty       *uint8         `gorm:"column:difficulty" json:"difficulty"`                       // 0:easy;1:moderate;2:difficult
 	EstimateTime     uint8          `gorm:"column:estimate_time" json:"-"`                             // 预估时间/min
@@ -29,8 +32,10 @@ type Collection struct {
 	Style            int            `gorm:"style;default:1" json:"style" `                            // 1:单独;2:合辑
 	Cover            string         `gorm:"column:cover;comment:封面图" json:"cover"`
 	Author           string         `gorm:"column:author;type:varchar(64);comment:合辑作者" json:"author"`
-	Sort             *int           `gorm:"column:sort;default:0" json:"sort"` // 	排序
+	Sort             int            `gorm:"column:sort;default:0" json:"sort"` // 	排序
 	CollectionStatus uint8          `gorm:"column:collection_status;default:0" json:"-"`
+	ChainID          int64          `gorm:"column:chain_id;comment:链ID;default:0" json:"chain_id"`              // 链ID
+	Category         pq.Int64Array  `gorm:"column:category;type:int8[];comment:分类标签" json:"category,omitempty"` // 分类标签
 }
 
 func (Collection) TableName() string {
