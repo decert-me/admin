@@ -27,3 +27,10 @@ type ReviewOpenQuestRequestV2 struct {
 	Index     int            `json:"index" binding:"required"`
 	UpdatedAt *time.Time     `json:"updated_at" binding:"required"`
 }
+
+type GetUserOpenQuestDetailListRequest struct {
+	PageInfo
+	TokenID               string `json:"token_id" binding:"required"`
+	Index                 *uint8 `json:"index" binding:"required"`
+	OpenQuestReviewStatus uint8  `json:"open_quest_review_status" form:"open_quest_review_status"`
+}

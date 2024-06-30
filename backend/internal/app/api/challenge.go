@@ -50,14 +50,22 @@ func ReviewOpenQuest(c *gin.Context) {
 func GetUserOpenQuestListV2(c *gin.Context) {
 	var r request.GetUserOpenQuestListRequest
 	_ = c.ShouldBindJSON(&r)
-	if list, total, err := backend.GetUserOpenQuestListV2(r); err != nil {
+	type Detail struct {
+		List          interface{} `json:"list"`
+		Total         int64       `json:"total"`
+		Page          int         `json:"page"`
+		PageSize      int         `json:"pageSize"`
+		TotalToReview int64       `json:"total_to_review"`
+	}
+	if list, total, totalToReview, err := backend.GetUserOpenQuestListV2(r); err != nil {
 		response.FailWithMessage("获取失败："+err.Error(), c)
 	} else {
-		response.OkWithDetailed(response.PageResult{
-			List:     list,
-			Total:    total,
-			Page:     r.Page,
-			PageSize: r.PageSize,
+		response.OkWithDetailed(Detail{
+			List:          list,
+			Total:         total,
+			Page:          r.Page,
+			PageSize:      r.PageSize,
+			TotalToReview: totalToReview,
 		}, "获取成功", c)
 	}
 
@@ -71,5 +79,21 @@ func ReviewOpenQuestV2(c *gin.Context) {
 		response.FailWithMessage("操作失败："+err.Error(), c)
 	} else {
 		response.OkWithMessage("操作成功", c)
+	}
+}
+
+// GetUserOpenQuestDetailListV2 获取用户开放题详情列表
+func GetUserOpenQuestDetailListV2(c *gin.Context) {
+	var r request.GetUserOpenQuestDetailListRequest
+	_ = c.ShouldBindJSON(&r)
+	if list, total, err := backend.GetUserOpenQuestDetailListV2(r); err != nil {
+		response.FailWithMessage("获取失败："+err.Error(), c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     r.Page,
+			PageSize: r.PageSize,
+		}, "获取成功", c)
 	}
 }

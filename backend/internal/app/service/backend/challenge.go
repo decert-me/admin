@@ -11,6 +11,7 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"gorm.io/datatypes"
+	"sort"
 	"time"
 )
 
@@ -86,43 +87,159 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 }
 
 // GetUserOpenQuestListV2 获取用户开放题列表V2
-func GetUserOpenQuestListV2(r request.GetUserOpenQuestListRequest) (list []response.UserOpenQuestJsonElements, total int64, err error) {
+func GetUserOpenQuestListV2(r request.GetUserOpenQuestListRequest) (list []response.UserOpenQuestJsonElements, total int64, totalToReview int64, err error) {
 	offset := (r.Page - 1) * r.PageSize
 	limit := r.PageSize
 	db := global.DB.Model(&model.UserOpenQuest{})
-	if r.OpenQuestReviewStatus != 0 {
-		countSQL := `
-				SELECT 
-					count(1)
-				FROM
-					user_open_quest
-				JOIN
-					jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
-				JOIN 
-					quest ON quest.token_id = user_open_quest.token_id
-				WHERE
-					user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest'
+	dataSQL := `
+		SELECT
+			t.json_element ->> 'title' as title,quest.title as challenge_title,quest.uuid,quest.token_id,(idx::int - 1)  AS index,quest.add_ts as add_ts
+		FROM
+			quest,
+			jsonb_array_elements (quest.quest_data -> 'questions') WITH ORDINALITY AS t(json_element, idx)
+		WHERE
+			t.json_element ->> 'type' = 'open_quest' AND quest.status = 1
+	`
+	err = db.Raw(dataSQL).Scan(&list).Error
+	if err != nil {
+		return
+	}
+	for i := 0; i < len(list); i++ {
+		// 待评分数量
+		toReviewCountSQL := `
+		SELECT 
+			count(1)
+		FROM
+			user_open_quest
+		JOIN
+			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
+		JOIN 
+			quest ON quest.token_id = user_open_quest.token_id
+		WHERE
+			user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest' AND quest.token_id = ? AND idx= ?
+			AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL  AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL
 		`
-		if r.OpenQuestReviewStatus == 2 {
-			countSQL += " AND (json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL)"
-		} else {
-			countSQL += " AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL"
-		}
-		err = db.Raw(countSQL).Scan(&total).Error
+		err = global.DB.Raw(toReviewCountSQL, list[i].TokenId, list[i].Index+1).Scan(&list[i].ToReviewCount).Error
 		if err != nil {
-			return
+			continue
 		}
-		dataSQL := `
+		// 已评分数量
+		reviewedCountSQL := `
+		SELECT 
+			count(1)
+		FROM
+			user_open_quest
+		JOIN
+			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
+		JOIN 
+			quest ON quest.token_id = user_open_quest.token_id
+		WHERE
+			user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest' AND quest.token_id = ? AND idx= ?
+			AND (json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL)
+		`
+		err = global.DB.Raw(reviewedCountSQL, list[i].TokenId, list[i].Index+1).Scan(&list[i].ReviewedCount).Error
+		if err != nil {
+			continue
+		}
+		// 查询最新提交时间
+		err = global.DB.Model(&model.UserOpenQuest{}).Select("created_at").Where("token_id = ?", list[i].TokenId).Order("id desc").First(&list[i].LastSummitTime).Error
+		if err != nil {
+			continue
+		}
+		// 查询最新审核时间
+		selectSQL := `
+		SELECT
+			to_timestamp(t.json_element ->> 'open_quest_review_time','YYYY-MM-DD HH24:MI:SS')
+		FROM
+			user_open_quest,
+			jsonb_array_elements (user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx)
+		WHERE
+		user_open_quest.token_id = ? AND idx= ? AND t.json_element ->> 'open_quest_review_time' != ''
+		ORDER BY t.json_element ->> 'open_quest_review_time' desc
+		limit 1
+		`
+		err = global.DB.Model(&model.UserOpenQuest{}).Raw(selectSQL, list[i].TokenId, list[i].Index+1).Scan(&list[i].LastReviewTime).Error
+		if err != nil {
+			continue
+		}
+		fmt.Println("add_ts", list[i].Addts)
+	}
+	sort.SliceStable(list, func(i, j int) bool {
+		return list[i].Addts > list[j].Addts
+	})
+	sort.SliceStable(list, func(i, j int) bool {
+		return list[i].ToReviewCount > 0
+	})
+	sort.SliceStable(list, func(i, j int) bool {
+		if list[i].ToReviewCount != 0 {
+			if list[i].TokenId == list[j].TokenId {
+				return list[i].Index < list[j].Index
+			}
+			return list[i].Addts > list[j].Addts
+		}
+		return false
+	})
+	// 过滤
+	temp := make([]response.UserOpenQuestJsonElements, 0)
+	for _, v := range list {
+		if v.LastSummitTime.IsZero() {
+			continue
+		}
+		temp = append(temp, v)
+	}
+	for i := 0; i < len(list); i++ {
+		// 先按照ToReviewCount倒序排序
+		totalToReview += list[i].ToReviewCount
+	}
+	total = int64(len(temp))
+	// limit offset
+	result := make([]response.UserOpenQuestJsonElements, 0)
+
+	for i := offset; i < (offset+limit) && i < len(temp); i++ {
+		result = append(result, temp[i])
+	}
+	return result, total, totalToReview, nil
+}
+
+// GetUserOpenQuestDetailListV2 获取用户开放题详情
+func GetUserOpenQuestDetailListV2(r request.GetUserOpenQuestDetailListRequest) (list []response.GetUserOpenQuestDetailListV2, total int64, err error) {
+	offset := (r.Page - 1) * r.PageSize
+	limit := r.PageSize
+	db := global.DB.Model(&model.UserOpenQuest{})
+	// OpenQuestReviewStatus 1 未审核 2 已审核
+	countSQL := `
+		SELECT 
+			count(1)
+		FROM
+			user_open_quest
+		JOIN
+			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
+		JOIN 
+			quest ON quest.token_id = user_open_quest.token_id
+		WHERE
+			user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest' AND quest.token_id = ? AND idx= ?
+	`
+	if r.OpenQuestReviewStatus == 2 {
+		countSQL += " AND (json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL)"
+	} else {
+		countSQL += " AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL"
+	}
+	err = db.Raw(countSQL, r.TokenID, *r.Index+1).Scan(&total).Error
+	if err != nil {
+		return
+	}
+	dataSQL := `
 				SELECT 
 					user_open_quest.id,
 					user_open_quest.address,
+					quest.uuid,
 					user_open_quest.token_id,
 					CASE 
 						WHEN json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL THEN 2
 						ELSE 1
 					END AS open_quest_review_status,
 					json_element->>'open_quest_review_time' AS open_quest_review_time,
-					COALESCE(user_open_quest.commit_time,user_open_quest.updated_at) as updated_at,
+					user_open_quest.updated_at,
 					(idx::int - 1)  AS index,
 					json_element->>'type' AS type,
 					json_element->>'value' AS value,
@@ -130,7 +247,11 @@ func GetUserOpenQuestListV2(r request.GetUserOpenQuestListRequest) (list []respo
 					(quest.quest_data->'questions')->(idx::int - 1)->>'title' AS title,
 					(quest.quest_data->'questions')->(idx::int - 1)->>'score' AS score,
 					(quest.quest_data->'questions')->(idx::int - 1)->>'correct' AS correct,
-					json_element AS answer
+					json_element AS answer,
+					quest.quest_data->>'passingScore' AS pass_score,
+					quest.quest_data AS quest_data,
+					quest.meta_data AS meta_data,  
+					user_open_quest.answer AS user_answer
 				FROM
 					user_open_quest
 				JOIN
@@ -138,61 +259,46 @@ func GetUserOpenQuestListV2(r request.GetUserOpenQuestListRequest) (list []respo
 				JOIN 
 					quest ON quest.token_id = user_open_quest.token_id
 				WHERE
-					user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest'
+					user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest' AND quest.token_id = ? AND idx= ?
 		`
-		if r.OpenQuestReviewStatus == 2 {
-			dataSQL += " AND (json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL)"
-		} else {
-			dataSQL += " AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL"
-		}
-		dataSQL += " ORDER BY updated_at asc OFFSET ? LIMIT ?"
-		err = db.Raw(dataSQL, offset, limit).Scan(&list).Error
+	if r.OpenQuestReviewStatus == 2 {
+		dataSQL += " AND (json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL)"
 	} else {
-		err = db.Raw(`
-				SELECT 
-					count(1)
-				FROM
-					user_open_quest
-				JOIN
-					jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
-				JOIN 
-					quest ON quest.token_id = user_open_quest.token_id
-				WHERE
-					user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest'
-		`).Scan(&total).Error
+		dataSQL += " AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL"
+	}
+	dataSQL += " ORDER BY updated_at asc OFFSET ? LIMIT ?"
+	err = db.Raw(dataSQL, r.TokenID, *r.Index+1, offset, limit).Scan(&list).Error
+	if err != nil {
+		return
+	}
+	// 计算分数
+	for i := 0; i < len(list); i++ {
+		quest := model.Quest{
+			TokenId:   list[i].TokenId,
+			MetaData:  list[i].MetaData,
+			QuestData: list[i].QuestData,
+		}
+		list[i].TotalScore, list[i].UserScore, _, _, _, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, list[i].UserAnswer, quest)
 		if err != nil {
 			return
 		}
-		err = db.Raw(`
-				SELECT 
-					user_open_quest.id,
-					user_open_quest.address,
-					user_open_quest.token_id,
-					CASE 
-						WHEN json_element->>'score' IS NOT NULL OR json_element->>'correct' IS NOT NULL THEN 2
-						ELSE 1
-					END AS open_quest_review_status,
-					json_element->>'open_quest_review_time' AS open_quest_review_time,
-					COALESCE(user_open_quest.commit_time,user_open_quest.updated_at) as updated_at,
-					(idx::int - 1) AS index,
-					json_element->>'type' AS type,
-					json_element->>'value' AS value,
-					quest.title AS challenge_title,
-					(quest.quest_data->'questions')->(idx::int - 1)->>'title' AS title,
-					(quest.quest_data->'questions')->(idx::int - 1)->>'score' AS score,
-					(quest.quest_data->'questions')->(idx::int - 1)->>'correct' AS correct,
-					json_element AS answer
-				FROM
-					user_open_quest
-				JOIN
-					jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
-				JOIN 
-					quest ON quest.token_id = user_open_quest.token_id
-				WHERE
-					user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest'
-				ORDER BY updated_at asc
-				OFFSET ? LIMIT ?
-		`, offset, limit).Scan(&list).Error
+		var showStr string
+		showStr = fmt.Sprintf("%s...%s", list[i].Address[:6], list[i].Address[len(list[i].Address)-4:])
+		// 显示标签
+		nickname, name, tags, err := GetUserNameTagsByAddress(list[i].Address)
+		if err == nil {
+			if nickname != "" {
+				showStr = nickname
+			}
+			if name != "" {
+				showStr += "-" + name
+			}
+			for i := 0; i < len(tags); i++ {
+				showStr += "，" + tags[i]
+			}
+		}
+
+		list[i].NickName = &showStr
 	}
 	return
 }
@@ -313,4 +419,25 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 		}
 	}
 	return db.Commit().Error
+}
+
+func GetUserNameTagsByAddress(address string) (nickname, name string, tags []string, err error) {
+	var user model.Users
+	err = global.DB.Model(&model.Users{}).
+		Where("address = ?", address).
+		First(&user).Error
+	if err != nil {
+		return
+	}
+	if user.Name != nil {
+		name = *user.Name
+	}
+	if user.NickName != nil {
+		nickname = *user.NickName
+	}
+	err = global.DB.Model(&model.UsersTag{}).Select("tag.name").
+		Joins("join tag on users_tag.tag_id = tag.id").
+		Where("users_tag.user_id = ?", user.ID).
+		Find(&tags).Error
+	return
 }
