@@ -1,223 +1,207 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react"
-import { Button, Input, Rate, Spin } from "antd";
+import { useEffect, useState } from "react"
+import { Button, Input, InputNumber, Slider, message } from "antd";
 import { download } from "../../utils/file/download";
-import { getUserOpenQuestList, reviewOpenQuest } from "../../request/api/judgment";
+import { getUserOpenQuestDetailList, reviewOpenQuest } from "../../request/api/judgment";
 import ReactMarkdown from 'react-markdown';
-import CustomIcon from "../../components/CustomIcon";
-import { GetPercentScore } from "../../utils/int/bigInt";
 const { TextArea } = Input;
 
 
-function ChallengeJudgPage({data, rateNum, pageNum, status, onFinish}, ref) {
+function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
 
-    const [loading, setLoading] = useState(false);
-    let [detail, setDetail] = useState();
-    let [openQuest, setOpenQuest] = useState([]);
+    const [index, setIndex] = useState(0);      // 第几题
+    const [total, setTotal] = useState(0);
     let [reviewQuests, setReviewQuests] = useState([]);
+    let [openQsList, setOpenQsList] = useState([]);
     let [selectOpenQs, setSelectOpenQs] = useState({});
     let [page, setPage] = useState(0);
+    let [rateCache, setRateCache] = useState({
+        rate: 0,
+        annotation: ""
+    });
 
-    // 比对当前已打分length 
-    function isOver() {
-        const flag = reviewQuests.length === detail.length;
-        const remain = detail.length - reviewQuests.length;
-        return  {flag, remain}
-    }
-
-    async function confirm(params) {
+    async function confirm() {
         // 没有改分直接退出
-        if (reviewQuests.length === 0) {
+        const list = reviewQuests.filter(e => e);
+        if (list.length === 0) {
+            hideModal();
             return
         }
         await reviewOpenQuest(reviewQuests)
-        reviewQuests = [];
-        setReviewQuests([...reviewQuests]);
-        onFinish();
+        .then(res => {
+            if (res.code === 0) {
+                message.success(res.msg);
+                hideModal();
+                updateList();
+            }
+        })
+        .catch(err => {
+            message.error(err.msg);
+        })
     }
 
-    function reviewInit(quest) {
-        const arr = [{
-            index: 0,
-            isPass: null,
-            rate: quest.answer?.correct ? quest.score : (quest.answer.score / quest.score * 5),
-            title: quest.title,
-            value: quest.answer.value,
-            annex: quest.answer.annex,
-            challenge_title: quest.challenge_title
-        }];
-        openQuest = arr;
-        setOpenQuest([...openQuest]);
-        page = 0;
-        setPage(page);
-        selectOpenQs = openQuest[page];
-        setSelectOpenQs({...selectOpenQs});
+    function setAnnotation(text) {
+        rateCache.annotation = text;
+        setRateCache({...rateCache});
+
+        updateCache();
+    }
+
+    function setPercent(percent) {
+        // 将rateCache写入数组中
+        rateCache.score = percent;
+        setRateCache({...rateCache});
+
+        updateCache();
+    }
+
+    function updateCache() {
+        reviewQuests[index - 1] = {
+            id: selectOpenQs.ID,
+            answer: {
+                type: "open_quest",
+                annex: selectOpenQs.answer.annex,
+                value: selectOpenQs.answer.value,
+                score: rateCache.score,
+                annotation: rateCache.annotation,
+                open_quest_review_time: new Date()
+                    .toLocaleString()
+                    .replace(/\//g, "-"),
+            },
+            index: selectOpenQs.index,
+            updated_at: selectOpenQs.updated_at,
+        }
+        setReviewQuests([...reviewQuests]);
     }
 
     async function init() {
-        page = 0;
-        setPage(page);
-        if (onFinish) {
-            detail = data?.filter(e => e.open_quest_review_status === 1);
-        }else{
-            detail = data;
-            setDetail([...detail]);
-            const quest = detail[0];
-            reviewInit(quest);
-            return
+        rateCache = {
+            rate: 0,
+            annotation: ""
         }
-        if (status !== 1) {
-            changePage(0);
-            return
-        }
-        // 创建指定长度的数组
-        const length = rateNum;
-        const allArr = Array.from({ length });
-        // 对数组的指定范围（索引10-20）写入数据
-        const start = (pageNum - 1) * 10;
-        const end = start + 10 > rateNum ? rateNum : start + 10;
-        const allData = Array.from({ length: end - start }, (_, index) => index + start);
-        allData.forEach((value, index) => {
-            allArr[start + index] = detail[index];
-        });
-        detail = allArr;
-        setDetail([...detail]);
-
-        // 获取开放题列表
-        const arr = [];
-        detail.forEach((quest, i) => {
-            arr.push(quest ? {
-                index: i,
-                isPass: null,
-                rate: 0,
-                title: quest.title,
-                value: quest.answer.value,
-                annex: quest.answer.annex,
-                challenge_title: quest.challenge_title
-            } : null)
-        })
-
-        openQuest = arr;
-        setOpenQuest([...openQuest]);
-        page = start;
-        setPage(page);
-        selectOpenQs = openQuest[page];
+        setRateCache({...rateCache});
+        reviewQuests = [];
+        setReviewQuests([...reviewQuests]);
+        openQsList = [];
+        setOpenQsList([...openQsList]);
+        selectOpenQs = {};
         setSelectOpenQs({...selectOpenQs});
+        setTotal(0);
+        changePage(1, true);
+
     }
 
     // 切换上下题
-    async function changePage(newPage) {
-                // 当指定索引内容为null时 加载新内容
-        if (!openQuest[newPage]) {
-            setLoading(true);
-            const page = Math.trunc(newPage/10) + 1;
-            await getUserOpenQuestList({
-                open_quest_review_status: 1,
-                pageSize: 10,
-                page
-            })
-            .then(res => {
-                const list = res.data.list;
-                const data = list ? list : [];
-                // 添加key
-                data.forEach((ele, index) => {
-                    ele.key = ele.updated_at + ele.index + index
-                })
-                const start = (page - 1) * 10;
-                const end = start + 10 > rateNum ? rateNum : start + 10;
-                const allData = Array.from({ length: end - start }, (_, index) => index + start);
-                allData.forEach((value, index) => {
-                    detail[start + index] = data[index];
-                    openQuest[start + index] = {
-                        index: start + index,
-                        isPass: null,
-                        rate: 0,
-                        title: data[index].title,
-                        value: data[index].answer.value,
-                        annex: data[index].answer.annex,
-                        challenge_title: data[index].challenge_title
-                    }
-                });
-                setDetail([...detail])
-                setOpenQuest([...openQuest])
-            })
-            setLoading(false);
+    function changeIndex(index) {
+        // 评分模式从reviewlist读取缓存
+        if (reviewStatus) {
+            rateCache = {
+                score: reviewQuests[index - 1]?.answer.score || 0,
+                annotation: reviewQuests[index - 1]?.answer.annotation || ""
+            }
+            setRateCache({...rateCache});
         }
-        page = newPage;
-        setPage(page);
-        selectOpenQs = openQuest[page];
+        if (index > openQsList.length) {
+            changePage(page+1);
+            return
+        }
+        setIndex(index);
+        selectOpenQs = openQsList[index-1];
         setSelectOpenQs({...selectOpenQs});
     }
 
-    function getScore(percent) {
-        // 记录rate
-        openQuest[page].rate = percent;
-        setOpenQuest([...openQuest]);
-        selectOpenQs.rate = percent;
-        setSelectOpenQs({...selectOpenQs});
-
-        // 已打分列表
-        const p = percent * 20 / 100;
-        const info = detail[page];
-        const score = GetPercentScore(info.score, p)
-        const obj = {
-            "id": info.ID,
-            "answer": {
-                "type": "open_quest",
-                "annex": selectOpenQs.annex,
-                "value": selectOpenQs.value,
-                "score": score,
-                "open_quest_review_time": new Date().toLocaleString().replace(/\//g, "-")
-            },
-            "index": info.index,
-            "updated_at": info.updated_at
-        };
-        // 判断是否是新的
-        const index = reviewQuests.findIndex(function(item) {
-            return item.id === info.ID && item.index === info.index;
-        });
-
-        if (index === -1) {
-            reviewQuests.push(obj)
-        }else{
-            reviewQuests[index] = obj;
+    // 切换上下页
+    async function changePage(newPage, isInit) {
+        if (newPage) {
+            page = newPage;
+            setPage(page);
         }
-        setReviewQuests([...reviewQuests]);
+        getUserOpenQuestDetailList({
+            "page": page,
+            "pageSize": 10,
+            "open_quest_review_status": reviewStatus ? 1 : 2,
+            ...questDetail
+        })
+        .then(res => {
+            if (res.code === 0) {
+                const list = res.data.list || [];
+                openQsList = openQsList.concat(list);
+                setOpenQsList([...openQsList]);
+                if (openQsList.length === 0) {
+                    setIndex(0);
+                    return
+                }
+                changeIndex(isInit ? 1 : index+1);
+                // 获取总页
+                setTotal(res.data.total);
+                // 初始化评分列表
+                if (reviewQuests.length === 0) {
+                    reviewQuests = new Array(res.data.total);
+                    setReviewQuests([...reviewQuests]);
+                } 
+            }
+        })
+        .catch(err => {
+            message.error(err.msg);
+        })
     }
 
     useEffect(() => {
-        data && init();
-    },[data])
-
-    useImperativeHandle(ref, () => ({
-        confirm,
-        isOver
-    }))
+        questDetail && init();
+    },[questDetail])
 
     return (
-        detail &&
         <div className="judg-content">
-            <h1>{selectOpenQs?.challenge_title}</h1>
-                <Spin spinning={loading}>
+            <h1>{selectOpenQs?.title}</h1>
                 <div className="judg-info">
 
                     <div className="item">
-                        <p className="item-title">题目:</p>
-                        <div className="item-content">
-                            <ReactMarkdown>{selectOpenQs?.title}</ReactMarkdown>
+                        <div className="item-title">挑战者: &nbsp;<a href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/user/${selectOpenQs?.address}`} target="_blank" rel="noopener noreferrer">{selectOpenQs?.nickname}</a></div>
+                    </div>
+
+                    <div className="item">
+                        <div className="item-title">提交时间: &nbsp;
+                            <span className="item-content">{
+                            selectOpenQs?.updated_at && selectOpenQs?.updated_at.indexOf("0001-01-01T") === -1
+                            ? selectOpenQs?.updated_at.replace("T", " ").split(".")[0].split("+")[0]
+                            : "-"}</span>
                         </div>
                     </div>
 
                     <div className="item">
-                        <p className="item-title">开放题答案:</p>
+                        <div className="item-title">题目: &nbsp;
+                            <span className="item-content">{selectOpenQs?.challenge_title}</span>
+                        </div>
+                        {/* <div className="item-content">
+                            <ReactMarkdown>{selectOpenQs?.challenge_title}</ReactMarkdown>
+                        </div> */}
+                    </div>
+
+                    <div className="item">
+                        <p className="item-title">答案:</p>
                         <TextArea 
                             className="item-content box"
                             bordered={false} 
-                            maxLength={2000}
                             autoSize={{
-                                minRows: 7,
+                                minRows: 3,
+                                maxRows: 5,
                             }}
                             readOnly
-                            value={selectOpenQs?.value}
+                            value={selectOpenQs?.answer?.value}
+                        />
+                    </div>
+
+                    <div className="item">
+                        <p className="item-title">批注:</p>
+                        <TextArea 
+                            disabled={!reviewStatus}
+                            className="item-content box"
+                            bordered={false} 
+                            autoSize={{
+                                minRows: 3,
+                                maxRows: 5,
+                            }}
+                            onChange={(e) => setAnnotation(e.target.value)}
+                            value={selectOpenQs?.answer?.annotation || rateCache.annotation}
                         />
                     </div>
 
@@ -225,50 +209,64 @@ function ChallengeJudgPage({data, rateNum, pageNum, status, onFinish}, ref) {
                         <p className="item-title">附件:</p>
                         <div className="item-content">
                             {
-                                selectOpenQs?.annex && selectOpenQs?.annex.map(e => (
+                                selectOpenQs?.answer?.annex && selectOpenQs?.answer?.annex.map(e => (
                                     <Button type="link" key={e.name} onClick={() => download(e.hash, e.name)}>{e.name}</Button>
                                 ))
                             }
                         </div>
                     </div>
 
-                    {/* <div className="item">
-                        <p className="item-title">判定结果:&nbsp;<span style={{color: "#2B2F32"}}>{checked ? detail.quest_data.questions[page].score : 0}分</span></p>
-                        <Radio.Group 
-                            onChange={changePass}
-                            className="isPass"
-                            value={checked}
-                            disabled={selectQuest.open_quest_review_status === 2}
-                        >
-                            <Radio value={true}>通过</Radio>
-                            <Radio value={false}>不通过</Radio>
-                        </Radio.Group>
-                    </div> */}
                     <div className="item">
-                        <div className="item-title flex">
-                            <p className="item-title">评分: </p>
-                                <Rate
-                                    allowHalf 
-                                    disabled={!onFinish}     //  预览模式不可选
-                                    value={selectOpenQs?.rate}
-                                    style={{color: "#DD8C53"}} 
-                                    character={<CustomIcon type="icon-star" className="icon" />} 
-                                    onChange={(percent) => getScore(percent)}
-                                />
+                        <div className="item-title">挑战总得分: &nbsp;
+                            {/* <span className="item-content">{selectOpenQs?.total_score}</span> */}
+                            <span className="item-content">{(selectOpenQs?.answer?.score ? selectOpenQs?.user_score : rateCache?.score ? selectOpenQs?.user_score + rateCache.score : "")}</span>
+                        </div>
+                    </div>
+
+                    <div className="item">
+                        <div className="item-title">挑战及格分: &nbsp;
+                            <span className="item-content">{selectOpenQs?.pass_score}</span>
+                        </div>
+                    </div>
+
+                    <div className="item">
+                        <div className="item-title">本题评分: &nbsp;
+                            {/* <span className="item-content">{selectOpenQs?.total_score}</span> */}
+                            <InputNumber
+                                disabled={!reviewStatus}
+                                min={0}
+                                max={selectOpenQs?.score}
+                                style={{margin: '0 16px'}}
+                                step={1}
+                                value={selectOpenQs?.answer?.score ? selectOpenQs.answer?.score : rateCache?.score ? rateCache.score : ""}
+                                onChange={(value) => setPercent(value)}
+                            />
+                        </div>
+                        <div style={{width: "352px"}}>
+                            <Slider
+                                disabled={!reviewStatus}
+                                max={selectOpenQs?.score}
+                                step={1}
+                                tooltip={{formatter: null}}
+                                value={selectOpenQs?.answer?.score ? selectOpenQs.answer?.score : rateCache?.score ? rateCache.score : 0}
+                                onChange={(percent) => setPercent(percent)}
+                            />
                         </div>
                     </div>
                 </div>
-                </Spin>
-            {
-                onFinish &&
-                <div className="pagination">
-                    <Button disabled={page === 0} onClick={() => changePage(page - 1)}>上一题</Button>
-                    <p>{page + 1}/<span style={{color: "#8B8D97"}}>{rateNum}</span></p>
-                    <Button disabled={page+1 === rateNum} onClick={() => changePage(page + 1)}>下一题</Button>
+                <div className="flex-bte">
+                    <div className="pagination">
+                        <Button disabled={index <= 1} onClick={() => changeIndex(index - 1)}>上一题</Button>
+                        <p>{index}/<span style={{color: "#8B8D97"}}>{total}</span></p>
+                        <Button disabled={index === total} onClick={() => changeIndex(index + 1)}>下一题</Button>
+                    </div>
+                    {
+                        reviewStatus &&
+                        <Button className="submit" type="primary" size="large" onClick={confirm}>提交</Button>
+                    } 
                 </div>
-            }
         </div>
     )
 }
 
-export default forwardRef(ChallengeJudgPage)
+export default ChallengeJudgPage

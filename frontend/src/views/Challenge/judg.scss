@@ -115,9 +115,18 @@
                 }
             }
         }
+        .flex-bte{
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .submit{
+            width: 120px;
+            height: 58px;
+        }
         .pagination{
-            position: absolute;
-            bottom: 29px;
+            // position: absolute;
+            // bottom: 29px;
             display: flex;
             align-items: center;
             gap: 15px;
