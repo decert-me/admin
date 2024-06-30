@@ -74,7 +74,10 @@ func GetUserOpenQuestListV2(c *gin.Context) {
 // ReviewOpenQuestV2 审核开放题目V2
 func ReviewOpenQuestV2(c *gin.Context) {
 	var r []request.ReviewOpenQuestRequestV2
-	_ = c.ShouldBindJSON(&r)
+	if err := c.ShouldBindJSON(&r); err != nil {
+		response.FailWithMessage(response.TranslateValidationErrors(err), c)
+		return
+	}
 	if err := backend.ReviewOpenQuestV2(r); err != nil {
 		response.FailWithMessage("操作失败："+err.Error(), c)
 	} else {
@@ -85,7 +88,10 @@ func ReviewOpenQuestV2(c *gin.Context) {
 // GetUserOpenQuestDetailListV2 获取用户开放题详情列表
 func GetUserOpenQuestDetailListV2(c *gin.Context) {
 	var r request.GetUserOpenQuestDetailListRequest
-	_ = c.ShouldBindJSON(&r)
+	if err := c.ShouldBindJSON(&r); err != nil {
+		response.FailWithMessage(response.TranslateValidationErrors(err), c)
+		return
+	}
 	if list, total, err := backend.GetUserOpenQuestDetailListV2(r); err != nil {
 		response.FailWithMessage("获取失败："+err.Error(), c)
 	} else {

@@ -24,7 +24,7 @@ type ReviewOpenQuestRequest struct {
 type ReviewOpenQuestRequestV2 struct {
 	ID        uint           `json:"id" binding:"required"`
 	Answer    datatypes.JSON `json:"answer" binding:"required"`
-	Index     int            `json:"index" binding:"required"`
+	Index     *int           `json:"index" binding:"required"`
 	UpdatedAt *time.Time     `json:"updated_at" binding:"required"`
 }
 
