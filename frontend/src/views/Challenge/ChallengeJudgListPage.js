@@ -50,12 +50,12 @@ export default function ChallengeJudgListPage(params) {
             )
         },
         {
-            title: "挑战编号",
-            key: 'token_id',
-            dataIndex: "token_id",
+            title: "挑战",
+            key: 'challenge_title',
+            dataIndex: "challenge_title",
             ellipsis: true,
-            render: (token_id) => (
-                <p className="of-h pointer" onClick={() => window.open(`${host}/quests/${token_id}`, "_blank")}>{token_id}</p>
+            render: (challenge_title, quest) => (
+                <p className="of-h pointer" onClick={() => window.open(`${host}/quests/${quest.token_id}`, "_blank")}>{challenge_title}</p>
             )
         },
         {
