@@ -151,7 +151,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
 
     return (
         <div className="judg-content">
-            <h1>{selectOpenQs?.title}</h1>
+            <h1>{selectOpenQs?.challenge_title}</h1>
                 <div className="judg-info">
 
                     <div className="item">
@@ -169,7 +169,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
 
                     <div className="item">
                         <div className="item-title">题目: &nbsp;
-                            <span className="item-content">{selectOpenQs?.challenge_title}</span>
+                            <span className="item-content">{selectOpenQs?.title}</span>
                         </div>
                         {/* <div className="item-content">
                             <ReactMarkdown>{selectOpenQs?.challenge_title}</ReactMarkdown>
