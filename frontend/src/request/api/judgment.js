@@ -11,6 +11,15 @@ import serviceAxios from "../index";
         })
     }
 
+    // 获取开放题详情
+    export const getUserOpenQuestDetailList = (data) => {
+        return serviceAxios({
+            url: `/challenge/getUserOpenQuestDetailListV2`,
+            method: "post",
+            data
+        })
+    }
+
     // 开放题打分
     export const reviewOpenQuest = (data) => {
         return serviceAxios({

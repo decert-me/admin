@@ -1,4 +1,4 @@
-import { Button, Modal, Table } from "antd"
+import { Button, Modal, Space, Table } from "antd"
 import { useEffect, useRef, useState } from "react";
 import { getUserOpenQuestList } from "../../request/api/judgment";
 import ChallengeJudgPage from "./ChallengeJudgPage";
@@ -12,13 +12,13 @@ const { confirm } = Modal;
 
 export default function ChallengeJudgListPage(params) {
 
-    const judgRef = useRef(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [detailOpen, setDetailOpen] = useState(false);
     const [rateNum, setRateNum] = useState(0);
-    let [isLoading, setIsLoading] = useState();
+    const [questDetail, setQuestDetail] = useState();
+    const [reviewStatus, setReviewStatus] = useState();     // true: 未评分 || false: 已评分
+    
     let [tableLoad, setTableLoad] = useState();
-    let [detail, setDetail] = useState([]);
+    
     let [status, setStatus] = useState(1);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
@@ -46,47 +46,27 @@ export default function ChallengeJudgListPage(params) {
             key: 'title',
             dataIndex: "title",
             render: (title, quest) => (
-                <p className="of-h pointer" onClick={() => openDetail(quest)}>{title}</p>
+                <p className="of-h pointer" onClick={() => window.open(`${host}/quests/${quest.token_id}`, "_blank")}>{title}</p>
             )
         },
         {
-            title: "挑战编号",
-            key: 'token_id',
-            dataIndex: "token_id",
-            render: (token_id) => (
-                <p className="pointer text-w-300" onClick={() => window.open(`${host}/quests/${token_id}`, "_blank")}>{token_id}</p>
+            title: "挑战",
+            key: 'challenge_title',
+            dataIndex: "challenge_title",
+            ellipsis: true,
+            render: (challenge_title, quest) => (
+                <p className="of-h pointer" onClick={() => window.open(`${host}/quests/${quest.token_id}`, "_blank")}>{challenge_title}</p>
             )
         },
         {
-            title: "挑战者地址",
-            key: 'address',
-            dataIndex: "address",
-            render: (address) => (
-                <p className="pointer" onClick={() => window.open(`${host}/${address}`, "_blank")}>{address.substring(0,5) + "..." + address.substring(38,42)}</p>
-            )
+            title: "待评分",
+            key: 'to_review_count',
+            dataIndex: "to_review_count"
         },
         {
-            title: "状态",
-            key: 'status',
-            dataIndex: "open_quest_review_status",
-            filters: [
-                { text: "全部", value: null },
-                { text: "待评分", value: 1 },
-                { text: "已评分", value: 2 },
-            ],
-            filterMultiple: false,
-            filteredValue: [status],
-            render: (status) => (
-                <p style={{
-                    color: status === 2 ? "#35D6A6" : "#9A9A9A",
-                    fontWeight: 600
-                }}>{status === 2 ? "已评分" : status === 1 ? "待评分" : "全部"}</p>
-            )
-        },
-        {
-            title: "提交时间",
-            key: 'updated_at',
-            dataIndex: "updated_at",
+            title: "最新提交时间",
+            key: 'last_sumbit_time',
+            dataIndex: "last_sumbit_time",
             render: (time) => (
                 time.indexOf("0001-01-01T") === -1 ?
                 time.replace("T", " ").split(".")[0]
@@ -94,27 +74,47 @@ export default function ChallengeJudgListPage(params) {
             )
         },
         {
-            title: "处理时间",
-            key: 'open_quest_review_time',
-            dataIndex: "open_quest_review_time",
+            title: "上次评分时间",
+            key: 'last_review_time',
+            dataIndex: "last_review_time",
             render: (time) => (
                 time.indexOf("0001-01-01T") === -1 ?
-                time.replace("T", " ").split(".")[0]
+                time.replace("T", " ").split(".")[0].split("+")[0]
                 :"-"
             )
-        }
+        },
+        {
+            title: "操作",
+            key: "action",
+            render: (_, quest) => (
+              <Space size="middle">
+                <Button
+                  type="link"
+                  className="p0"
+                    // onClick={() => navigateTo(`/dashboard/user/tag/modifyuser/${tag.address}`)}
+                    onClick={() => openDetail(quest, true)}
+                >
+                  评分
+                </Button>
+                <Button
+                  type="link"
+                  className="p0"
+                    // onClick={() => navigateTo(`/dashboard/user/tag/modifyuser/${tag.address}`)}
+                    onClick={() => openDetail(quest, false)}
+                >
+                  已评分
+                </Button>
+              </Space>
+            ),
+        },
     ];
 
     // 展示该题详情
-    function openDetail(quest) {
-        detail = [quest];
-        setDetail([...detail]);
+    function openDetail({index, token_id}, isReview) {
+        const obj = {index, token_id};
+        setQuestDetail({...obj});
+        setReviewStatus(isReview);
         setDetailOpen(true);
-    }
-
-    // 判题弹窗
-    function OpenJudgModal() {
-        setIsModalOpen(true);
     }
     
     // 获取列表
@@ -133,7 +133,7 @@ export default function ChallengeJudgListPage(params) {
             data = list ? list : [];
             // 添加key
             data.forEach((ele, index) => {
-                ele.key = ele.updated_at + ele.index + index
+                ele.key = ele.uuid + ele.index
             })
             setData([...data]);
             pageConfig.total = res.data.total;
@@ -143,33 +143,6 @@ export default function ChallengeJudgListPage(params) {
             setPageConfig({...pageConfig});
         })
         setTableLoad(false);
-    }
-
-    // 提交批改内容
-    async function submitReview(params) {
-        setIsLoading(true);
-        await judgRef.current.confirm();
-        setIsLoading(false);
-    }
-
-    function handleOk() {
-        // 是否批改完
-        const {flag, remain} = judgRef.current.isOver();
-        if (flag) { 
-            submitReview()
-        }else{
-            confirm({
-                title: `还有${remain}道未评分，仍然提交？`,
-                onOk() {
-                    submitReview()
-                },
-            });
-        }
-    }
-
-    function onFinish() {
-        setIsModalOpen(false)
-        getList()
     }
 
     async function init() {
@@ -185,24 +158,10 @@ export default function ChallengeJudgListPage(params) {
     return (
         <div className="judg">
             <div className="tabel-title">
-                <h2 style={{fontSize: 20}}>评分列表<span style={{fontSize: 14, fontWeight: 400, color: "#999999"}}>（待评分 {rateNum}）</span></h2>
-                {
-                    data?.findIndex((e) => e.open_quest_review_status === 1) !== -1 &&
-                    <Button id="hover-btn-full" className="btn-start" onClick={() => OpenJudgModal()}>开始评分</Button>
-                }
+                <h2 style={{fontSize: 20}}>评分列表
+                    {/* <span style={{fontSize: 14, fontWeight: 400, color: "#999999"}}>（待评分 {rateNum}）</span> */}
+                </h2>
             </div>
-            <Modal
-                width={1177}
-                open={isModalOpen}
-                className="judg-modal"
-                onCancel={() => {setIsModalOpen(false)}}
-                onOk={handleOk}
-                okButtonProps={{
-                    loading: isLoading
-                }}
-            >
-                <ChallengeJudgPage ref={judgRef} rateNum={rateNum} status={status} pageNum={pageConfig.page} data={data} onFinish={onFinish} />
-            </Modal>
 
             <Modal
                 width={1177}
@@ -211,7 +170,7 @@ export default function ChallengeJudgListPage(params) {
                 footer={null}
                 onCancel={() => {setDetailOpen(false)}}
             >
-                <ChallengeJudgPage data={detail} />
+                <ChallengeJudgPage questDetail={questDetail} reviewStatus={reviewStatus} hideModal={() => setDetailOpen(false)} updateList={() => getList()} />
             </Modal>
             <Table
                 columns={columns} 
