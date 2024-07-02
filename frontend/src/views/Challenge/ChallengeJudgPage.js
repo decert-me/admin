@@ -10,6 +10,8 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
 
     const [index, setIndex] = useState(0);      // 第几题
     const [total, setTotal] = useState(0);
+    const [isLoding, setTsLoding] = useState(false);
+    
     let [reviewQuests, setReviewQuests] = useState([]);
     let [openQsList, setOpenQsList] = useState([]);
     let [selectOpenQs, setSelectOpenQs] = useState({});
@@ -92,6 +94,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
 
     // 切换上下题
     function changeIndex(index) {
+        setTsLoding(true);
         // 评分模式从reviewlist读取缓存
         if (reviewStatus) {
             rateCache = {
@@ -107,6 +110,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
         setIndex(index);
         selectOpenQs = openQsList[index-1];
         setSelectOpenQs({...selectOpenQs});
+        setTsLoding(false);
     }
 
     // 切换上下页
@@ -258,7 +262,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
                     <div className="pagination">
                         <Button disabled={index <= 1} onClick={() => changeIndex(index - 1)}>上一题</Button>
                         <p>{index}/<span style={{color: "#8B8D97"}}>{total}</span></p>
-                        <Button disabled={index === total} onClick={() => changeIndex(index + 1)}>下一题</Button>
+                        <Button loading={isLoding} disabled={index === total} onClick={() => changeIndex(index + 1)}>下一题</Button>
                     </div>
                     {
                         reviewStatus &&
