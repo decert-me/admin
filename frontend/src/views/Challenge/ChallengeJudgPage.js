@@ -26,7 +26,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
             hideModal();
             return
         }
-        await reviewOpenQuest(reviewQuests)
+        await reviewOpenQuest(list)
         .then(res => {
             if (res.code === 0) {
                 message.success(res.msg);
