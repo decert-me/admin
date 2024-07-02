@@ -78,10 +78,10 @@ func TranslateValidationErrors(err error) string {
 	for _, e := range validationErrors {
 		switch e.Tag() {
 		case "required":
-			errMessages = append(errMessages, fmt.Sprintf("%s 不能为空", e.Field()))
+			errMessages = append(errMessages, fmt.Sprintf("字段 %s 不能为空", e.Field()))
 		// 可以添加更多的case来处理不同的验证标签
 		default:
-			errMessages = append(errMessages, fmt.Sprintf("%s 验证失败", e.Field()))
+			errMessages = append(errMessages, fmt.Sprintf("字段 %s 验证失败", e.Field()))
 		}
 	}
 
