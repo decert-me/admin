@@ -21,10 +21,10 @@ type UserOpenQuestJsonElements struct {
 	Index          int       `gorm:"column:index" json:"index"`
 	Title          string    `gorm:"column:title" json:"title"`
 	ChallengeTitle string    `gorm:"column:challenge_title" json:"challenge_title"`
-	ToReviewCount  int64     `gorm:"-" json:"to_review_count"`  // 待评分数量
-	ReviewedCount  int64     `gorm:"-" json:"reviewed_count"`   // 已评分数量
-	LastSummitTime time.Time `gorm:"-" json:"last_sumbit_time"` // 最新提交时间
-	LastReviewTime time.Time `gorm:"-" json:"last_review_time"` // 上次评分时间
+	ToReviewCount  int64     `gorm:"column:to_review_count" json:"to_review_count"` // 待评分数量
+	ReviewedCount  int64     `gorm:"-" json:"reviewed_count"`                       // 已评分数量
+	LastSummitTime time.Time `gorm:"-" json:"last_sumbit_time"`                     // 最新提交时间
+	LastReviewTime time.Time `gorm:"-" json:"last_review_time"`                     // 上次评分时间
 	Addts          int64     `gorm:"column:add_ts" json:"add_ts"`
 }
 
