@@ -21,13 +21,6 @@ export default function ChallengeAnswerListPage() {
 
   const columns = [
     {
-      title: "挑战名称",
-      dataIndex: "title",
-      render: (title, quest) => (
-        <a target="_blank" href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/quests/${quest.uuid}`}>{title}</a>
-      )
-    },
-    {
       title: "挑战者地址",
       dataIndex: "address",
       render: (address) => (
@@ -42,6 +35,13 @@ export default function ChallengeAnswerListPage() {
       title: "标签",
       dataIndex: "tags",
       ellipsis: true,
+    },
+    {
+      title: "挑战名称",
+      dataIndex: "title",
+      render: (title, quest) => (
+        <a target="_blank" href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/quests/${quest.uuid}`}>{title}</a>
+      )
     },
     {
       title: "挑战结果",
