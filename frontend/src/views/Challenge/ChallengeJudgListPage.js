@@ -165,6 +165,7 @@ export default function ChallengeJudgListPage(params) {
 
             <Modal
                 width={1177}
+                maskClosable={false}
                 className="judg-modal"
                 open={detailOpen}
                 footer={null}
