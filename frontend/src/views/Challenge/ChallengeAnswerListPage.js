@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Button, Form, Input, Modal, Space, Table, message } from "antd";
 import { getChallengeStatisticsSummary, getQuestAnswerList } from "../../request/api/quest";
 import { useUpdateEffect } from "ahooks";
+import JudgReviewModal from "./JudgReviewModal";
 const { TextArea } = Input;
 
 export default function ChallengeAnswerListPage() {
@@ -58,11 +59,11 @@ export default function ChallengeAnswerListPage() {
       dataIndex: "score_detail",
     },
     {
-      title: "批注",
+      title: "评分详情",
       dataIndex: "annotation",
       ellipsis: true,
-      render: (annotation) => (
-          <a onClick={() => info(annotation)}>{annotation}</a>
+      render: (annotation, quest) => (
+          <a onClick={() => info(quest)}>{annotation ? "查看" : ""}</a>
       )
     },
     {
@@ -75,22 +76,14 @@ export default function ChallengeAnswerListPage() {
     },
   ];
 
-  const info = (value) => {
+  const info = ({uuid, address}) => {
     Modal.info({
         icon: <></>,
         width: "1200px",
-        title: "批注",
-        content: (
-            <TextArea 
-                autoSize={{
-                    minRows: 5,
-                    maxRows: 15,
-                }}
-                readOnly
-                value={value}
-            />
-        ),
-        okText: "我知道了"
+        wrapClassName: "judg-modal",
+        content: <JudgReviewModal uuid={uuid} address={address} />,
+        footer: null,
+        closable: true
     });
 };
 
