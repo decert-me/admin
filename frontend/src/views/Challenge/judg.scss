@@ -29,6 +29,10 @@
 
 .judg-modal{
     // 开始评分按钮
+    .ant-modal-confirm-body{
+        width: 100%;
+        display: inline-block;
+    }
     .flex{
         display: flex;
         align-items: center;

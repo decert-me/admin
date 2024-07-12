@@ -28,4 +28,12 @@ import serviceAxios from "../index";
             data
         })
     }
-    
+
+    // 获取用户答题统计
+    export const getUserQuestDetail = (data) => {
+        return serviceAxios({
+            url: `/challenge/getUserQuestDetail`,
+            method: "post",
+            data
+        })
+    }
