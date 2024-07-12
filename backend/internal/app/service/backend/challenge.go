@@ -11,7 +11,6 @@ import (
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"gorm.io/datatypes"
-	"sort"
 	"time"
 )
 
@@ -91,38 +90,70 @@ func GetUserOpenQuestListV2(r request.GetUserOpenQuestListRequest) (list []respo
 	offset := (r.Page - 1) * r.PageSize
 	limit := r.PageSize
 	db := global.DB.Model(&model.UserOpenQuest{})
-	dataSQL := `
+	countSQL := `
 		SELECT
-			t.json_element ->> 'title' as title,quest.title as challenge_title,quest.uuid,quest.token_id,(idx::int - 1)  AS index,quest.add_ts as add_ts
+			count(1)
 		FROM
 			quest,
-			jsonb_array_elements (quest.quest_data -> 'questions') WITH ORDINALITY AS t(json_element, idx)
+			jsonb_array_elements(quest.quest_data -> 'questions') WITH ORDINALITY AS t(json_element, idx)
 		WHERE
-			t.json_element ->> 'type' = 'open_quest' AND quest.status = 1
+			t.json_element ->> 'type' = 'open_quest' 
+			AND quest.status = 1
 	`
-	err = db.Raw(dataSQL).Scan(&list).Error
+	err = db.Raw(countSQL).Scan(&total).Error
+	dataSQL := `
+		WITH quest_data AS (
+			SELECT
+				t.json_element ->> 'title' AS title,
+				quest.title AS challenge_title,
+				quest.uuid,
+				quest.token_id,
+				(t.idx::int - 1) AS index,
+				quest.add_ts AS add_ts,
+				quest.status
+			FROM
+				quest,
+				jsonb_array_elements(quest.quest_data -> 'questions') WITH ORDINALITY AS t(json_element, idx)
+			WHERE
+				t.json_element ->> 'type' = 'open_quest' 
+				AND quest.status = 1
+		)
+		SELECT 
+			quest_data.title, 
+			quest_data.challenge_title, 
+			quest_data.uuid, 
+			quest_data.token_id, 
+			quest_data.index, 
+			quest_data.add_ts,
+			COUNT(user_open_quest.token_id) AS to_review_count
+		FROM
+			quest_data
+		LEFT JOIN user_open_quest ON quest_data.token_id = user_open_quest.token_id
+			AND user_open_quest.deleted_at IS NULL
+			AND quest_data.status = 1
+			AND EXISTS (
+				SELECT 1
+				FROM jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx)
+				WHERE t.json_element ->> 'type' = 'open_quest'
+				AND idx = index+1
+				AND t.json_element ->> 'score' IS NULL
+				AND t.json_element ->> 'correct' IS NULL
+			)
+		GROUP BY 
+			quest_data.title, 
+			quest_data.challenge_title, 
+			quest_data.uuid, 
+			quest_data.token_id, 
+			quest_data.index, 
+			quest_data.add_ts
+		ORDER BY to_review_count desc
+		LIMIT ? OFFSET ? 
+	`
+	err = db.Raw(dataSQL, limit, offset).Scan(&list).Error
 	if err != nil {
 		return
 	}
 	for i := 0; i < len(list); i++ {
-		// 待评分数量
-		toReviewCountSQL := `
-		SELECT 
-			count(1)
-		FROM
-			user_open_quest
-		JOIN
-			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
-		JOIN 
-			quest ON quest.token_id = user_open_quest.token_id
-		WHERE
-			user_open_quest.deleted_at IS NULL AND quest.status = 1 AND json_element->>'type' = 'open_quest' AND quest.token_id = ? AND idx= ?
-			AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL  AND json_element->>'score' IS NULL AND json_element->>'correct' IS NULL
-		`
-		err = global.DB.Raw(toReviewCountSQL, list[i].TokenId, list[i].Index+1).Scan(&list[i].ToReviewCount).Error
-		if err != nil {
-			continue
-		}
 		// 已评分数量
 		reviewedCountSQL := `
 		SELECT 
@@ -162,43 +193,8 @@ func GetUserOpenQuestListV2(r request.GetUserOpenQuestListRequest) (list []respo
 		if err != nil {
 			continue
 		}
-		fmt.Println("add_ts", list[i].Addts)
 	}
-	sort.SliceStable(list, func(i, j int) bool {
-		return list[i].Addts > list[j].Addts
-	})
-	sort.SliceStable(list, func(i, j int) bool {
-		return list[i].ToReviewCount > 0
-	})
-	sort.SliceStable(list, func(i, j int) bool {
-		if list[i].ToReviewCount != 0 {
-			if list[i].TokenId == list[j].TokenId {
-				return list[i].Index < list[j].Index
-			}
-			return list[i].Addts > list[j].Addts
-		}
-		return false
-	})
-	// 过滤
-	temp := make([]response.UserOpenQuestJsonElements, 0)
-	for _, v := range list {
-		if v.LastSummitTime.IsZero() {
-			continue
-		}
-		temp = append(temp, v)
-	}
-	for i := 0; i < len(list); i++ {
-		// 先按照ToReviewCount倒序排序
-		totalToReview += list[i].ToReviewCount
-	}
-	total = int64(len(temp))
-	// limit offset
-	result := make([]response.UserOpenQuestJsonElements, 0)
-
-	for i := offset; i < (offset+limit) && i < len(temp); i++ {
-		result = append(result, temp[i])
-	}
-	return result, total, totalToReview, nil
+	return list, total, totalToReview, nil
 }
 
 // GetUserOpenQuestDetailListV2 获取用户开放题详情
