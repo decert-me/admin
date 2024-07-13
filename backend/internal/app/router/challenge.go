@@ -15,5 +15,6 @@ func InitChallengeRouter(Router *gin.RouterGroup) {
 		challengeRouterAuth.POST("getUserOpenQuestListV2", api.GetUserOpenQuestListV2)             // 获取用户开放题列表V2
 		challengeRouterAuth.POST("reviewOpenQuestV2", api.ReviewOpenQuestV2)                       // 审核开放题目V2
 		challengeRouterAuth.POST("getUserOpenQuestDetailListV2", api.GetUserOpenQuestDetailListV2) // 获取用户开放题详情列表V2
+		challengeRouterAuth.POST("getUserQuestDetail", api.GetUserQuestDetail)                     // 获取用户答题详情
 	}
 }

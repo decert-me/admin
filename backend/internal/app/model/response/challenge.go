@@ -50,3 +50,15 @@ type GetUserOpenQuestDetailListV2 struct {
 	UserScore             int64          `gorm:"column:user_score" form:"user_score" json:"user_score"`    // 用户分数
 	NickName              *string        `gorm:"column:nickname;type:varchar(200);default:''" json:"nickname" form:"nickname"`
 }
+
+type GetUserQuestDetailResponse struct {
+	ID         uint           `gorm:"primarykey" json:"id"`
+	UUID       string         `gorm:"column:uuid" json:"uuid"`
+	Address    string         `gorm:"column:address;type:varchar(44);comment:钱包地址;index:address_tokenId" json:"address" form:"address"`
+	SubmitTime time.Time      `gorm:"column:submit_time" json:"submit_time"`
+	Title      string         `gorm:"column:title;comment:标题;type:varchar" json:"title" form:"title"` // 标题
+	TokenId    string         `gorm:"column:token_id;UNIQUE;not null;type:varchar(100)" json:"tokenId"`
+	QuestData  datatypes.JSON `gorm:"column:quest_data" json:"quest_data"` // 元数据
+	Answer     datatypes.JSON `gorm:"column:answer" json:"answer"`
+	Answers    []string       `gorm:"-" json:"answers"`
+}
