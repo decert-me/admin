@@ -15,7 +15,7 @@ export default function UserListPage(params) {
     const [search_key, setSearch_key] = useState(""); //  搜索
     const [form, setForm] = useState({tag: ""}); //  搜索
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
     const columns = [
@@ -101,7 +101,7 @@ export default function UserListPage(params) {
     useEffect(() => {
         pageConfig = {
           page: 0,
-          pageSize: 10,
+          pageSize: 50,
           total: 0,
         };
         setPageConfig({ ...pageConfig });

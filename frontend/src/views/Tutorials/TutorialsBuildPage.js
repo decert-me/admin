@@ -10,7 +10,7 @@ export default function TutorialsBuildPage(params) {
     let [loading, setLoading] = useState(false);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
-      page: 1, total: 0, pageSize: 10
+      page: 1, total: 0, pageSize: 50
     });
 
     const columns = [

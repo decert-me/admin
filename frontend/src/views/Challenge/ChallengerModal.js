@@ -8,7 +8,7 @@ export default function ChallengerModal(props) {
     const {challenge} = props;
     const [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
     const info = ({uuid, address}) => {
@@ -118,7 +118,7 @@ export default function ChallengerModal(props) {
     useEffect(() => {
         pageConfig = {
           page: 0,
-          pageSize: 10,
+          pageSize: 50,
           total: 0,
         };
         setPageConfig({ ...pageConfig });

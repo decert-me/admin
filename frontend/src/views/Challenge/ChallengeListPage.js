@@ -73,7 +73,7 @@ export default function ChallengeListPage(params) {
     let [modalData, setModalData] = useState([]);
     let [checkedList, setCheckedList] = useState([]);
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
     const { run } = useRequest(changeSearch, {
@@ -432,7 +432,7 @@ export default function ChallengeListPage(params) {
         if (res.code === 0) {
           message.success(res.msg);
           pageConfig = {
-            page: 0, pageSize: 10, total: 0
+            page: 0, pageSize: 50, total: 0
           }
           modalPage.page = 0;
           setModalPage({...modalPage})
@@ -455,7 +455,7 @@ export default function ChallengeListPage(params) {
       modalData = [];
       setModalData([...modalData]);
       pageConfig = {
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
       }
       init();
     }
@@ -468,7 +468,7 @@ export default function ChallengeListPage(params) {
 
     useEffect(() => {
       pageConfig = {
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
       }
       setPageConfig({...pageConfig});
       if (location.search) {
