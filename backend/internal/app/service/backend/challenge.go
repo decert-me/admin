@@ -437,3 +437,30 @@ func GetUserNameTagsByAddress(address string) (nickname, name string, tags []str
 		Find(&tags).Error
 	return
 }
+
+func GetUserQuestDetail(r request.GetUserQuestDetailRequest) (res response.GetUserQuestDetailResponse, err error) {
+	address := r.Address
+	res.Address = address
+	err = global.DB.Model(&model.Quest{}).
+		Select("quest.*,COALESCE(tr.title,quest.title) as title,COALESCE(tr.description,quest.description) as description,"+
+			"COALESCE(tr.meta_data,quest.meta_data) as meta_data,COALESCE(tr.quest_data,quest.quest_data) as quest_data,"+
+			"b.claimed,b.user_score,b.nft_address,b.badge_token_id,b.chain_id as badge_chain_id,COALESCE(o.open_quest_review_status,0) as open_quest_review_status,COALESCE(o.answer,l.answer) as answer,COALESCE(o.created_at,l.created_at) as submit_time").
+		Joins("left join user_challenges b ON quest.token_id=b.token_id AND b.address= ?", address).
+		Joins("left join user_challenge_log l ON quest.token_id=l.token_id AND l.address= ? AND l.deleted_at IS NULL", address).
+		Joins("left join user_open_quest o ON quest.token_id=o.token_id AND o.address= ? AND o.deleted_at IS NULL", address).
+		Joins("LEFT JOIN quest_translated tr ON quest.token_id = tr.token_id AND tr.language = ?", "zh-CN").
+		Where("quest.uuid", r.UUID).
+		Order("l.add_ts desc,o.id desc").
+		First(&res).Error
+	if err != nil {
+		return res, err
+	}
+	// 获取所有答案
+	err = global.DB.Raw(`SELECT answer AS answers
+		FROM (
+		SELECT  quest_data->>'answers' AS answer FROM quest WHERE token_id = ?
+		UNION
+		SELECT answer FROM quest_translated WHERE token_id = ? AND answer IS NOT NULL) AS combined_data
+		`, res.TokenId, res.TokenId).Scan(&res.Answers).Error
+	return
+}

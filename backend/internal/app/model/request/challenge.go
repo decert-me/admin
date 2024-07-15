@@ -34,3 +34,8 @@ type GetUserOpenQuestDetailListRequest struct {
 	Index                 *uint8 `json:"index" binding:"required"`
 	OpenQuestReviewStatus uint8  `json:"open_quest_review_status" form:"open_quest_review_status"`
 }
+
+type GetUserQuestDetailRequest struct {
+	UUID    string `json:"uuid" binding:"required"`
+	Address string `json:"address" binding:"required"`
+}

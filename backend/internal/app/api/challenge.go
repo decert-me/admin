@@ -103,3 +103,17 @@ func GetUserOpenQuestDetailListV2(c *gin.Context) {
 		}, "获取成功", c)
 	}
 }
+
+// GetUserQuestDetail 获取用户题目详情
+func GetUserQuestDetail(c *gin.Context) {
+	var r request.GetUserQuestDetailRequest
+	if err := c.ShouldBindJSON(&r); err != nil {
+		response.FailWithMessage(response.TranslateValidationErrors(err), c)
+		return
+	}
+	if data, err := backend.GetUserQuestDetail(r); err != nil {
+		response.FailWithMessage("获取失败："+err.Error(), c)
+	} else {
+		response.OkWithData(data, c)
+	}
+}
