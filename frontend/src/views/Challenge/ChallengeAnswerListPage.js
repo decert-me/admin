@@ -16,7 +16,7 @@ export default function ChallengeAnswerListPage() {
   const [totalObj, setTotalObj] = useState({});
   let [pageConfig, setPageConfig] = useState({
     page: 0,
-    pageSize: 10,
+    pageSize: 50,
     total: 0,
   });
 
@@ -145,7 +145,7 @@ export default function ChallengeAnswerListPage() {
   useEffect(() => {
     pageConfig = {
       page: 0,
-      pageSize: 10,
+      pageSize: 50,
       total: 0,
     };
     setPageConfig({ ...pageConfig });

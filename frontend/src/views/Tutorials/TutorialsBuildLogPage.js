@@ -14,7 +14,7 @@ export default function TutorialsBuildLogPage(params) {
     let [tutorial, setTutorial] = useState();
     let [log, setLog] = useState();
     let [pageConfig, setPageConfig] = useState({
-        page: 1, total: 0, pageSize: 10
+        page: 1, total: 0, pageSize: 50
     });
 
     const columns = [

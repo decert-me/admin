@@ -121,7 +121,7 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
         }
         getUserOpenQuestDetailList({
             "page": page,
-            "pageSize": 10,
+            "pageSize": 50,
             "open_quest_review_status": reviewStatus ? 1 : 2,
             ...questDetail
         })
