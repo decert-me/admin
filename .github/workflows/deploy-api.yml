@@ -30,12 +30,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       
-      - name: Go to Directory
-        run: |
-          cd backend
 
       - name: Build Go application
         run: |
+          cd backend  # 在这里进入目录
           BINARY_FILENAME=decert_admin-$(date +'%Y%m%d-%H%M%S')
           echo "BINARY_FILENAME=$BINARY_FILENAME" >> $GITHUB_ENV
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $BINARY_FILENAME
@@ -48,7 +46,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           port: 22
-          source: ${{ env.BINARY_FILENAME }} # 修改为你的应用二进制文件的路径
+          source: backend/${{ env.BINARY_FILENAME }} # 修改为你的应用二进制文件的路径
           target: "${{ vars.BACKEND_DIRECTORY }}" # 更改为服务器上的目标目录
 
       - name: Clean old releases and restart application with PM2
