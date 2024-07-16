@@ -65,4 +65,4 @@ jobs:
             # copy to decert_admin
             cp -f ${{ env.BINARY_FILENAME }} decert_admin
             # 使用 pm2 重启应用
-            pm2 reload pm2.json
+            pm2 reload pm2.config.js
