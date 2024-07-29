@@ -37,6 +37,10 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 			WHEN MAX(CAST(user_open_quest.pass AS integer))=1 THEN true
 			ELSE false
 			END AS pass
+			CASE 
+			WHEN MAX(CASE WHEN user_open_quest.open_quest_review_status = 1 THEN 1 ELSE 0 END) = 1 THEN true
+			ELSE false
+			END AS reviewing
 			FROM
 			"user_challenge_log"
 			LEFT JOIN quest ON quest.token_id = user_challenge_log.token_id

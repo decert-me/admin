@@ -49,7 +49,8 @@ type GetQuestStatisticsRes struct {
 	Pass          bool      `gorm:"pass" json:"pass"`
 	Claimed       bool      `gorm:"claimed" json:"claimed"`
 	ScoreDetail   string    `gorm:"column:score_detail" json:"score_detail"`
-	Annotation    string    `gorm:"column:annotation" json:"annotation"` // 批注
+	Annotation    string    `gorm:"column:annotation" json:"annotation"`                                          // 批注
+	Reviewing     bool      `gorm:"column:reviewing;default:false;comment:审核中" json:"reviewing" form:"reviewing"` // 审核中
 }
 
 type GetChallengeUserStatisticsRes struct {
