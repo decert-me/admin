@@ -165,8 +165,8 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
                     <div className="item">
                         <div className="item-title">提交时间: &nbsp;
                             <span className="item-content">{
-                            selectOpenQs?.updated_at && selectOpenQs?.updated_at.indexOf("0001-01-01T") === -1
-                            ? selectOpenQs?.updated_at.replace("T", " ").split(".")[0].split("+")[0]
+                            selectOpenQs?.created_at && selectOpenQs?.created_at.indexOf("0001-01-01T") === -1
+                            ? selectOpenQs?.created_at.replace("T", " ").split(".")[0].split("+")[0]
                             : "-"}</span>
                         </div>
                     </div>
