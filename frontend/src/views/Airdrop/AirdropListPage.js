@@ -10,7 +10,7 @@ export default function AirdropList(params) {
     let [data, setData] = useState([]);
     let [status, setStatus] = useState(3);
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
     const handleChange = (pagination, filters, sorter) => {

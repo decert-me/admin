@@ -1,32 +1,24 @@
 import { Modal, Table, message, Input } from "antd";
 import { useEffect, useState } from "react";
 import { getQuestAnswerList } from "../../request/api/quest";
-const { TextArea } = Input;
+import JudgReviewModal from "./JudgReviewModal";
 
 export default function ChallengerModal(props) {
 
     const {challenge} = props;
     const [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
-    const info = (value) => {
+    const info = ({uuid, address}) => {
         Modal.info({
             icon: <></>,
             width: "1200px",
-            title: "批注",
-            content: (
-                <TextArea 
-                    autoSize={{
-                        minRows: 5,
-                        maxRows: 15,
-                    }}
-                    readOnly
-                    value={value}
-                />
-            ),
-            okText: "我知道了"
+            wrapClassName: "judg-modal",
+            content: <JudgReviewModal uuid={uuid} address={address} />,
+            footer: null,
+            closable: true
         });
     };
 
@@ -71,11 +63,11 @@ export default function ChallengerModal(props) {
             dataIndex: "score_detail"
         },
         {
-            title: "批注",
+            title: "评分详情",
             dataIndex: "annotation",
             ellipsis: true,
-            render: (annotation) => (
-                <a onClick={() => info(annotation)}>{annotation}</a>
+            render: (annotation, quest) => (
+                <a onClick={() => info(quest)}>{annotation ? "查看" : ""}</a>
             )
         },
         {
@@ -126,7 +118,7 @@ export default function ChallengerModal(props) {
     useEffect(() => {
         pageConfig = {
           page: 0,
-          pageSize: 10,
+          pageSize: 50,
           total: 0,
         };
         setPageConfig({ ...pageConfig });

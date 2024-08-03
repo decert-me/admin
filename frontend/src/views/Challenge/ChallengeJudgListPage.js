@@ -1,19 +1,16 @@
 import { Button, Modal, Space, Table } from "antd"
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { getUserOpenQuestList } from "../../request/api/judgment";
 import ChallengeJudgPage from "./ChallengeJudgPage";
 import "./judg.scss";
-import { copyToClipboard } from "../../utils/text/copyToClipboard";
 
 const location = window.location.host;
 const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
 const host = isTest ? "https://decert.me" : "http://192.168.1.10:8087";
-const { confirm } = Modal;
 
 export default function ChallengeJudgListPage(params) {
 
     const [detailOpen, setDetailOpen] = useState(false);
-    const [rateNum, setRateNum] = useState(0);
     const [questDetail, setQuestDetail] = useState();
     const [reviewStatus, setReviewStatus] = useState();     // true: 未评分 || false: 已评分
     
@@ -22,7 +19,7 @@ export default function ChallengeJudgListPage(params) {
     let [status, setStatus] = useState(1);
     let [data, setData] = useState([]);
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
     const handleChange = (pagination, filters, sorter) => {
@@ -137,9 +134,6 @@ export default function ChallengeJudgListPage(params) {
             })
             setData([...data]);
             pageConfig.total = res.data.total;
-            if (status === 1) {
-                setRateNum(pageConfig.total);
-            }
             setPageConfig({...pageConfig});
         })
         setTableLoad(false);
@@ -158,13 +152,12 @@ export default function ChallengeJudgListPage(params) {
     return (
         <div className="judg">
             <div className="tabel-title">
-                <h2 style={{fontSize: 20}}>评分列表
-                    {/* <span style={{fontSize: 14, fontWeight: 400, color: "#999999"}}>（待评分 {rateNum}）</span> */}
-                </h2>
+                <h2 style={{fontSize: 20}}>评分列表</h2>
             </div>
 
             <Modal
                 width={1177}
+                maskClosable={false}
                 className="judg-modal"
                 open={detailOpen}
                 footer={null}
@@ -176,7 +169,6 @@ export default function ChallengeJudgListPage(params) {
                 columns={columns} 
                 dataSource={data} 
                 loading={tableLoad}
-                onChange={handleChange}
                 pagination={{
                     current: pageConfig.page, 
                     total: pageConfig.total, 

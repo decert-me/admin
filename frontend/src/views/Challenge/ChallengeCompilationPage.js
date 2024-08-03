@@ -14,7 +14,7 @@ export default function ChallengeCompilationPage(params) {
     const navigateTo = useNavigate();
     let [data, setData] = useState();
     let [pageConfig, setPageConfig] = useState({
-      page: 0, pageSize: 10, total: 0
+      page: 0, pageSize: 50, total: 0
     });
 
     const handleChange = (pagination, filters, sorter) => {

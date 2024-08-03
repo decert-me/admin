@@ -52,7 +52,7 @@ export default function UserTagAddPage(params) {
         let searchItem = {};
         getUsersList({
             "page": 1,
-            "pageSize": 10, //每页数量
+            "pageSize": 50, //每页数量
             "search_tag": "", 
             "search_address": addr
         })

@@ -46,7 +46,7 @@ export default function UserTagModify() {
         // 获取user_id
         const res = await getUsersList({
             "page": 1,
-            "pageSize": 10, 
+            "pageSize": 50, 
             "search_tag": "", 
             "search_address": address
         })

@@ -235,7 +235,8 @@ func GetUserOpenQuestDetailListV2(r request.GetUserOpenQuestDetailListRequest) (
 						ELSE 1
 					END AS open_quest_review_status,
 					json_element->>'open_quest_review_time' AS open_quest_review_time,
-					user_open_quest.updated_at,
+					user_open_quest.updated_at as updated_at,
+					user_open_quest.created_at as created_at,
 					(idx::int - 1)  AS index,
 					json_element->>'type' AS type,
 					json_element->>'value' AS value,

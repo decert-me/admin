@@ -12,7 +12,7 @@ export default function UserTagsPage(params) {
   const [data, setData] = useState([]);
   const [form, setForm] = useState({}); //  搜索
   let [pageConfig, setPageConfig] = useState({
-    page: 0, pageSize: 10, total: 0
+    page: 0, pageSize: 50, total: 0
 });
 
   const rowSelection = {
@@ -124,7 +124,7 @@ export default function UserTagsPage(params) {
   useEffect(() => {
     pageConfig = {
       page: 0,
-      pageSize: 10,
+      pageSize: 50,
       total: 0,
     };
     setPageConfig({ ...pageConfig });

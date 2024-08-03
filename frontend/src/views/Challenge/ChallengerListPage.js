@@ -8,7 +8,7 @@ export default function ChallengerListPage() {
     const [data, setData] = useState([]);
     const [form, setForm] = useState({}); //  搜索
     let [pageConfig, setPageConfig] = useState({
-        page: 0, pageSize: 10, total: 0
+        page: 0, pageSize: 50, total: 0
     });
 
     const columns = [
@@ -110,7 +110,7 @@ export default function ChallengerListPage() {
     useEffect(() => {
         pageConfig = {
           page: 0,
-          pageSize: 10,
+          pageSize: 50,
           total: 0,
         };
         setPageConfig({ ...pageConfig });
