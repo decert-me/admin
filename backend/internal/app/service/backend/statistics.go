@@ -18,6 +18,7 @@ import (
 func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response.GetQuestStatisticsRes, total int64, err error) {
 	limit := r.PageSize
 	offset := r.PageSize * (r.Page - 1)
+
 	var results []response.GetQuestStatisticsRes
 	countSQL := "SELECT count(1) FROM ("
 	selectSQL := "SELECT * FROM ("
@@ -76,6 +77,9 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 	dataSQL += " GROUP BY users.address,quest.ID,users.name) as tt"
 	// 分页SQL
 	paginateSQL := " LIMIT ? OFFSET ?"
+	if r.SearchTag != "" && r.SearchQuest != "" {
+		paginateSQL = ""
+	}
 	// 过滤条件
 	whereList = nil // 清空
 	if r.Pass != nil {
@@ -103,7 +107,10 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		return
 	}
 	// 执行查询
-	valueList = append(valueList, limit, offset)
+	if !(r.SearchTag != "" && r.SearchQuest != "") {
+		valueList = append(valueList, limit, offset)
+	}
+
 	err = db.Raw(selectSQL+dataSQL+paginateSQL, valueList...).Scopes(Paginate(r.Page, r.PageSize)).Find(&results).Error
 	if err != nil {
 		return res, total, err
@@ -209,9 +216,13 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 				result.Claimed = false
 				result.ChallengeResult = "-"
 				results = append(results, result)
-
+				total++
 			}
 		}
+	}
+	// 手动分页
+	if len(results) > int(r.PageSize) {
+		results = results[offset : offset+limit]
 	}
 	return results, total, nil
 }
