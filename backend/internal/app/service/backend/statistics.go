@@ -6,9 +6,12 @@ import (
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
 	"fmt"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/tidwall/gjson"
+	"go.uber.org/zap"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // GetChallengeStatistics 挑战详情统计
@@ -36,7 +39,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 			WHEN MAX(CAST(user_challenge_log.pass AS integer))=1 THEN true
 			WHEN MAX(CAST(user_open_quest.pass AS integer))=1 THEN true
 			ELSE false
-			END AS pass
+			END AS pass,
 			CASE 
 			WHEN MAX(CASE WHEN user_open_quest.open_quest_review_status = 1 THEN 1 ELSE 0 END) = 1 THEN true
 			ELSE false
@@ -163,9 +166,63 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 				results[i].Annotation += fmt.Sprintf("第 %d 题 %s \n %s \n", ii+1, title, annotation)
 			}
 		}
+		if results[i].Claimed || results[i].Pass {
+			results[i].ChallengeResult = "成功"
+		} else if results[i].Reviewing {
+			results[i].ChallengeResult = "审核中"
+		} else {
+			results[i].ChallengeResult = "失败"
+		}
 	}
 
+	// 额外处理
+	if r.SearchTag != "" && r.SearchQuest != "" {
+		// 查询所有挑战
+		var questList []model.Quest
+		err = global.DB.Model(&model.Quest{}).Where("quest.title LIKE ? OR quest.token_id LIKE ? OR quest.uuid LIKE ?", r.SearchQuest, r.SearchQuest, r.SearchQuest).Find(&questList).Error
+		if err != nil {
+			log.Error("Failed to query quest", zap.Error(err))
+			return results, total, err
+		}
+		// 查询所有地址
+		var userList []model.Users
+		err = global.DB.Model(&model.Users{}).
+			Joins("LEFT JOIN users_tag ON users_tag.user_id = users.ID").
+			Joins("LEFT JOIN tag ON tag.id = users_tag.tag_id").
+			Where("tag.name LIKE ?", "%"+r.SearchTag+"%").
+			Find(&userList).Error
+
+		for _, user := range userList {
+			for _, quest := range questList {
+				if isAddressAndTokenIDInResults(user.Address, quest.TokenId, results) {
+					continue
+				}
+				var result response.GetQuestStatisticsRes
+				result.Address = user.Address
+				result.TokenID = quest.TokenId
+				result.QuestID = int64(quest.ID)
+				result.Title = quest.Title
+				result.Name = *user.Name
+				result.Tags = r.SearchTag
+				result.ChallengeTime = time.Time{}
+				result.Pass = false
+				result.Claimed = false
+				result.ChallengeResult = "-"
+				results = append(results, result)
+
+			}
+		}
+	}
 	return results, total, nil
+}
+
+func isAddressAndTokenIDInResults(address string, tokenID string, results []response.GetQuestStatisticsRes) bool {
+	for _, result := range results {
+		if result.Address == address && result.TokenID == tokenID {
+			return true
+		}
+	}
+	return false
 }
 
 // GetChallengeUserStatistics 挑战者统计
