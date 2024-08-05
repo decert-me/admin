@@ -46,8 +46,7 @@ export default function ChallengeAnswerListPage() {
     },
     {
       title: "挑战结果",
-      dataIndex: "pass",
-      render: (claimed) => (claimed ? "成功" : "失败"),
+      dataIndex: "challenge_result",
     },
     {
       title: "领取NFT",
