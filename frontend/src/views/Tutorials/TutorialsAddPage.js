@@ -112,7 +112,7 @@ export default function TutorialsAddPage(params) {
                     }
                 })
             }else{
-                await getCollectionDetail({id: challenge})
+                await getCollectionDetail({id: Number(challenge)})
                 .then(res => {
                     if (res.code !== 0) {
                         flag = false;

@@ -102,7 +102,7 @@ export default function TutorialsModifyPage(params) {
                     }
                 })
             }else{
-                await getCollectionDetail({id: challenge})
+                await getCollectionDetail({id: Number(challenge)})
                 .then(res => {
                     if (res.code !== 0) {
                         flag = false;
@@ -171,7 +171,7 @@ export default function TutorialsModifyPage(params) {
         .catch(err => {
             navigateTo(-1);
         })
-        const {link_type, challenge} = splitUrl(tutorial.challenge);
+        const {link_type, challenge} = splitUrl(tutorial?.challenge);
         fields = [
             {
                 name: ['label'],
