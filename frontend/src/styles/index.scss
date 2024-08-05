@@ -26,6 +26,17 @@
         color: #1677ff;
     }
 }
+.ellipsis{
+    max-width: 120px;
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    word-break: keep-all;
+} 
+.cursor-pointer{
+    cursor: pointer;
+}
 .text-w-300{
     max-width: 300px;
     display: inline-block;
