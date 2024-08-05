@@ -6,12 +6,13 @@ import (
 	"backend/internal/app/model/request"
 	"backend/internal/app/model/response"
 	"fmt"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/tidwall/gjson"
-	"go.uber.org/zap"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/tidwall/gjson"
+	"go.uber.org/zap"
 )
 
 // GetChallengeStatistics 挑战详情统计
@@ -176,7 +177,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		if results[i].Claimed || results[i].Pass {
 			results[i].ChallengeResult = "成功"
 		} else if results[i].Reviewing {
-			results[i].ChallengeResult = "审核中"
+			results[i].ChallengeResult = "评分中"
 		} else {
 			results[i].ChallengeResult = "失败"
 		}
