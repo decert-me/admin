@@ -38,18 +38,20 @@ type GetQuestCollectionAddListRes struct {
 }
 
 type GetQuestStatisticsRes struct {
-	UUID          string    `gorm:"uuid" json:"uuid"`
-	Title         string    `gorm:"title" json:"title"`
-	Address       string    `gorm:"column:address;type:varchar(44);UNIQUE;comment:钱包地址" json:"address" form:"address"`
-	Name          string    `gorm:"name" json:"name"`
-	Tags          string    `json:"tags"`
-	ChallengeTime time.Time `gorm:"challenge_time" json:"challenge_time"` // 挑战时间
-	QuestID       int64     `gorm:"quest_id" json:"-"`
-	TokenID       string    `gorm:"token_id" json:"-"`
-	Pass          bool      `gorm:"pass" json:"pass"`
-	Claimed       bool      `gorm:"claimed" json:"claimed"`
-	ScoreDetail   string    `gorm:"column:score_detail" json:"score_detail"`
-	Annotation    string    `gorm:"column:annotation" json:"annotation"` // 批注
+	UUID            string    `gorm:"uuid" json:"uuid"`
+	Title           string    `gorm:"title" json:"title"`
+	Address         string    `gorm:"column:address;type:varchar(44);UNIQUE;comment:钱包地址" json:"address" form:"address"`
+	Name            string    `gorm:"name" json:"name"`
+	Tags            string    `json:"tags"`
+	ChallengeTime   time.Time `gorm:"challenge_time" json:"challenge_time"` // 挑战时间
+	QuestID         int64     `gorm:"quest_id" json:"-"`
+	TokenID         string    `gorm:"token_id" json:"-"`
+	Pass            bool      `gorm:"pass" json:"pass"`
+	Claimed         bool      `gorm:"claimed" json:"claimed"`
+	ScoreDetail     string    `gorm:"column:score_detail" json:"score_detail"`
+	Annotation      string    `gorm:"column:annotation" json:"annotation"`                                          // 批注
+	Reviewing       bool      `gorm:"column:reviewing;default:false;comment:评分中" json:"reviewing" form:"reviewing"` // 评分中
+	ChallengeResult string    `gorm:"column:challenge_result" json:"challenge_result"`                              // 挑战结果
 }
 
 type GetChallengeUserStatisticsRes struct {
