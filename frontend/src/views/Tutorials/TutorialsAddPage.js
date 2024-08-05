@@ -104,7 +104,7 @@ export default function TutorialsAddPage(params) {
         let flag = true;
         if (challenge && link_type) {
             if (link_type === "quests") {                
-                await getQuest({id: Number(challenge)})
+                await getQuest({id: challenge})
                 .then(res => {
                     if (res.code !== 0) {
                         flag = false;
@@ -112,7 +112,7 @@ export default function TutorialsAddPage(params) {
                     }
                 })
             }else{
-                await getCollectionDetail({id: Number(challenge)})
+                await getCollectionDetail({id: challenge})
                 .then(res => {
                     if (res.code !== 0) {
                         flag = false;

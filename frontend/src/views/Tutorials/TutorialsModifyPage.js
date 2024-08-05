@@ -13,6 +13,7 @@ import { UploadProps } from '../../utils/props';
 import { getYouTubePlayList } from '../../request/api/public';
 import { getCollectionDetail, getQuest } from '../../request/api/quest';
 import { useUpdateEffect } from 'ahooks';
+import { splitUrl } from '../../utils/text/url';
 const { TextArea } = Input;
 
 
@@ -93,7 +94,7 @@ export default function TutorialsModifyPage(params) {
         let flag = true;
         if (challenge && link_type) {
             if (link_type === "quests") {                
-                await getQuest({id: Number(challenge)})
+                await getQuest({id: challenge})
                 .then(res => {
                     if (res.code !== 0) {
                         flag = false;
@@ -101,7 +102,7 @@ export default function TutorialsModifyPage(params) {
                     }
                 })
             }else{
-                await getCollectionDetail({id: Number(challenge)})
+                await getCollectionDetail({id: challenge})
                 .then(res => {
                     if (res.code !== 0) {
                         flag = false;
@@ -170,6 +171,7 @@ export default function TutorialsModifyPage(params) {
         .catch(err => {
             navigateTo(-1);
         })
+        const {link_type, challenge} = splitUrl(tutorial.challenge);
         fields = [
             {
                 name: ['label'],
@@ -184,8 +186,12 @@ export default function TutorialsModifyPage(params) {
                 value: "https://ipfs.decert.me/"+tutorial.img
             },
             {
+                name: ['link_type'],
+                value: link_type
+            },
+            {
                 name: ['challenge'],
-                value: tutorial?.challenge
+                value: challenge
             },
             {
                 name: ['category'],
@@ -365,7 +371,7 @@ export default function TutorialsModifyPage(params) {
                     label="挑战编号"
                     name="challenge"
                 >
-                    <InputNumber addonBefore={prefixSelector} controls={false} />
+                    <InputNumber stringMode addonBefore={prefixSelector} controls={false} />
                 </Form.Item>
 
                 <Form.Item
