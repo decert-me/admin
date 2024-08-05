@@ -11,7 +11,7 @@ import { getTutorial, updateTutorial } from '../../request/api/tutorial';
 import { getLabelList } from '../../request/api/tags';
 import { UploadProps } from '../../utils/props';
 import { getYouTubePlayList } from '../../request/api/public';
-import { getQuest } from '../../request/api/quest';
+import { getCollectionDetail, getQuest } from '../../request/api/quest';
 import { useUpdateEffect } from 'ahooks';
 const { TextArea } = Input;
 
@@ -21,6 +21,7 @@ export default function TutorialsModifyPage(params) {
     
     const { id } = useParams();
     const [form] = Form.useForm();
+    const { Option } = Select;
     const navigateTo = useNavigate();
     const videoCategory = Form.useWatch("videoCategory", form);
     const docType = Form.useWatch("docType", form);
@@ -33,6 +34,19 @@ export default function TutorialsModifyPage(params) {
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
     let [videoList, updateVideoList] = useState([]);
+
+    const prefixSelector = (
+        <Form.Item name="link_type" noStyle>
+          <Select
+            style={{
+              width: 70,
+            }}
+          >
+            <Option value="quests">挑战</Option>
+            <Option value="collection">合集</Option>
+          </Select>
+        </Form.Item>
+    );
 
     function parseVideoList() {
         const link = form.getFieldValue("url");
@@ -70,21 +84,31 @@ export default function TutorialsModifyPage(params) {
         setLoading(true);
         const {
             repoUrl, label, docType, desc, tutorial_sort,
-            challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
+            challenge, link_type, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime, mdbookTranslator
         } = values;
         const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
 
         // 判断challenge是否存在
         let flag = true;
-        if (challenge) {
-            await getQuest({id: Number(challenge)})
-            .then(res => {
-                if (res.code !== 0) {
-                    flag = false;
-                    return;
-                }
-            })
+        if (challenge && link_type) {
+            if (link_type === "quests") {                
+                await getQuest({id: Number(challenge)})
+                .then(res => {
+                    if (res.code !== 0) {
+                        flag = false;
+                        return;
+                    }
+                })
+            }else{
+                await getCollectionDetail({id: Number(challenge)})
+                .then(res => {
+                    if (res.code !== 0) {
+                        flag = false;
+                        return;
+                    }
+                })
+            }
         }
         if (!flag) {
             // 终止
@@ -92,18 +116,20 @@ export default function TutorialsModifyPage(params) {
             setLoading(false);
             return
         }
+        const domain = process.env.REACT_APP_IS_DEV ? "http://123.88.4.114:8087/" : "https://decert.me/";
         if (doctype === "doc") {
             const obj = {
                 repoUrl, label, docType, img, desc, tutorial_sort,
-                challenge, branch, docPath, commitHash,
-                category, language, difficulty, estimateTime, mdbookTranslator
+                branch, docPath, commitHash,
+                category, language, difficulty, estimateTime, mdbookTranslator,
+                challenge: domain+link_type+"/"+challenge
             }
             create(obj)
         }else{
             const obj = {
-                url, label, img, desc, tutorial_sort,
-                challenge, videoCategory,
-                category, language, difficulty, estimateTime, docType: "video"
+                url, label, img, desc, tutorial_sort, videoCategory,
+                category, language, difficulty, estimateTime, docType: "video",
+                challenge: domain+link_type+"/"+challenge
             }
             if (videoCategory === "bilibili") {
                 create({...obj, video: videoItems})
@@ -339,7 +365,7 @@ export default function TutorialsModifyPage(params) {
                     label="挑战编号"
                     name="challenge"
                 >
-                    <InputNumber controls={false} />
+                    <InputNumber addonBefore={prefixSelector} controls={false} />
                 </Form.Item>
 
                 <Form.Item

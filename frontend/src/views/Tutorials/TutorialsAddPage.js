@@ -14,7 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getLabelList } from '../../request/api/tags';
 import { getYouTubePlayList } from '../../request/api/public';
 import { useRequest, useUpdateEffect } from 'ahooks';
-import { getQuest } from "../../request/api/quest";
+import { getCollectionDetail, getQuest } from "../../request/api/quest";
 const { TextArea } = Input;
 
 
@@ -22,6 +22,7 @@ const { TextArea } = Input;
 export default function TutorialsAddPage(params) {
     
     const [form] = Form.useForm();
+    const { Option } = Select;
     const videoCategory = Form.useWatch("videoCategory", form);
     const docType = Form.useWatch("docType", form);
     
@@ -34,6 +35,20 @@ export default function TutorialsAddPage(params) {
     let [lang, setLang] = useState();     //  语种 选择器option
     let [doctype, setDoctype] = useState("doc");
     let [videoList, updateVideoList] = useState([]);
+
+    const prefixSelector = (
+        <Form.Item name="link_type" noStyle>
+          <Select
+            style={{
+              width: 70,
+            }}
+          >
+            <Option value="quests">挑战</Option>
+            <Option value="collection">合集</Option>
+          </Select>
+        </Form.Item>
+    );
+
     const { run } = useRequest(parseUrl, {
         debounceWait: 500,
         manual: true,
@@ -79,20 +94,32 @@ export default function TutorialsAddPage(params) {
         setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, tutorial_sort,
-            challenge, branch, docPath, commitHash, url, videoCategory, videoItems,
+            challenge, link_type, branch, docPath, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime, mdbookTranslator
         } = values;
+
+        
         const img = values.img.file.response.data.hash;
 
         let flag = true;
-        if (challenge) {
-            await getQuest({id: Number(challenge)})
-            .then(res => {
-                if (res.code !== 0) {
-                    flag = false;
-                    return;
-                }
-            })
+        if (challenge && link_type) {
+            if (link_type === "quests") {                
+                await getQuest({id: Number(challenge)})
+                .then(res => {
+                    if (res.code !== 0) {
+                        flag = false;
+                        return;
+                    }
+                })
+            }else{
+                await getCollectionDetail({id: Number(challenge)})
+                .then(res => {
+                    if (res.code !== 0) {
+                        flag = false;
+                        return;
+                    }
+                })
+            }
         }
         if (!flag) {
             // 终止
@@ -101,18 +128,20 @@ export default function TutorialsAddPage(params) {
             return
         }
 
+        const domain = process.env.REACT_APP_IS_DEV ? "http://123.88.4.114:8087/" : "https://decert.me/";
         if (doctype === "doc") {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, tutorial_sort,
-                challenge, branch, docPath, commitHash,
-                category, language, difficulty, estimateTime, mdbookTranslator
+                branch, docPath, commitHash,
+                category, language, difficulty, estimateTime, mdbookTranslator,
+                challenge: domain+link_type+"/"+challenge
             }
             create(obj)
         }else{
             const obj = {
-                url, label, catalogueName, img, desc, tutorial_sort,
-                challenge, videoCategory,
-                category, language, difficulty, estimateTime, docType: "video"
+                url, label, catalogueName, img, desc, tutorial_sort,videoCategory,
+                category, language, difficulty, estimateTime, docType: "video",
+                challenge: domain+link_type+"/"+challenge
             }
             if (videoCategory === "bilibili") {
                 create({...obj, video: videoItems})
@@ -257,7 +286,7 @@ export default function TutorialsAddPage(params) {
                     label="挑战编号"
                     name="challenge"
                 >
-                    <InputNumber controls={false} />
+                    <InputNumber addonBefore={prefixSelector} controls={false} />
                 </Form.Item>
                 
                 <Form.Item
