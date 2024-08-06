@@ -22,6 +22,7 @@ import InfiniteScroll from "../../components/InfiniteScroll";
 import CustomLoading from "../../components/InfiniteScroll/CustomLoading";
 import { Encryption } from "../../utils/encryption";
 import { exportJsonFile } from "../../utils/file/export";
+import { copyToClipboard } from "../../utils/text/copyToClipboard";
 
 const location = window.location.host;
 const isTest = ((location.indexOf("localhost") !== -1) || (location.indexOf("192.168.1.10") !== -1)) ? false : true;
@@ -99,18 +100,6 @@ export default function ChallengeListPage(params) {
           )
         },
         {
-          title: '挑战编号',
-          dataIndex: 'uuid',
-          render: (uuid, quest) => (
-            id ?
-            <Tooltip title="点此管理挑战">
-              <a className="underline" href={`/dashboard/challenge/list?tokenId=${quest.tokenId}`} target="">{quest.tokenId}</a>
-            </Tooltip>
-            :
-            <a className="underline" href={`${host}/quests/${uuid}`} target="_blank">{uuid}</a>
-          )
-        },
-        {
           title: 'NFT',
           dataIndex: 'metadata',
           render: ({image}, quest) => (
@@ -127,8 +116,17 @@ export default function ChallengeListPage(params) {
           dataIndex: 'title',
           render: (title, quest) => (
             <Tooltip title="查看挑战网页效果">
-              <a className="underline text-w-300" href={`${host}/quests/${quest.tokenId}`} target="_blank">{title}</a>
+              <a className="underline text-w-300" href={`${host}/quests/${quest.uuid}`} target="_blank">{title}</a>
             </Tooltip>
+          )
+        },
+        {
+          title: 'TokenId',
+          dataIndex: 'tokenId',
+          render: (tokenId) => (
+            <div className="ellipsis cursor-pointer" onClick={() => copyToClipboard(tokenId)}>
+              {tokenId}
+            </div>
           )
         },
         {
