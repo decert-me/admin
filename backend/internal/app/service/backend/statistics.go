@@ -71,7 +71,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		whereList = append(whereList, fmt.Sprintf("(users.address ILIKE ? OR users.name ILIKE ?)"))
 		valueList = append(valueList, "%"+r.SearchAddress+"%", "%"+r.SearchAddress+"%")
 	}
-	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null"
+	dataSQL += " WHERE quest.token_id is not null AND  users.address is not null AND quest.disable = false"
 	if len(whereList) > 0 {
 		dataSQL += " AND " + strings.Join(whereList, " AND ")
 	}
@@ -202,6 +202,9 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 
 		for _, user := range userList {
 			for _, quest := range questList {
+				if quest.Disabled {
+					continue
+				}
 				if isAddressAndTokenIDInResults(user.Address, quest.TokenId, results) {
 					continue
 				}
