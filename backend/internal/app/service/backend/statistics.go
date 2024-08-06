@@ -202,6 +202,9 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 
 		for _, user := range userList {
 			for _, quest := range questList {
+				if quest.Disabled {
+					continue
+				}
 				if isAddressAndTokenIDInResults(user.Address, quest.TokenId, results) {
 					continue
 				}
