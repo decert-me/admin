@@ -178,7 +178,7 @@ export default function ChallengeAnswerListPage() {
         <Form.Item label="标签" name="tag">
           <Input />
         </Form.Item>
-        <Form.Item label="挑战者地址" name="addr">
+        <Form.Item label="挑战者" name="addr">
           <Input />
         </Form.Item>
         <Form.Item shouldUpdate>
