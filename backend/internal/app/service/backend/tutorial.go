@@ -45,7 +45,7 @@ func GetTutorialList(info request.GetTutorialListStatusRequest) (list interface{
 
 func CreateTutorial(tutorial model.Tutorial) (res model.Tutorial, err error) {
 	// 判断挑战是否存在
-	if tutorial.Challenge != nil && *tutorial.Challenge != 0 {
+	if tutorial.Challenge != nil && *tutorial.Challenge != "" {
 		var count int64
 		err = global.DB.Model(&model.Quest{}).Where("token_id = ?", *tutorial.Challenge).Count(&count).Error
 		if count == 0 {
