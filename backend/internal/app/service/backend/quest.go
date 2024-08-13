@@ -70,9 +70,9 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 func GetQuest(id string) (quest response.GetQuestRes, err error) {
 	db := global.DB.Model(&model.Quest{})
 	if utils.IsUUID(id) {
-		err = db.Where("uuid = ?", db).First(&quest).Error
+		err = db.Where("uuid = ?", id).First(&quest).Error
 	} else {
-		err = db.Where("token_id = ?", db).First(&quest).Error
+		err = db.Where("token_id = ?", id).First(&quest).Error
 	}
 	// 获取所属合辑
 	global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", quest.TokenId).Find(&quest.CollectionID)
