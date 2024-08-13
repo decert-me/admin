@@ -371,7 +371,7 @@ export default function TutorialsModifyPage(params) {
                     label="挑战编号"
                     name="challenge"
                 >
-                    <InputNumber stringMode addonBefore={prefixSelector} controls={false} />
+                    <Input stringMode addonBefore={prefixSelector} />
                 </Form.Item>
 
                 <Form.Item
