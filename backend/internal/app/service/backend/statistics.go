@@ -181,6 +181,7 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		} else {
 			results[i].ChallengeResult = "失败"
 		}
+		results[i].IsOpenQuest = isOpenQuest
 	}
 
 	// 额外处理
