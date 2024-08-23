@@ -68,9 +68,14 @@ func GetQuestList(req request.GetQuestListRequest) (res []response.GetQuestListR
 
 // GetQuest 获取挑战详情
 func GetQuest(id string) (quest response.GetQuestRes, err error) {
-	err = global.DB.Model(&model.Quest{}).Where("token_id", id).First(&quest).Error
+	db := global.DB.Model(&model.Quest{})
+	if utils.IsUUID(id) {
+		err = db.Where("uuid = ?", id).First(&quest).Error
+	} else {
+		err = db.Where("token_id = ?", id).First(&quest).Error
+	}
 	// 获取所属合辑
-	global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", id).Find(&quest.CollectionID)
+	global.DB.Model(&model.CollectionRelate{}).Select("collection_id").Where("token_id = ?", quest.TokenId).Find(&quest.CollectionID)
 	return
 }
 
