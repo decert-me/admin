@@ -58,11 +58,11 @@ export default function ChallengeAnswerListPage() {
       dataIndex: "score_detail",
     },
     {
-      title: "评分详情",
+      title: "答题/评分详情",
       dataIndex: "annotation",
       ellipsis: true,
       render: (annotation, quest) => (
-          <a onClick={() => info(quest)}>{annotation ? "查看" : ""}</a>
+          <a onClick={() => info(quest)}>查看</a>
       )
     },
     {
