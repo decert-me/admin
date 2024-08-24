@@ -27,15 +27,28 @@ export default function JudgReviewModal({uuid, address}) {
                 const all_score = quest.map(e => e.score).reduce((accumulator, currentValue) => accumulator + currentValue, 0);
                 const data = {...res.data, all_score} || {};
                 const answer = res.data.answer || [];
+                
                 const arr = quest.map((e, i) => {
+                    let value = answer[i].value;
+                    if (e.type === "multiple_choice") {
+                        value = e.options[value];
+                    }
+                    if (e.type === "multiple_response") {
+                        value = value.map(item => e.options[item]).join("\n");
+                    }
+                    if (e.type === "coding") {
+                        value = answer[i].code;
+                    }
                     return {
                         score: e.score,
+                        description: e?.description,
                         title: e.title,
                         annex: answer[i].annex,
                         user_score: answer[i].score,
                         annotation: answer[i].annotation,
                         open_quest_review_time: answer[i].open_quest_review_time,
-                        value: answer[i].value
+                        value: value,
+                        type: e.type
                     }
                 })
                 setData(data);
@@ -75,6 +88,12 @@ export default function JudgReviewModal({uuid, address}) {
                         <div className="item-title">题目: &nbsp;
                             <span className="item-content">{selectOpenQs?.title}</span>
                         </div>
+                        {
+                            selectOpenQs?.description &&
+                            <div className="item-title">题干: &nbsp;
+                                <span className="item-content">{selectOpenQs?.description}</span>
+                            </div>
+                        }
                     </div>
 
                     <div className="item">
@@ -90,20 +109,22 @@ export default function JudgReviewModal({uuid, address}) {
                             value={selectOpenQs?.value}
                         />
                     </div>
-
-                    <div className="item">
-                        <p className="item-title">批注:</p>
-                        <TextArea 
-                            disabled
-                            className="item-content box"
-                            bordered={false} 
-                            autoSize={{
-                                minRows: 3,
-                                maxRows: 5,
-                            }}
-                            value={selectOpenQs?.annotation}
-                        />
-                    </div>
+                    {
+                        selectOpenQs.type === "open_quest" &&
+                        <div className="item">
+                            <p className="item-title">批注:</p>
+                            <TextArea 
+                                disabled
+                                className="item-content box"
+                                bordered={false} 
+                                autoSize={{
+                                    minRows: 3,
+                                    maxRows: 5,
+                                }}
+                                value={selectOpenQs?.annotation}
+                            />
+                        </div>
+                    }
                     <div className="item">
                         <p className="item-title">附件:</p>
                         <div className="item-content">
