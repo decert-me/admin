@@ -52,19 +52,20 @@ func ReviewOpenQuest(r request.ReviewOpenQuestRequest) (err error) {
 		return errors.New("获取题目失败")
 	}
 	// 获取分数
-	_, _, score, userScore, pass, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
+	result, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, r.Answer, quest)
+	score := result.UserReturnScore
 	// 写入审核结果
 	err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ? AND open_quest_review_status = 1", r.ID).Updates(&model.UserOpenQuest{
 		OpenQuestReviewTime:   time.Now(),
 		OpenQuestReviewStatus: 2,
 		OpenQuestScore:        score,
 		Answer:                r.Answer,
-		Pass:                  pass,
-		UserScore:             userScore,
+		Pass:                  result.Pass,
+		UserScore:             result.UserScore,
 	}).Error
 	// 写入Message
 	var message model.UserMessage
-	if pass {
+	if result.Pass {
 		message = model.UserMessage{
 			Title:     "恭喜通过挑战",
 			TitleEn:   "Congratulations on passing the challenge!",
@@ -275,10 +276,12 @@ func GetUserOpenQuestDetailListV2(r request.GetUserOpenQuestDetailListRequest) (
 			MetaData:  list[i].MetaData,
 			QuestData: list[i].QuestData,
 		}
-		list[i].TotalScore, list[i].UserScore, _, _, _, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, list[i].UserAnswer, quest)
+		result, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, list[i].UserAnswer, quest)
 		if err != nil {
-			return
+			return list, 0, err
 		}
+		list[i].TotalScore = result.TotalScore
+		list[i].UserScore = result.UserScore
 		var showStr string
 		showStr = fmt.Sprintf("%s...%s", list[i].Address[:6], list[i].Address[len(list[i].Address)-4:])
 		// 显示标签
@@ -360,11 +363,14 @@ func ReviewOpenQuestV2(req []request.ReviewOpenQuestRequestV2) (err error) {
 		}
 		// 判断是否通过
 		if openQuestReviewStatus == 2 {
-			_, _, userReturnScore, userScore, pass, err = AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(answerRes), quest)
+			result, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(answerRes), quest)
 			if err != nil {
 				db.Rollback()
 				return errors.New("服务器错误")
 			}
+			userReturnScore = result.UserReturnScore
+			userScore = result.UserScore
+			pass = result.Pass
 		}
 		score := fmt.Sprintf("%d", userReturnScore)
 		// 写入审核结果
@@ -463,5 +469,24 @@ func GetUserQuestDetail(r request.GetUserQuestDetailRequest) (res response.GetUs
 		UNION
 		SELECT answer FROM quest_translated WHERE token_id = ? AND answer IS NOT NULL) AS combined_data
 		`, res.TokenId, res.TokenId).Scan(&res.Answers).Error
+
+	var quest model.Quest
+	if err = global.DB.Model(&model.Quest{}).Where("token_id = ?", res.TokenId).First(&quest).Error; err != nil {
+		return
+	}
+	result, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, res.Answer, quest)
+	if err != nil {
+		return response.GetUserQuestDetailResponse{}, err
+	}
+	answer := gjson.Get(string(res.Answer), "@this").Array()
+	answerStr := gjson.Get(string(res.Answer), "@this").String()
+	for i, _ := range answer {
+		answerRes, err := sjson.Set(answerStr, fmt.Sprintf("%d.score", i), result.UserScoreList[i])
+		if err != nil {
+			continue
+		}
+		answerStr = answerRes
+	}
+	res.Answer = datatypes.JSON(answerStr)
 	return
 }
