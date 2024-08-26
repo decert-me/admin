@@ -5,7 +5,7 @@ import (
 	"backend/internal/app/model"
 	"backend/internal/app/utils"
 	"errors"
-	"fmt"
+
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 	"gorm.io/datatypes"
@@ -69,11 +69,12 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (result A
 		// 编程题目
 		if questType == "coding" || questType == "special_judge_coding" {
 			// 跳过不正确
-			if gjson.Get(v.String(), "correct").Bool() == true {
+			if gjson.Get(v.String(), "correct").Bool() {
 				score += scoreList[i].Int()
 				result.UserScoreList = append(result.UserScoreList, scoreList[i].Int())
+			} else {
+				result.UserScoreList = append(result.UserScoreList, 0)
 			}
-			result.UserScoreList = append(result.UserScoreList, 0)
 			continue
 		}
 		// 单选题
@@ -81,27 +82,30 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (result A
 			if questValue == answerU[i].String() {
 				score += scoreList[i].Int()
 				result.UserScoreList = append(result.UserScoreList, scoreList[i].Int())
+			} else {
+				result.UserScoreList = append(result.UserScoreList, 0)
 			}
-			result.UserScoreList = append(result.UserScoreList, 0)
 			continue
 		}
 		// 填空题
 		if questType == "fill_blank" {
+			var pass bool
 			for _, item := range answersList {
 				if questValue == item[i].String() {
 					score += scoreList[i].Int()
 					result.UserScoreList = append(result.UserScoreList, scoreList[i].Int())
+					pass = true
 					break
 				}
 			}
-			result.UserScoreList = append(result.UserScoreList, 0)
+			if !pass {
+				result.UserScoreList = append(result.UserScoreList, 0)
+			}
 			continue
 		}
 		// 多选题
 		if questType == "multiple_response" {
 			answerArray := gjson.Get(questValue, "@this").Array()
-			fmt.Println(len(answerArray))
-			fmt.Println(len(answerU[i].Array()))
 			// 数量
 			if len(answerArray) != len(answerU[i].Array()) {
 				continue

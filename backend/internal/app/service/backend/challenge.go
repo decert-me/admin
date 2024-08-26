@@ -7,11 +7,12 @@ import (
 	"backend/internal/app/model/response"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"gorm.io/datatypes"
-	"time"
 )
 
 // GetUserOpenQuestList 获取用户开放题列表
@@ -457,7 +458,7 @@ func GetUserQuestDetail(r request.GetUserQuestDetailRequest) (res response.GetUs
 		Joins("left join user_open_quest o ON quest.token_id=o.token_id AND o.address= ? AND o.deleted_at IS NULL", address).
 		Joins("LEFT JOIN quest_translated tr ON quest.token_id = tr.token_id AND tr.language = ?", "zh-CN").
 		Where("quest.uuid", r.UUID).
-		Order("l.add_ts desc,o.id desc").
+		Order("o.pass desc,l.pass desc,l.add_ts desc,o.id desc").
 		First(&res).Error
 	if err != nil {
 		return res, err
@@ -483,6 +484,7 @@ func GetUserQuestDetail(r request.GetUserQuestDetailRequest) (res response.GetUs
 	for i, _ := range answer {
 		answerRes, err := sjson.Set(answerStr, fmt.Sprintf("%d.score", i), result.UserScoreList[i])
 		if err != nil {
+			fmt.Println("err", err)
 			continue
 		}
 		answerStr = answerRes
