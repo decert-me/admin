@@ -108,6 +108,7 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (result A
 			answerArray := gjson.Get(questValue, "@this").Array()
 			// 数量
 			if len(answerArray) != len(answerU[i].Array()) {
+				result.UserScoreList = append(result.UserScoreList, 0)
 				continue
 			}
 			// 内容
