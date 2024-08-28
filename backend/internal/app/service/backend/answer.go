@@ -61,9 +61,6 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (result A
 
 	var score int64
 	for i, v := range answerS {
-		if v.String() == "" {
-			continue
-		}
 		questType := gjson.Get(v.String(), "type").String()
 		questValue := gjson.Get(v.String(), "value").String()
 		// 编程题目
@@ -132,6 +129,7 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (result A
 			} else {
 				result.UserScoreList = append(result.UserScoreList, 0)
 			}
+			continue
 		}
 		if questType == "open_quest" {
 			if gjson.Get(v.String(), "score").Int() != 0 {
@@ -143,7 +141,9 @@ func AnswerCheck(key string, answer datatypes.JSON, quest model.Quest) (result A
 			} else {
 				result.UserScoreList = append(result.UserScoreList, 0)
 			}
+			continue
 		}
+		result.UserScoreList = append(result.UserScoreList, 0)
 	}
 	result.UserReturnRawScore = score
 	result.UserReturnScore = score * 100 / result.TotalScore
