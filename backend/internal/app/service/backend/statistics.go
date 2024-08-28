@@ -147,7 +147,8 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 		if err := userChallengeLogDB.Where("token_id = ? AND address = ?", v.TokenID, v.Address).Order("pass desc,id desc").First(&userChallengeLog).Error; err == nil {
 			results[i].ChallengeTime = userChallengeLog.CreatedAt
 		}
-		_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userChallengeLog.Answer, quest)
+		result, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userChallengeLog.Answer, quest)
+		userReturnRawScore := result.UserReturnRawScore
 		results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
 		// 开放题
 		if isOpenQuest {
@@ -161,7 +162,8 @@ func GetChallengeStatistics(r request.GetChallengeStatisticsReq) (res []response
 			} else {
 				continue
 			}
-			_, userReturnRawScore, _, _, _, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userOpenQuest.Answer, quest)
+			resultAnswer, _ := AnswerCheck(global.CONFIG.Quest.EncryptKey, userOpenQuest.Answer, quest)
+			userReturnRawScore = resultAnswer.UserReturnRawScore
 			results[i].ScoreDetail = strconv.Itoa(int(userReturnRawScore)) + "/" + strconv.Itoa(int(passingScore))
 			// 获取批注
 			temp := gjson.Get(string(userOpenQuest.Answer), "@this").Array()

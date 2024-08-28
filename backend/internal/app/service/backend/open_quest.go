@@ -53,10 +53,11 @@ func InitOpenQuestUserScore() {
 		if err = global.DB.Model(&model.Quest{}).Where("token_id = ?", userOpenQuest.TokenId).First(&quest).Error; err != nil {
 			continue
 		}
-		_, _, _, userScore, _, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(userOpenQuest.Answer), quest)
+		result, err := AnswerCheck(global.CONFIG.Quest.EncryptKey, datatypes.JSON(userOpenQuest.Answer), quest)
 		if err != nil {
 			continue
 		}
+		userScore := result.UserScore
 		// 更新用户分数
 		err = global.DB.Model(&model.UserOpenQuest{}).Where("id = ?", userOpenQuest.ID).Update("user_score", userScore).Error
 		if err != nil {
