@@ -62,7 +62,10 @@ export default function ChallengeAnswerListPage() {
       dataIndex: "annotation",
       ellipsis: true,
       render: (annotation, quest) => (
+        quest.challenge_time.indexOf("0001-01-01T") === -1 ?
           <a onClick={() => info(quest)}>查看</a>
+          :
+          "-"
       )
     },
     {
