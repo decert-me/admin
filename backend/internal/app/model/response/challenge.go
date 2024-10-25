@@ -2,8 +2,9 @@ package response
 
 import (
 	"backend/internal/app/model"
-	"gorm.io/datatypes"
 	"time"
+
+	"gorm.io/datatypes"
 )
 
 type GetUserOpenQuestListResponse struct {
@@ -50,6 +51,8 @@ type GetUserOpenQuestDetailListV2 struct {
 	TotalScore            int64          `gorm:"column:total_score" form:"total_score" json:"total_score"` // 总分
 	UserScore             int64          `gorm:"column:user_score" form:"user_score" json:"user_score"`    // 用户分数
 	NickName              *string        `gorm:"column:nickname;type:varchar(200);default:''" json:"nickname" form:"nickname"`
+	SubmitCount           int64          `gorm:"column:submit_count" json:"submit_count"`
+	LastScore             int64          `gorm:"column:last_score" json:"last_score"`
 }
 
 type GetUserQuestDetailResponse struct {
