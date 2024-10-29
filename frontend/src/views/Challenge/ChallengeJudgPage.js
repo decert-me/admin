@@ -157,7 +157,9 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
         <div className="judg-content">
             <h1>{selectOpenQs?.challenge_title}</h1>
                 <div className="judg-info">
-
+                    <div className="item">
+                        <div className="item-title">第 <strong>{selectOpenQs?.submit_count}</strong> 次提交</div>
+                    </div>
                     <div className="item">
                         <div className="item-title">挑战者: &nbsp;<a href={`${process.env.REACT_APP_LINK_URL || "https://decert.me"}/user/${selectOpenQs?.address}`} target="_blank" rel="noopener noreferrer">{selectOpenQs?.nickname}</a></div>
                     </div>
@@ -245,6 +247,9 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
                                 value={selectOpenQs?.answer?.score ? selectOpenQs.answer?.score : rateCache?.score ? rateCache.score : ""}
                                 onChange={(value) => setPercent(value)}
                             />
+                        </div>
+                        <div className="item-title">上次评分: &nbsp;
+                            <span className="item-content">{selectOpenQs?.last_score}</span>
                         </div>
                         <div style={{width: "352px"}}>
                             <Slider
