@@ -9,10 +9,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/spf13/cast"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // GetUserOpenQuestList 获取用户开放题列表
@@ -272,6 +274,45 @@ func GetUserOpenQuestDetailListV2(r request.GetUserOpenQuestDetailListRequest) (
 	}
 	// 计算分数
 	for i := 0; i < len(list); i++ {
+		// 提交次数
+		submitCountSQL := `
+		SELECT 
+			count(1)
+		FROM
+			user_open_quest
+		WHERE
+			user_open_quest.deleted_at IS NULL AND user_open_quest.token_id = ? AND user_open_quest.address = ? AND user_open_quest.id <= ?
+		`
+		submitCountErr := global.DB.Raw(submitCountSQL, list[i].TokenId, list[i].Address, list[i].ID).Scan(&list[i].SubmitCount).Error
+		if submitCountErr != nil {
+			if submitCountErr == gorm.ErrRecordNotFound {
+				list[i].SubmitCount = 0
+			} else {
+				log.Error("获取提交次数失败", "error", submitCountErr)
+			}
+		}
+		// 上次分数
+		lastAnswerSQL := `
+		SELECT
+			COALESCE(json_element->>'score', '0') AS score
+		FROM
+			user_open_quest
+		JOIN
+			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
+		WHERE
+			user_open_quest.deleted_at IS NULL AND json_element->>'type' = 'open_quest' AND user_open_quest.token_id = ? AND idx = ? AND user_open_quest.address = ? AND open_quest_review_status=2 AND user_open_quest.id < ?
+		ORDER BY
+			updated_at DESC
+		LIMIT 1
+		`
+		lastAnswerErr := global.DB.Raw(lastAnswerSQL, list[i].TokenId, list[i].Index+1, list[i].Address, list[i].ID).Scan(&list[i].LastScore).Error
+		if lastAnswerErr != nil {
+			if lastAnswerErr == gorm.ErrRecordNotFound {
+				list[i].LastScore = 0
+			} else {
+				log.Error("获取上次分数失败", "error", lastAnswerErr)
+			}
+		}
 		quest := model.Quest{
 			TokenId:   list[i].TokenId,
 			MetaData:  list[i].MetaData,
