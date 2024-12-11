@@ -323,7 +323,7 @@ func GetUserOpenQuestDetailListV2(r request.GetUserOpenQuestDetailListRequest) (
 			return list, 0, err
 		}
 		list[i].TotalScore = result.TotalScore
-		list[i].UserScore = result.UserScore
+		list[i].UserScore = result.UserReturnRawScore
 		var showStr string
 		showStr = fmt.Sprintf("%s...%s", list[i].Address[:6], list[i].Address[len(list[i].Address)-4:])
 		// 显示标签
