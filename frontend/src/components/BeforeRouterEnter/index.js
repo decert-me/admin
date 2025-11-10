@@ -30,6 +30,7 @@ import {
 } from '../../views/Challenge';
 import { PersonelEditPage, PersonelListPage } from '../../views/Personel';
 import ChallengeAnswerListPage from '../../views/Challenge/ChallengeAnswerListPage';
+import BootcampChallengeStatistics from '../../views/Challenge/BootcampChallengeStatistics';
 import UserTagsPage from '../../views/User/UserTagsPage';
 import UserListPage from '../../views/User/UserListPage';
 import UserTagInfoPage from '../../views/User/UserTagInfoPage';
@@ -147,9 +148,13 @@ export default function BeforeRouterEnter(params) {
                 path="challenge/openquest/judg/:id" 
                 element={<ChallengeJudgPage />} 
                 />
-                <Route 
-                path="challenge/challenge/list" 
-                element={<ChallengerListPage />} 
+                <Route
+                path="challenge/challenge/list"
+                element={<ChallengerListPage />}
+                />
+                <Route
+                path="challenge/bootcamp/statistics"
+                element={<BootcampChallengeStatistics />}
                 />
 
 

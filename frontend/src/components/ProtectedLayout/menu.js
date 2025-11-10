@@ -63,6 +63,11 @@ export const menu = [
                 key: "challenge/challenge/list",
                 icon: <LineChartOutlined />,
             },
+            {
+                label: "训练营挑战统计",
+                key: "challenge/bootcamp/statistics",
+                icon: <LineChartOutlined />,
+            },
         ]
     },
     {

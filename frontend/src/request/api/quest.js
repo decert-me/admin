@@ -183,4 +183,39 @@ import serviceAxios from "../index";
             data
         })
     }
-    
+
+    // 获取训练营挑战统计
+    export const getBootcampChallengeStatistics = (data) => {
+        return serviceAxios({
+            url: `/statistics/getBootcampChallengeStatistics`,
+            method: "post",
+            data
+        })
+    }
+
+    // 获取训练营挑战配置
+    export const getBootcampChallengeConfig = (data) => {
+        return serviceAxios({
+            url: `/statistics/getBootcampChallengeConfig`,
+            method: "post",
+            data
+        })
+    }
+
+    // 更新训练营挑战配置
+    export const updateBootcampChallengeConfig = (data) => {
+        return serviceAxios({
+            url: `/statistics/updateBootcampChallengeConfig`,
+            method: "post",
+            data
+        })
+    }
+
+    // 获取启用的训练营挑战
+    export const getEnabledBootcampChallenges = (data) => {
+        return serviceAxios({
+            url: `/statistics/getEnabledBootcampChallenges`,
+            method: "post",
+            data
+        })
+    }
