@@ -20,14 +20,13 @@ func GetBootcampChallengeStatistics(c *gin.Context) {
 	}
 
 	type UserChallengeData struct {
-		UserID    uint   `json:"user_id"`
-		Address   string `json:"address"`
-		Name      string `json:"name"`
-		Tags      string `json:"tags"`
-		Title     string `json:"title"`
-		UserScore int    `json:"user_score"`
-		Status    int    `json:"status"`
-		UUID      string `json:"uuid"`
+		UserID  uint   `json:"user_id"`
+		Address string `json:"address"`
+		Name    string `json:"name"`
+		Tags    string `json:"tags"`
+		Title   string `json:"title"`
+		Status  int    `json:"status"` // 0=未提交, 1=未通过, 2=通过
+		UUID    string `json:"uuid"`
 	}
 
 	// 1. 获取指定标签下的所有用户
@@ -84,34 +83,29 @@ func GetBootcampChallengeStatistics(c *gin.Context) {
 		for _, quest := range quests {
 			// 查询该用户该挑战的记录（与挑战详情统计逻辑一致）
 			type LogRecord struct {
-				TokenID   string
-				UserScore int64
-				Pass      bool
+				TokenID string
+				Pass    bool
 			}
 			var logRecord LogRecord
 			var hasRecord bool
 
-			// 先查 user_challenge_log 表，读取 pass 字段和 user_score
+			// 先查 user_challenge_log 表，检查是否有 pass=true 的记录
+			var passCount int64
 			err := global.DB.Table("user_challenge_log").
-				Select("token_id, user_score, pass").
-				Where("address = ? AND token_id = ?", user.Address, quest.TokenID).
-				Order("pass DESC, user_score DESC, id DESC").
-				Limit(1).
-				Scan(&logRecord).Error
+				Where("address = ? AND token_id = ? AND pass = true", user.Address, quest.TokenID).
+				Count(&passCount).Error
 
-			if err == nil && logRecord.TokenID != "" {
+			if err == nil && passCount > 0 {
+				logRecord.Pass = true
 				hasRecord = true
-			} else if err != nil && err.Error() != "record not found" {
-				global.LOG.Error("查询挑战记录失败!", zap.Error(err))
 			}
 
-			// 如果是开放题，可能在 user_open_quest 表中
+			// 如果没有 pass=true 的记录，检查是否有任何记录
 			if !hasRecord {
-				logRecord = LogRecord{} // 重置
-				err = global.DB.Table("user_open_quest").
-					Select("token_id, user_score, pass").
+				err = global.DB.Table("user_challenge_log").
+					Select("token_id, pass").
 					Where("address = ? AND token_id = ?", user.Address, quest.TokenID).
-					Order("pass DESC, user_score DESC, id DESC").
+					Order("pass DESC, id DESC").
 					Limit(1).
 					Scan(&logRecord).Error
 
@@ -120,52 +114,62 @@ func GetBootcampChallengeStatistics(c *gin.Context) {
 				}
 			}
 
-			// 检查是否在 user_challenges 表中（已领取NFT）
+			// 检查 user_open_quest 表（开放题），是否有 pass=true 的记录
+			if !logRecord.Pass {
+				var openQuestPassCount int64
+				err = global.DB.Table("user_open_quest").
+					Where("address = ? AND token_id = ? AND pass = true", user.Address, quest.TokenID).
+					Count(&openQuestPassCount).Error
+
+				if err == nil && openQuestPassCount > 0 {
+					logRecord.Pass = true
+					hasRecord = true
+				}
+			}
+
+			// 检查是否已领取（在 user_challenges 或 zcloak_card 表中）
 			var hasClaimed bool
 			if hasRecord {
 				var count int64
+				// 检查 user_challenges 表
 				global.DB.Table("user_challenges").
 					Where("address = ? AND token_id = ?", user.Address, quest.TokenID).
 					Count(&count)
 				if count > 0 {
 					hasClaimed = true
+				} else {
+					// 检查 zcloak_card 表
+					global.DB.Table("zcloak_card").
+						Where("address = ? AND quest_id = ?", user.Address, quest.ID).
+						Count(&count)
+					if count > 0 {
+						hasClaimed = true
+					}
 				}
 			}
 
-			// 如果找不到记录，标记为未完成
+			// 判断状态（与挑战详情统计的"挑战结果"逻辑一致）
+			// 0=未提交（无记录）, 1=未通过（有记录但失败）, 2=通过（成功）
+			var status int
 			if !hasRecord {
-				results = append(results, UserChallengeData{
-					UserID:    user.UserID,
-					Address:   user.Address,
-					Name:      user.Name,
-					Tags:      user.Tags,
-					Title:     quest.Title,
-					UserScore: 0,
-					Status:    0, // 未完成
-					UUID:      quest.UUID,
-				})
-				continue
-			}
-
-			// 转换分数（从10000分制转为100分制）
-			scorePercent := int(logRecord.UserScore / 100)
-
-			// 判断是否通过（与挑战详情统计逻辑一致）
-			// 只要 pass=true 或者已领取NFT，就标记为通过
-			status := 0 // 未通过
-			if logRecord.Pass || hasClaimed {
-				status = 2 // 通过
+				// 没有记录 = 未提交
+				status = 0
+			} else if hasClaimed || logRecord.Pass {
+				// 已领取 或 pass=true = 通过（对应"成功"）
+				status = 2
+			} else {
+				// 有记录但未通过 = 未完成（对应"失败"）
+				status = 1
 			}
 
 			results = append(results, UserChallengeData{
-				UserID:    user.UserID,
-				Address:   user.Address,
-				Name:      user.Name,
-				Tags:      user.Tags,
-				Title:     quest.Title,
-				UserScore: scorePercent,
-				Status:    status,
-				UUID:      quest.UUID,
+				UserID:  user.UserID,
+				Address: user.Address,
+				Name:    user.Name,
+				Tags:    user.Tags,
+				Title:   quest.Title,
+				Status:  status,
+				UUID:    quest.UUID,
 			})
 		}
 	}

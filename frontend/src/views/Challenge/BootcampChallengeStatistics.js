@@ -126,13 +126,9 @@ export default function BootcampChallengeStatistics() {
 
         // 只有当title不为空时才处理挑战状态
         if (item.title && challenges.includes(item.title)) {
-          // user_score是10000分制，需要转换为100分制
-          const score = Math.round(item.user_score / 100);
-
+          // status: 0=未提交, 1=未通过, 2=通过
           user.challengeStatus[item.title] = {
-            score: score,
-            passingScore: 60, // 默认及格分60
-            passed: item.status === 2 // status=2表示通过
+            status: item.status
           };
         }
       });
@@ -174,19 +170,20 @@ export default function BootcampChallengeStatistics() {
   }, [selectedTagId, challenges]);
 
   // 渲染挑战完成状态标签
-  const renderChallengeStatus = (status) => {
-    if (!status) {
-      return <Tag color="default">未完成</Tag>;
+  const renderChallengeStatus = (challengeStatus) => {
+    if (!challengeStatus) {
+      return <Tag color="default">未提交</Tag>;
     }
 
-    const { score, passingScore, passed } = status;
+    const { status } = challengeStatus;
 
-    if (score === 0) {
-      return <Tag color="default">未完成</Tag>;
-    } else if (passed || score >= passingScore) {
-      return <Tag color="success">通过 ({score}分)</Tag>;
+    // status: 0=未提交, 1=未通过, 2=通过
+    if (status === 2) {
+      return <Tag color="success">通过</Tag>;
+    } else if (status === 1) {
+      return <Tag color="warning">未通过</Tag>;
     } else {
-      return <Tag color="warning">未通过 ({score}分)</Tag>;
+      return <Tag color="default">未提交</Tag>;
     }
   };
 
