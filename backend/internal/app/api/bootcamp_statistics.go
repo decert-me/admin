@@ -2,12 +2,9 @@ package api
 
 import (
 	"backend/internal/app/global"
-	"backend/internal/app/model"
 	"backend/internal/app/model/response"
-	"backend/internal/app/service/backend"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"gorm.io/datatypes"
 )
 
 // GetBootcampChallengeStatistics 获取训练营挑战统计
@@ -64,16 +61,14 @@ func GetBootcampChallengeStatistics(c *gin.Context) {
 
 	// 2. 获取所有挑战的信息
 	type QuestInfo struct {
-		ID       uint
-		TokenID  string
-		Title    string
-		UUID     string
-		QuestData datatypes.JSON
-		MetaData  datatypes.JSON
+		ID      uint
+		TokenID string
+		Title   string
+		UUID    string
 	}
 	var quests []QuestInfo
 	if err := global.DB.Table("quest").
-		Select("id, token_id, title, uuid, quest_data, meta_data").
+		Select("id, token_id, title, uuid").
 		Where("title IN ?", req.Challenges).
 		Where("disabled = ?", false).
 		Scan(&quests).Error; err != nil {
@@ -82,50 +77,63 @@ func GetBootcampChallengeStatistics(c *gin.Context) {
 		return
 	}
 
-	// 创建 token_id 到 quest 的映射
-	questMap := make(map[string]QuestInfo)
-	for _, q := range quests {
-		questMap[q.TokenID] = q
-	}
-
 	// 3. 查询用户的挑战记录
 	var results []UserChallengeData
 
 	for _, user := range users {
 		for _, quest := range quests {
-			// 查询该用户该挑战的最高分记录
+			// 查询该用户该挑战的记录（与挑战详情统计逻辑一致）
 			type LogRecord struct {
-				TokenID string
-				Answer  datatypes.JSON
+				TokenID   string
+				UserScore int64
+				Pass      bool
 			}
 			var logRecord LogRecord
+			var hasRecord bool
 
-			// 先查 user_challenge_log 表
+			// 先查 user_challenge_log 表，读取 pass 字段和 user_score
 			err := global.DB.Table("user_challenge_log").
-				Select("token_id, answer").
+				Select("token_id, user_score, pass").
 				Where("address = ? AND token_id = ?", user.Address, quest.TokenID).
-				Order("user_score DESC, id DESC").
+				Order("pass DESC, user_score DESC, id DESC").
 				Limit(1).
 				Scan(&logRecord).Error
 
-			if err != nil && err.Error() != "record not found" {
+			if err == nil && logRecord.TokenID != "" {
+				hasRecord = true
+			} else if err != nil && err.Error() != "record not found" {
 				global.LOG.Error("查询挑战记录失败!", zap.Error(err))
-				continue
 			}
 
 			// 如果是开放题，可能在 user_open_quest 表中
-			if err != nil || len(logRecord.Answer) == 0 || string(logRecord.Answer) == "null" {
+			if !hasRecord {
 				logRecord = LogRecord{} // 重置
 				err = global.DB.Table("user_open_quest").
-					Select("token_id, answer").
+					Select("token_id, user_score, pass").
 					Where("address = ? AND token_id = ?", user.Address, quest.TokenID).
-					Order("user_score DESC, id DESC").
+					Order("pass DESC, user_score DESC, id DESC").
 					Limit(1).
 					Scan(&logRecord).Error
+
+				if err == nil && logRecord.TokenID != "" {
+					hasRecord = true
+				}
 			}
 
-			// 如果找不到记录或answer为空，标记为未完成
-			if err != nil || len(logRecord.Answer) == 0 || string(logRecord.Answer) == "null" {
+			// 检查是否在 user_challenges 表中（已领取NFT）
+			var hasClaimed bool
+			if hasRecord {
+				var count int64
+				global.DB.Table("user_challenges").
+					Where("address = ? AND token_id = ?", user.Address, quest.TokenID).
+					Count(&count)
+				if count > 0 {
+					hasClaimed = true
+				}
+			}
+
+			// 如果找不到记录，标记为未完成
+			if !hasRecord {
 				results = append(results, UserChallengeData{
 					UserID:    user.UserID,
 					Address:   user.Address,
@@ -139,39 +147,13 @@ func GetBootcampChallengeStatistics(c *gin.Context) {
 				continue
 			}
 
-			// 4. 调用 AnswerCheck 计算分数
-			questModel := model.Quest{
-				ID:        quest.ID,
-				TokenId:   quest.TokenID,
-				Title:     quest.Title,
-				UUID:      quest.UUID,
-				QuestData: quest.QuestData,
-				MetaData:  quest.MetaData,
-			}
+			// 转换分数（从10000分制转为100分制）
+			scorePercent := int(logRecord.UserScore / 100)
 
-			answerCheckRes, err := backend.AnswerCheck(global.CONFIG.Quest.EncryptKey, logRecord.Answer, questModel)
-			if err != nil {
-				global.LOG.Error("AnswerCheck 失败!", zap.Error(err), zap.String("address", user.Address), zap.String("quest", quest.Title))
-				// 出错时标记为未完成
-				results = append(results, UserChallengeData{
-					UserID:    user.UserID,
-					Address:   user.Address,
-					Name:      user.Name,
-					Tags:      user.Tags,
-					Title:     quest.Title,
-					UserScore: 0,
-					Status:    0,
-					UUID:      quest.UUID,
-				})
-				continue
-			}
-
-			// 5. 转换分数（从10000分制转为100分制）
-			scorePercent := int(answerCheckRes.UserScore / 100)
-
-			// 6. 判断是否通过
+			// 判断是否通过（与挑战详情统计逻辑一致）
+			// 只要 pass=true 或者已领取NFT，就标记为通过
 			status := 0 // 未通过
-			if answerCheckRes.Pass {
+			if logRecord.Pass || hasClaimed {
 				status = 2 // 通过
 			}
 
