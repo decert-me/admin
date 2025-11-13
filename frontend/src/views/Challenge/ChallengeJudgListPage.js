@@ -2,6 +2,7 @@ import { Button, Modal, Space, Table } from "antd"
 import { useEffect, useState } from "react";
 import { getUserOpenQuestList } from "../../request/api/judgment";
 import ChallengeJudgPage from "./ChallengeJudgPage";
+import AiConfigModal from "./AiConfigModal";
 import "./judg.scss";
 
 const location = window.location.host;
@@ -13,7 +14,8 @@ export default function ChallengeJudgListPage(params) {
     const [detailOpen, setDetailOpen] = useState(false);
     const [questDetail, setQuestDetail] = useState();
     const [reviewStatus, setReviewStatus] = useState();     // true: 未评分 || false: 已评分
-    
+    const [aiConfigOpen, setAiConfigOpen] = useState(false);
+
     let [tableLoad, setTableLoad] = useState();
     
     let [status, setStatus] = useState(1);
@@ -113,6 +115,11 @@ export default function ChallengeJudgListPage(params) {
         setReviewStatus(isReview);
         setDetailOpen(true);
     }
+
+    // 打开AI配置弹窗
+    function openAiConfig() {
+        setAiConfigOpen(true);
+    }
     
     // 获取列表
     async function getList(page) {
@@ -151,8 +158,11 @@ export default function ChallengeJudgListPage(params) {
 
     return (
         <div className="judg">
-            <div className="tabel-title">
+            <div className="tabel-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h2 style={{fontSize: 20}}>评分列表</h2>
+                <Button type="primary" onClick={openAiConfig}>
+                    AI判题配置
+                </Button>
             </div>
 
             <Modal
@@ -165,6 +175,11 @@ export default function ChallengeJudgListPage(params) {
             >
                 <ChallengeJudgPage questDetail={questDetail} reviewStatus={reviewStatus} hideModal={() => setDetailOpen(false)} updateList={() => getList()} />
             </Modal>
+
+            <AiConfigModal
+                open={aiConfigOpen}
+                onCancel={() => setAiConfigOpen(false)}
+            />
             <Table
                 columns={columns} 
                 dataSource={data} 

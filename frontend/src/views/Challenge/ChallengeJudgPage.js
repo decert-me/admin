@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
-import { Button, Input, InputNumber, Slider, message } from "antd";
+import { Button, Input, InputNumber, Slider, message, Modal } from "antd";
 import { download } from "../../utils/file/download";
 import { getUserOpenQuestDetailList, reviewOpenQuest } from "../../request/api/judgment";
+import { aiGrade } from "../../request/api/aiJudgeConfig";
 import ReactMarkdown from 'react-markdown';
 const { TextArea } = Input;
 
@@ -11,7 +12,15 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
     const [index, setIndex] = useState(0);      // 第几题
     const [total, setTotal] = useState(0);
     const [isLoding, setTsLoding] = useState(false);
-    
+    const [aiGrading, setAiGrading] = useState(false); // AI判题中的loading状态
+    const [debugModalOpen, setDebugModalOpen] = useState(false); // AI调试弹窗
+    const [aiDebugInfo, setAiDebugInfo] = useState({ // AI对话信息
+        request: '',
+        response: '',
+        systemPrompt: '',
+        userPrompt: ''
+    });
+
     let [reviewQuests, setReviewQuests] = useState([]);
     let [openQsList, setOpenQsList] = useState([]);
     let [selectOpenQs, setSelectOpenQs] = useState({});
@@ -73,6 +82,79 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
             updated_at: selectOpenQs.updated_at,
         }
         setReviewQuests([...reviewQuests]);
+    }
+
+    // AI判题
+    async function handleAiGrade() {
+        if (!selectOpenQs?.title) {
+            message.warning('题目信息不完整');
+            return;
+        }
+
+        // 检查是否有答案或附件
+        const hasAnswer = selectOpenQs?.answer?.value && selectOpenQs.answer.value.trim();
+        const hasAttachment = selectOpenQs?.answer?.annex && selectOpenQs.answer.annex.length > 0;
+
+        if (!hasAnswer && !hasAttachment) {
+            message.warning('用户未提供答案或附件，将判定为不通过');
+        }
+
+        setAiGrading(true);
+        message.loading({ content: 'AI判题中...', key: 'aiGrading', duration: 0 });
+
+        // 构建附件URL列表
+        let attachmentUrls = [];
+        if (selectOpenQs?.answer?.annex && selectOpenQs.answer.annex.length > 0) {
+            attachmentUrls = selectOpenQs.answer.annex.map(annex => {
+                // 根据hash构建附件URL
+                const baseUrl = process.env.REACT_APP_IPFS_URL || 'https://ipfs.decert.me';
+                return `${baseUrl}/ipfs/${annex.hash} (文件名: ${annex.name})`;
+            });
+        }
+
+        try {
+            const requestData = {
+                question_title: selectOpenQs.title,
+                question_score: selectOpenQs.score,
+                pass_score: selectOpenQs.pass_score,
+                user_answer: selectOpenQs.answer.value,
+                attachment_urls: attachmentUrls
+            };
+
+            const res = await aiGrade(requestData);
+
+            if (res.code === 0) {
+                message.destroy('aiGrading');
+                message.success('AI判题完成');
+
+                // 设置分数和批注
+                const { score, annotation, raw_result, system_prompt, user_prompt } = res.data;
+
+                // 保存调试信息
+                setAiDebugInfo({
+                    request: JSON.stringify(requestData, null, 2),
+                    response: raw_result || annotation,
+                    systemPrompt: system_prompt || '',
+                    userPrompt: user_prompt || ''
+                });
+
+                // 显示调试弹窗
+                setDebugModalOpen(true);
+
+                rateCache.score = score;
+                rateCache.annotation = annotation;
+                setRateCache({...rateCache});
+                updateCache();
+            } else {
+                message.destroy('aiGrading');
+                message.error(res.msg || 'AI判题失败');
+            }
+        } catch (error) {
+            message.destroy('aiGrading');
+            message.error('AI判题失败：' + (error.message || '未知错误'));
+        } finally {
+            setAiGrading(false);
+        }
     }
 
     async function init() {
@@ -247,6 +329,18 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
                                 value={selectOpenQs?.answer?.score ? selectOpenQs.answer?.score : rateCache?.score ? rateCache.score : ""}
                                 onChange={(value) => setPercent(value)}
                             />
+                            {reviewStatus && (
+                                <Button
+                                    type="primary"
+                                    size="small"
+                                    onClick={handleAiGrade}
+                                    loading={aiGrading}
+                                    disabled={aiGrading}
+                                    style={{marginLeft: 8}}
+                                >
+                                    AI判题
+                                </Button>
+                            )}
                         </div>
                         <div className="item-title">上次评分: &nbsp;
                             <span className="item-content">{selectOpenQs?.last_score}</span>
@@ -272,8 +366,82 @@ function ChallengeJudgPage({questDetail, reviewStatus, hideModal, updateList}) {
                     {
                         reviewStatus &&
                         <Button className="submit" type="primary" size="large" onClick={confirm}>提交</Button>
-                    } 
+                    }
                 </div>
+
+                {/* AI调试弹窗 */}
+                <Modal
+                    title="AI判题详情"
+                    open={debugModalOpen}
+                    onCancel={() => setDebugModalOpen(false)}
+                    width={900}
+                    footer={[
+                        <Button key="close" type="primary" onClick={() => setDebugModalOpen(false)}>
+                            关闭
+                        </Button>
+                    ]}
+                >
+                    <div style={{ maxHeight: '70vh', overflow: 'auto' }}>
+                        <div style={{ marginBottom: 20 }}>
+                            <h3 style={{ marginBottom: 10, color: '#1890ff' }}>📤 发送给AI的请求数据</h3>
+                            <pre style={{
+                                background: '#f5f5f5',
+                                padding: 15,
+                                borderRadius: 4,
+                                fontSize: 12,
+                                whiteSpace: 'pre-wrap',
+                                wordWrap: 'break-word'
+                            }}>
+                                {aiDebugInfo.request}
+                            </pre>
+                        </div>
+
+                        <div style={{ marginBottom: 20 }}>
+                            <h3 style={{ marginBottom: 10, color: '#52c41a' }}>🤖 System Prompt（系统提示词）</h3>
+                            <pre style={{
+                                background: '#f6ffed',
+                                padding: 15,
+                                borderRadius: 4,
+                                border: '1px solid #b7eb8f',
+                                fontSize: 12,
+                                whiteSpace: 'pre-wrap',
+                                wordWrap: 'break-word'
+                            }}>
+                                {aiDebugInfo.systemPrompt}
+                            </pre>
+                        </div>
+
+                        <div style={{ marginBottom: 20 }}>
+                            <h3 style={{ marginBottom: 10, color: '#faad14' }}>💬 User Prompt（用户提示词）</h3>
+                            <pre style={{
+                                background: '#fffbe6',
+                                padding: 15,
+                                borderRadius: 4,
+                                border: '1px solid #ffe58f',
+                                fontSize: 12,
+                                whiteSpace: 'pre-wrap',
+                                wordWrap: 'break-word'
+                            }}>
+                                {aiDebugInfo.userPrompt}
+                            </pre>
+                        </div>
+
+                        <div>
+                            <h3 style={{ marginBottom: 10, color: '#f5222d' }}>📥 AI返回的原始结果</h3>
+                            <pre style={{
+                                background: '#fff1f0',
+                                padding: 15,
+                                borderRadius: 4,
+                                border: '1px solid #ffccc7',
+                                fontSize: 12,
+                                whiteSpace: 'pre-wrap',
+                                wordWrap: 'break-word'
+                            }}>
+                                {aiDebugInfo.response}
+                            </pre>
+                        </div>
+                    </div>
+                </Modal>
         </div>
     )
 }

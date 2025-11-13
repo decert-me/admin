@@ -78,6 +78,7 @@ func Routers() *gin.Engine {
 		router.InitTagRouter(v1Group)
 		router.InitUsersRouter(v1Group)
 		router.InitStatisticsRouter(v1Group)
+		router.InitAiJudgeConfigRouter(v1Group) // AI判题配置
 	}
 	global.LOG.Info("router register success")
 	return Router

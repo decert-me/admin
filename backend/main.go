@@ -6,6 +6,7 @@ import (
 	"backend/internal/app/initialize"
 	"backend/internal/app/service/backend"
 	"backend/internal/app/service/system"
+	"backend/internal/app/task"
 	"go.uber.org/zap"
 	"time"
 )
@@ -30,5 +31,7 @@ func main() {
 	backend.Init()
 	// 初始化casbin
 	system.CasbinInit()
+	// 启动自动判题定时任务
+	task.StartAutoGradingTask()
 	core.RunWindowsServer()
 }
