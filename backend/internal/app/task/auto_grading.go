@@ -66,12 +66,17 @@ func runAutoGrading() {
 			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
 		JOIN
 			quest ON quest.token_id = user_open_quest.token_id
+		LEFT JOIN
+			users ON users.address = user_open_quest.address
+		LEFT JOIN
+			users_tag ON users_tag.user_id = users.id
 		WHERE
 			user_open_quest.deleted_at IS NULL
 			AND quest.status = 1
 			AND json_element->>'type' = 'open_quest'
 			AND json_element->>'score' IS NULL
 			AND json_element->>'correct' IS NULL
+			AND users_tag.user_id IS NULL
 		ORDER BY user_open_quest.id ASC
 		LIMIT 10
 	`

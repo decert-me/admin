@@ -215,9 +215,16 @@ export default function AiConfigModal({ open, onCancel }) {
         try {
             const res = await batchGradePreview({ max_count: batchCount });
             if (res.code === 0) {
-                setPreviewResults(res.data.results || []);
-                setPreviewModalOpen(true);
-                message.success(`已生成 ${res.data.count} 条判题结果，请检查后提交`);
+                const results = res.data.results || [];
+                const count = res.data.count || results.length || 0;
+                setPreviewResults(results);
+
+                if (count === 0) {
+                    message.info('当前没有待判题的开放题');
+                } else {
+                    setPreviewModalOpen(true);
+                    message.success(`已生成 ${count} 条判题结果，请检查后提交`);
+                }
             } else {
                 message.error(res.msg || '批量判题失败');
             }

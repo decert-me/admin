@@ -230,10 +230,11 @@ func AiGrade(c *gin.Context) {
 	// 判断是否通过：分数达到及格分则通过
 	isPassed := score >= req.PassScore
 
-	// 如果通过，清空批注；如果不通过，保留批注
-	finalAnnotation := ""
-	if !isPassed {
-		finalAnnotation = annotation
+	// 添加AI判题前缀
+	finalAnnotation := "本挑战由AI自动判题"
+	if !isPassed && annotation != "" {
+		// 如果不通过且有批注，添加前缀和原因
+		finalAnnotation = "本挑战由AI自动判题\n" + annotation
 	}
 
 	response.OkWithData(gin.H{
@@ -516,12 +517,17 @@ func BatchGrade(c *gin.Context) {
 			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
 		JOIN
 			quest ON quest.token_id = user_open_quest.token_id
+		LEFT JOIN
+			users ON users.address = user_open_quest.address
+		LEFT JOIN
+			users_tag ON users_tag.user_id = users.id
 		WHERE
 			user_open_quest.deleted_at IS NULL
 			AND quest.status = 1
 			AND json_element->>'type' = 'open_quest'
 			AND json_element->>'score' IS NULL
 			AND json_element->>'correct' IS NULL
+			AND users_tag.user_id IS NULL
 		ORDER BY user_open_quest.id ASC
 		LIMIT ?
 	`
@@ -614,7 +620,7 @@ func ProcessOneOpenQuest(recordID uint, tokenId string, answerIndex int, config 
 		answerPath := fmt.Sprintf("%d", answerIndex)
 		newAnswer := answerJSON
 		newAnswer, _ = sjson.Set(newAnswer, answerPath+".score", 0)
-		newAnswer, _ = sjson.Set(newAnswer, answerPath+".annotation", "未提供答案或附件")
+		newAnswer, _ = sjson.Set(newAnswer, answerPath+".annotation", "本挑战由AI自动判题\n未提供答案或附件")
 		newAnswer, _ = sjson.Set(newAnswer, answerPath+".open_quest_review_time", time.Now().Format("2006-01-02 15:04:05"))
 		newAnswer, _ = sjson.Set(newAnswer, answerPath+".is_ai_graded", true)
 
@@ -718,10 +724,11 @@ func ProcessOneOpenQuest(recordID uint, tokenId string, answerIndex int, config 
 	score, annotation := parseAIResult(aiResult, int(questionScore))
 	isPassed := int64(score) >= passingScore
 
-	// 如果通过，清空批注
-	finalAnnotation := ""
-	if !isPassed {
-		finalAnnotation = annotation
+	// 添加AI判题前缀
+	finalAnnotation := "本挑战由AI自动判题"
+	if !isPassed && annotation != "" {
+		// 如果不通过且有批注，添加前缀和原因
+		finalAnnotation = "本挑战由AI自动判题\n" + annotation
 	}
 
 	// 9. 更新答案JSON（添加AI判题结果到指定索引位置）
@@ -933,12 +940,17 @@ func BatchGradePreview(c *gin.Context) {
 			jsonb_array_elements(user_open_quest.answer) WITH ORDINALITY AS t(json_element, idx) ON true
 		JOIN
 			quest ON quest.token_id = user_open_quest.token_id
+		LEFT JOIN
+			users ON users.address = user_open_quest.address
+		LEFT JOIN
+			users_tag ON users_tag.user_id = users.id
 		WHERE
 			user_open_quest.deleted_at IS NULL
 			AND quest.status = 1
 			AND json_element->>'type' = 'open_quest'
 			AND json_element->>'score' IS NULL
 			AND json_element->>'correct' IS NULL
+			AND users_tag.user_id IS NULL
 		ORDER BY user_open_quest.id ASC
 		LIMIT ?
 	`
@@ -1061,10 +1073,11 @@ func BatchGradePreview(c *gin.Context) {
 		score, annotation := parseAIResult(aiResult, int(questionScore))
 		isPassed := int64(score) >= passingScore
 
-		// 如果通过，清空批注
-		finalAnnotation := ""
-		if !isPassed {
-			finalAnnotation = annotation
+		// 添加AI判题前缀
+		finalAnnotation := "本挑战由AI自动判题"
+		if !isPassed && annotation != "" {
+			// 如果不通过且有批注，添加前缀和原因
+			finalAnnotation = "本挑战由AI自动判题\n" + annotation
 		}
 
 		results = append(results, PreviewResult{
