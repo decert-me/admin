@@ -3,6 +3,7 @@ package request
 import (
 	"backend/internal/app/model"
 	"github.com/lib/pq"
+	"gorm.io/datatypes"
 )
 
 type GetQuestListRequest struct {
@@ -24,13 +25,14 @@ type AddQuestRequest struct {
 }
 
 type UpdateQuestRequest struct {
-	ID           uint           `json:"id"`
-	Difficulty   *uint          `json:"difficulty"`    // 0:easy;1:moderate;2:difficult
-	EstimateTime *uint          `json:"estimate_time"` // 预估时间/min
-	CollectionID *[]uint        `json:"collection_id"`
-	Sort         *int           `json:"sort"` // 排序
-	Description  *string        `json:"description"`
-	Category     *pq.Int64Array `gorm:"column:category;type:int8[];comment:分类标签" json:"category,omitempty"` // 分类标签
+	ID           uint            `json:"id"`
+	Difficulty   *uint           `json:"difficulty"`    // 0:easy;1:moderate;2:difficult
+	EstimateTime *uint           `json:"estimate_time"` // 预估时间/min
+	CollectionID *[]uint         `json:"collection_id"`
+	Sort         *int            `json:"sort"` // 排序
+	Description  *string         `json:"description"`
+	Category     *pq.Int64Array  `gorm:"column:category;type:int8[];comment:分类标签" json:"category,omitempty"` // 分类标签
+	QuestData    *datatypes.JSON `json:"quest_data"`                                                           // 题目数据
 }
 
 type TopQuestRequest struct {

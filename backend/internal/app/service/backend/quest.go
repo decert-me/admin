@@ -121,6 +121,10 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if req.Category != nil {
 		data["category"] = *req.Category
 	}
+	// 新增：支持更新quest_data
+	if req.QuestData != nil {
+		data["quest_data"] = *req.QuestData
+	}
 	tx := global.DB.Begin()
 	// 查询quest
 	var quest model.Quest
