@@ -50,9 +50,9 @@ export default function BootcampChallengeStatistics() {
       });
 
       if (res.code === 0) {
-        // 筛选出S2-S8的标签
+        // 筛选出S开头的标签
         const sTags = (res.data?.list || [])
-          .filter(tag => /^S[2-8]$/.test(tag.name))
+          .filter(tag => /^S\d+$/.test(tag.name))
           .map(tag => ({
             id: tag.id,
             name: tag.name
