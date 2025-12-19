@@ -133,6 +133,15 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		tx.Rollback()
 		return err
 	}
+
+	// 准备quest_translated表的更新数据
+	translatedData := map[string]interface{}{}
+	if req.QuestData != nil {
+		translatedData["quest_data"] = *req.QuestData
+	}
+	if req.Description != nil {
+		translatedData["description"] = *req.Description
+	}
 	if req.Description != nil {
 		// 判断链上是否有数据
 		if gjson.Get(string(quest.MetaData), "description").String() != "" {
@@ -161,6 +170,14 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 		if raw.Error != nil {
 			tx.Rollback()
 			return raw.Error
+		}
+		// 同步更新quest_translated表
+		if len(translatedData) > 0 {
+			err = tx.Model(&model.QuestTranslated{}).Where("token_id = ?", quest.TokenId).Updates(translatedData).Error
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 		return tx.Commit().Error
 	}
@@ -236,6 +253,14 @@ func UpdateQuest(req request.UpdateQuestRequest) error {
 	if raw.Error != nil {
 		tx.Rollback()
 		return raw.Error
+	}
+	// 同步更新quest_translated表
+	if len(translatedData) > 0 {
+		err = tx.Model(&model.QuestTranslated{}).Where("token_id = ?", quest.TokenId).Updates(translatedData).Error
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 	UpdateCollectionStatusAuto(tx) // 更新合辑下架状态
 	return tx.Commit().Error
