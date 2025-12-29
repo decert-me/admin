@@ -19,6 +19,7 @@ type Tutorial struct {
 	Desc             string         `json:"desc,omitempty"`
 	Branch           *string        `json:"branch,omitempty"`
 	DocPath          *string        `json:"docPath,omitempty"`
+	ExternalLink     *string        `json:"externalLink,omitempty"` // 外部链接
 	StartPage        string         `json:"startPage,omitempty"`
 	CommitHash       *string        `json:"commitHash,omitempty"`
 	VideoCategory    string         `json:"videoCategory,omitempty"`

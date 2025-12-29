@@ -85,7 +85,7 @@ export default function TutorialsModifyPage(params) {
         setLoading(true);
         const {
             repoUrl, label, docType, desc, tutorial_sort,
-            challenge, link_type, branch, docPath, commitHash, url, videoCategory, videoItems,
+            challenge, link_type, branch, docPath, externalLink, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime, mdbookTranslator
         } = values;
         const img = values.img?.file ? values.img.file.response.data.hash : tutorial.img;
@@ -121,14 +121,14 @@ export default function TutorialsModifyPage(params) {
         if (doctype === "doc") {
             const obj = {
                 repoUrl, label, docType, img, desc, tutorial_sort,
-                branch, docPath, commitHash,
+                branch, docPath, externalLink, commitHash,
                 category, language, difficulty, estimateTime, mdbookTranslator,
                 challenge: domain+link_type+"/"+challenge
             }
             create(obj)
         }else{
             const obj = {
-                url, label, img, desc, tutorial_sort, videoCategory,
+                url, label, img, desc, tutorial_sort, videoCategory, externalLink,
                 category, language, difficulty, estimateTime, docType: "video",
                 challenge: domain+link_type+"/"+challenge
             }
@@ -230,6 +230,10 @@ export default function TutorialsModifyPage(params) {
             {
                 name: ['docPath'],
                 value: tutorial?.docPath
+            },
+            {
+                name: ['externalLink'],
+                value: tutorial?.externalLink
             },
             {
                 name: ['commitHash'],
@@ -460,6 +464,12 @@ export default function TutorialsModifyPage(params) {
                                 disabled
                             />
                         </Form.Item>
+                        <Form.Item
+                            label="外部链接"
+                            name="externalLink"
+                        >
+                            <Input placeholder="可选：填写外部链接URL" />
+                        </Form.Item>
                         {
                             videoCategory === "bilibili" &&
                             <Form.Item
@@ -580,6 +590,12 @@ export default function TutorialsModifyPage(params) {
                                     name="docPath"
                                 >
                                     <Input placeholder="默认为根目录" />
+                                </Form.Item>
+                                <Form.Item
+                                    label="外部链接"
+                                    name="externalLink"
+                                >
+                                    <Input placeholder="可选：填写外部链接URL" />
                                 </Form.Item>
                                 <Form.Item
                                     label="教程文档commitHash"

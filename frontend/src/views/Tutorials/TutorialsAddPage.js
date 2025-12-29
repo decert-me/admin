@@ -94,7 +94,7 @@ export default function TutorialsAddPage(params) {
         setLoading(true);
         const {
             repoUrl, label, catalogueName, docType, desc, tutorial_sort,
-            challenge, link_type, branch, docPath, commitHash, url, videoCategory, videoItems,
+            challenge, link_type, branch, docPath, externalLink, commitHash, url, videoCategory, videoItems,
             category, language, difficulty, estimateTime, mdbookTranslator
         } = values;
 
@@ -132,14 +132,14 @@ export default function TutorialsAddPage(params) {
         if (doctype === "doc") {
             const obj = {
                 repoUrl, label, catalogueName, docType, img, desc, tutorial_sort,
-                branch, docPath, commitHash,
+                branch, docPath, externalLink, commitHash,
                 category, language, difficulty, estimateTime, mdbookTranslator,
                 challenge: domain+link_type+"/"+challenge
             }
             create(obj)
         }else{
             const obj = {
-                url, label, catalogueName, img, desc, tutorial_sort,videoCategory,
+                url, label, catalogueName, img, desc, tutorial_sort, videoCategory, externalLink,
                 category, language, difficulty, estimateTime, docType: "video",
                 challenge: domain+link_type+"/"+challenge
             }
@@ -378,6 +378,12 @@ export default function TutorialsAddPage(params) {
                                 ]}
                             />
                         </Form.Item>
+                        <Form.Item
+                            label="外部链接"
+                            name="externalLink"
+                        >
+                            <Input placeholder="可选：填写外部链接URL" />
+                        </Form.Item>
                         {
                             videoCategory === "bilibili" &&
                             <Form.Item
@@ -498,6 +504,12 @@ export default function TutorialsAddPage(params) {
                                     name="docPath"
                                 >
                                     <Input placeholder="默认为根目录" />
+                                </Form.Item>
+                                <Form.Item
+                                    label="外部链接"
+                                    name="externalLink"
+                                >
+                                    <Input placeholder="可选：填写外部链接URL" />
                                 </Form.Item>
                                 <Form.Item
                                     label="教程文档commitHash"
